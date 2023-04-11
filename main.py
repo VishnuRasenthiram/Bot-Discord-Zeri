@@ -90,7 +90,7 @@ async def on_ready():
         current_day= now.strftime("%d/%m/%Y")
         currect_daay=now2.strftime("%A")
         current_time = now2.strftime("%H:%M")
-        if currect_daay in ["Monday","Tuesday","Wednesday","Thursday"] and (current_time>="23:00" and current_time<="23:05"):
+        if currect_daay in ["Monday","Tuesday","Wednesday","Thursday"] and (current_time>="23:00" and current_time<"23:05"):
             msg = await guuruuchanflame.send("Alors,<@185191654255362048> t'es allé à la salle ?")
             global FLAMEID
             FLAMEID=msg.id

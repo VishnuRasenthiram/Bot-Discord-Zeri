@@ -44,7 +44,7 @@ my_region = 'euw1'
 version = lol_watcher.data_dragon.versions_for_region("euw1")
 ##########################################################################
 #CONSTANTES
-#aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+
 antifeur=[133228507873411072,300928722939281409,688997212113600586,320579380390658048]
 antispam=[133228507873411072]
 CHAN_GEN =833833047454515223

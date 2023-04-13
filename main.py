@@ -114,6 +114,48 @@ async def on_ready():
 async def ping(interaction:discord.Interaction):
     await interaction.response.send_message("Pong! Latence: {}ms".format(round(bot.latency * 1000, 1)))
 
+#wola jsuis trop drole
+@bot.event
+async def on_message(message):
+    cheh=["https://tenor.com/view/vilebrequin-cheh-levy-gif-19953300","https://tenor.com/view/maskey-gif-17974418"]
+    if not message.author == bot.user:
+
+        if (not message.author.id in antifeur) and not (message.author.id in antispam):
+
+            if  message.content.lower().endswith("quoi")or message.content.lower().endswith("koi")or message.content.lower().endswith("quoi?")or message.content.lower().endswith("quoi ?"):
+                await message.channel.send("Feur")
+            if "imo" in message.content.lower().split() or "if i speak" in message.content.lower():
+
+                await message.channel.send("Et ce ratio t'en pense quoi ?")
+            
+        file = discord.File(f"env/ranked-emblem/PALU.mp4", filename=f"PALU.mp4")
+        if not message.author.id in antispam:
+
+            if "palu"in message.content.lower().split():
+                await message.channel.send(file=file)
+            file2 = discord.File(f"env/ranked-emblem/ratio.png", filename=f"ratio.png")
+
+            if "ratio"in message.content.lower().split():
+                await message.channel.send(file=file2)
+
+            file3 = discord.File(f"env/ranked-emblem/junglediff.png", filename=f"junglediff.png")
+
+            if "jungle diff"in message.content.lower():
+                a=await message.channel.send(file=file3)
+                await a.add_reaction("✅")
+                await a.add_reaction("❌")
+            if "cheh"in message.content.lower().split():
+                await message.channel.send(random.choice(cheh))
+            await bot.process_commands(message)
+            if "guuruu"in message.content.lower().split():
+                await message.add_reaction("<:GuuruuW:1091852794568396810>")
+            if "merci zeri" in message.content.lower():
+                await message.reply("Derien frérot/e <:Shock:1089628155133820938>")
+            if "zebi" in message.content.lower().split():
+                await message.add_reaction("<:Zebi:1092526109192618074>")
+            if "bonne nuit" in message.content.lower():
+                await message.channel.send("Bonne nuit Bg/Blg! Repose toi bien !")
+
 
 
 
@@ -491,47 +533,6 @@ async def ban(ctx, member : discord.Member, *, reason = None):
     await ctx.message.channel.send(f'{member} a été ban !') 
 ##########################################################################
 
-#wola jsuis trop drole
-@bot.event
-async def on_message(message):
-    cheh=["https://tenor.com/view/vilebrequin-cheh-levy-gif-19953300","https://tenor.com/view/maskey-gif-17974418"]
-    if not message.author == bot.user:
-
-        if (not message.author.id in antifeur) and not (message.author.id in antispam):
-
-            if  message.content.lower().endswith("quoi")or message.content.lower().endswith("koi")or message.content.lower().endswith("quoi?")or message.content.lower().endswith("quoi ?"):
-                await message.channel.send("Feur")
-            if "imo" in message.content.lower().split() or "if i speak" in message.content.lower():
-
-                await message.channel.send("Et ce ratio t'en pense quoi ?")
-            
-        file = discord.File(f"env/ranked-emblem/PALU.mp4", filename=f"PALU.mp4")
-        if not message.author.id in antispam:
-
-            if "palu"in message.content.lower().split():
-                await message.channel.send(file=file)
-            file2 = discord.File(f"env/ranked-emblem/ratio.png", filename=f"ratio.png")
-
-            if "ratio"in message.content.lower().split():
-                await message.channel.send(file=file2)
-
-            file3 = discord.File(f"env/ranked-emblem/junglediff.png", filename=f"junglediff.png")
-
-            if "jungle diff"in message.content.lower():
-                a=await message.channel.send(file=file3)
-                await a.add_reaction("✅")
-                await a.add_reaction("❌")
-            if "cheh"in message.content.lower().split():
-                await message.channel.send(random.choice(cheh))
-            await bot.process_commands(message)
-            if "guuruu"in message.content.lower().split():
-                await message.add_reaction("<:GuuruuW:1091852794568396810>")
-            if "merci zeri" in message.content.lower():
-                await message.reply("Derien frérot/e <:Shock:1089628155133820938>")
-            if "zebi" in message.content.lower().split():
-                await message.add_reaction("<:Zebi:1092526109192618074>")
-
-
 
 
 
@@ -662,7 +663,7 @@ async def on_raw_reaction_add(emoji):
         if emoji.member.id==GUURUUID:
             if emoji.emoji.name=='❌':
                 
-                await channel.send(f"Oh le bouffon il est pas allé à la salle et en plus il a perdu sont streak de {streak['streak'][0]} séances")
+                await channel.send(f"Oh le bouffon il est pas allé à la salle et en plus il a perdu son streak de {streak['streak'][0]} séances")
                 streak["streak"][0] = 0
                 FLAMEID=0
             elif emoji.emoji.name=='✅':

@@ -46,7 +46,7 @@ version = lol_watcher.data_dragon.versions_for_region("euw1")
 #CONSTANTES
 
 antifeur=[133228507873411072,300928722939281409,688997212113600586,320579380390658048]
-antispam=[133228507873411072]
+antispam=[133228507873411072,632906154003136512]
 CHAN_GEN =833833047454515223
 CHAN_BVN =614953541911576692
 ROLE_NEANTIN =1079422327391006851
@@ -196,7 +196,7 @@ async def pp(ctx):
 
     else:
         
-        await ctx.message.channel.send(ctx.display_avatar)
+        await ctx.message.channel.send(ctx.author.display_avatar)
 @bot.command()
 async def ppdebase(ctx):
     
@@ -207,7 +207,7 @@ async def ppdebase(ctx):
 
     else:
         
-        await ctx.message.channel.send(ctx.avatar)
+        await ctx.message.channel.send(ctx.author.avatar)
 
 @bot.command()
 async def banner(ctx):
@@ -497,7 +497,7 @@ async def on_message(message):
     cheh=["https://tenor.com/view/vilebrequin-cheh-levy-gif-19953300","https://tenor.com/view/maskey-gif-17974418"]
     if not message.author == bot.user:
 
-        if not message.author.id in antifeur and antispam:
+        if (not message.author.id in antifeur) and not (message.author.id in antispam):
 
             if  message.content.lower().endswith("quoi")or message.content.lower().endswith("koi")or message.content.lower().endswith("quoi?")or message.content.lower().endswith("quoi ?"):
                 await message.channel.send("Feur")

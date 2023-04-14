@@ -116,7 +116,7 @@ async def ping(interaction:discord.Interaction):
 
 #wola jsuis trop drole
 @bot.event
-@commands.cooldown(1, 10, commands.BucketType.user)
+
 async def on_message(message):
     cheh=["https://tenor.com/view/vilebrequin-cheh-levy-gif-19953300","https://tenor.com/view/maskey-gif-17974418"]
     if not message.author == bot.user:

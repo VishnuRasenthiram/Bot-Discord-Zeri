@@ -122,8 +122,8 @@ async def on_message(message):
 
         if (not message.author.id in antifeur) and not (message.author.id in antispam):
 
-            if  message.content.lower().endswith("quoi")or message.content.lower().endswith("koi")or message.content.lower().endswith("quoi?")or message.content.lower().endswith("quoi ?"):
-                await message.channel.send("Feur")
+            #if  message.content.lower().endswith("quoi")or message.content.lower().endswith("koi")or message.content.lower().endswith("quoi?")or message.content.lower().endswith("quoi ?"):
+                #await message.channel.send("Feur")
             if "imo" in message.content.lower().split() or "if i speak" in message.content.lower():
 
                 await message.channel.send("Et ce ratio t'en pense quoi ?")

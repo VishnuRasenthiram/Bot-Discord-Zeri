@@ -155,7 +155,8 @@ async def on_message(message):
                 await message.add_reaction("<:Zebi:1092526109192618074>")
             if "bonne nuit" in message.content.lower():
                 await message.channel.send("Bonne nuit Bg/Blg! Repose toi bien !")
-
+            if "prankex" in message.content.lower().split():
+                await message.channel.send("https://tenor.com/view/guuruu-prank-prankex-gif-19025746535426067")
 
 
 

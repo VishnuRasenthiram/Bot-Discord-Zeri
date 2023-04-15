@@ -174,7 +174,8 @@ async def on_message(message):
             if "prankex" in message.content.lower().split():
                 await message.channel.send("https://tenor.com/view/guuruu-prank-prankex-gif-19025746535426067")
 
-
+            if 'udyr' in message.content.lower().split():
+                await message.channel.send('<@133228507873411072> Udyr ça pue !')
 
 #CLEAR
 

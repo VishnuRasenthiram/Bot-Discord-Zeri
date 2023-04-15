@@ -114,17 +114,20 @@ async def on_ready():
 async def ping(interaction:discord.Interaction):
     await interaction.response.send_message("Pong! Latence: {}ms".format(round(bot.latency * 1000, 1)))
 
-#wola jsuis trop drole
-@bot.event
 
+@bot.event
 async def on_message(message):
     cheh=["https://tenor.com/view/vilebrequin-cheh-levy-gif-19953300","https://tenor.com/view/maskey-gif-17974418"]
+    
     if not message.author == bot.user:
 
+        if bot.user.mentioned_in(message):
+            await message.reply("Zebi pourquoi tu me ping?")
+        
         if (not message.author.id in antifeur) and not (message.author.id in antispam):
 
             #if  message.content.lower().endswith("quoi")or message.content.lower().endswith("koi")or message.content.lower().endswith("quoi?")or message.content.lower().endswith("quoi ?"):
-                #await message.channel.send("Feur")
+            #   await message.channel.send("Feur")
             if "imo" in message.content.lower().split() or "if i speak" in message.content.lower():
 
                 await message.channel.send("Et ce ratio t'en pense quoi ?")
@@ -145,17 +148,29 @@ async def on_message(message):
                 a=await message.channel.send(file=file3)
                 await a.add_reaction("✅")
                 await a.add_reaction("❌")
+                
+                
             if "cheh"in message.content.lower().split():
                 await message.channel.send(random.choice(cheh))
+                
             await bot.process_commands(message)
+            
             if "guuruu"in message.content.lower().split():
                 await message.add_reaction("<:GuuruuW:1091852794568396810>")
+                
+                
             if "merci zeri" in message.content.lower():
                 await message.reply("Derien frérot/e <:Shock:1089628155133820938>")
+                
+                
             if "zebi" in message.content.lower().split():
                 await message.add_reaction("<:Zebi:1092526109192618074>")
+                
+                
             if "bonne nuit" in message.content.lower():
                 await message.channel.send("Bonne nuit Bg/Blg! Repose toi bien !")
+                
+                
             if "prankex" in message.content.lower().split():
                 await message.channel.send("https://tenor.com/view/guuruu-prank-prankex-gif-19025746535426067")
 

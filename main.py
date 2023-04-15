@@ -138,9 +138,17 @@ async def on_message(message):
             if "palu"in message.content.lower().split():
                 await message.channel.send(file=file)
             file2 = discord.File(f"env/ranked-emblem/ratio.png", filename=f"ratio.png")
-
-            if "ratio"in message.content.lower().split():
-                await message.channel.send(file=file2)
+            ISMENTIONED =False
+            if message.mentions !=None:
+                
+                for i in range(len(message.mentions)):
+                    if message.mentions[i].id == 517231233235812353:
+                        ISMENTIONED=True
+                    
+            if ISMENTIONED==False:    
+                if ("ratio"in message.content.lower().split())and(not "aladdin"in message.content.lower().split())  :
+                    
+                    await message.channel.send(file=file2)
 
             file3 = discord.File(f"env/ranked-emblem/junglediff.png", filename=f"junglediff.png")
 

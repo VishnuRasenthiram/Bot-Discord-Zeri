@@ -121,8 +121,8 @@ async def on_message(message):
     
     if (not message.author == bot.user) and (not message.author.bot):
 
-        if bot.user.mentioned_in(message):
-            await message.reply("Zebi pourquoi tu me ping?")
+        #if bot.user.mentioned_in(message):
+        #    await message.reply("Zebi pourquoi tu me ping?")
         
         if (not message.author.id in antifeur) and not (message.author.id in antispam):
 

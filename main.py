@@ -372,7 +372,7 @@ async def lolp(ctx):
 
             
 
-            embed=discord.Embed(title="League Profile",
+            embed=discord.Embed(title="League Profil",
             description=f'{ctx.author.name} voici le profile de {name} ', 
             color=discord.Color.blue()).set_thumbnail(
             url=icone

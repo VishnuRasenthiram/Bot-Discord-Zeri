@@ -103,7 +103,7 @@ async def on_ready():
         else:
             await guild.edit(name="Karan 🍁")
             
-        if current_time>="04:00"and current_time <="04:05" :
+        if current_time>="04:00"and current_time <"04:05" :
             await guuruuchan.send("N'oubliez pas de faire votre Loldle du jour !")
             await guuruuchan.send("https://loldle.net/")
         await asyncio.sleep(300)

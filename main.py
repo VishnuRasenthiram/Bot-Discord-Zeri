@@ -448,7 +448,7 @@ async def lolp(ctx):
 
 async def spam(ctx):
         
-        if ctx.message.member.id!=688997212113600586:
+        if ctx.message.author.id!=688997212113600586:
             msg =int(ctx.message.content.split()[1])
             if msg<=100:
                 await ctx.message.delete()
@@ -460,7 +460,7 @@ async def spam(ctx):
             else:
                 await ctx.message.channel.send("https://tenor.com/view/mister-v-encore-beaucoup-talking-still-thats-a-lot-there-right-gif-16825265")
         else :
-            ctx.message.reply("T'as pas l'age mon con")
+            await ctx.message.reply("T'as pas l'age mon con")
 
 
 

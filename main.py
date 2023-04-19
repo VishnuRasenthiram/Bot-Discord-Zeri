@@ -448,17 +448,22 @@ async def lolp(ctx):
 
 async def spam(ctx):
         
-    
-        msg =int(ctx.message.content.split()[1])
-        if msg<=100:
-            await ctx.message.delete()
-            spam =str(" ".join(ctx.message.content.split()[2:]))
-            for msg in range(msg):
-                await ctx.message.channel.send(spam)
+        if ctx.member.id!=688997212113600586:
+            msg =int(ctx.message.content.split()[1])
+            if msg<=100:
+                await ctx.message.delete()
+                spam =str(" ".join(ctx.message.content.split()[2:]))
+                for msg in range(msg):
+                    await ctx.message.channel.send(spam)
 
-            await ctx.message.channel.send("https://tenor.com/view/jigm%C3%A9-hearthstone-travail-termin%C3%A9-mdr-mecredi-des-r%C3%A9ponse-gif-17412853")
-        else:
-            await ctx.message.channel.send("https://tenor.com/view/mister-v-encore-beaucoup-talking-still-thats-a-lot-there-right-gif-16825265")
+                await ctx.message.channel.send("https://tenor.com/view/jigm%C3%A9-hearthstone-travail-termin%C3%A9-mdr-mecredi-des-r%C3%A9ponse-gif-17412853")
+            else:
+                await ctx.message.channel.send("https://tenor.com/view/mister-v-encore-beaucoup-talking-still-thats-a-lot-there-right-gif-16825265")
+        else :
+            ctx.message.reply("T'as pas l'age mon con")
+
+
+
 ##########################################################################
 
 #BAN UNBAN

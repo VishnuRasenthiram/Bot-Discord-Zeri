@@ -124,13 +124,10 @@ async def on_message(message):
         #if bot.user.mentioned_in(message):
         #    await message.reply("Zebi pourquoi tu me ping?")
         
-        if (not message.author.id in antifeur) and not (message.author.id in antispam):
+        #if (not message.author.id in antifeur) and not (message.author.id in antispam):
 
             #if  message.content.lower().endswith("quoi")or message.content.lower().endswith("koi")or message.content.lower().endswith("quoi?")or message.content.lower().endswith("quoi ?"):
             #   await message.channel.send("Feur")
-            if "imo" in message.content.lower().split() or "if i speak" in message.content.lower():
-
-                await message.channel.send("Et ce ratio t'en pense quoi ?")
             
         file = discord.File(f"env/ranked-emblem/PALU.mp4", filename=f"PALU.mp4")
         if not message.author.id in antispam:
@@ -182,7 +179,9 @@ async def on_message(message):
             if "prankex" in message.content.lower().split():
                 await message.channel.send("https://tenor.com/view/guuruu-prank-prankex-gif-19025746535426067")
 
-            
+            if "imo" in message.content.lower().split() or "if i speak" in message.content.lower():
+
+                await message.channel.send("Et ce ratio t'en pense quoi ?")
 
 #CLEAR
 

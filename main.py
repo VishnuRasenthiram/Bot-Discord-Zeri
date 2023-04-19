@@ -448,7 +448,7 @@ async def lolp(ctx):
 
 async def spam(ctx):
         
-        if ctx.member.id!=688997212113600586:
+        if ctx.message.member.id!=688997212113600586:
             msg =int(ctx.message.content.split()[1])
             if msg<=100:
                 await ctx.message.delete()

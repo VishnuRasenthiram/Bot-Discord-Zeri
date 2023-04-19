@@ -179,9 +179,7 @@ async def on_message(message):
             if "prankex" in message.content.lower().split():
                 await message.channel.send("https://tenor.com/view/guuruu-prank-prankex-gif-19025746535426067")
 
-            if "imo" in message.content.lower().split() or "if i speak" in message.content.lower():
-
-                await message.channel.send("Et ce ratio t'en pense quoi ?")
+            
 
 #CLEAR
 

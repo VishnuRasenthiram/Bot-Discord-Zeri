@@ -391,7 +391,7 @@ async def lolp(ctx):
             value=win,
             inline=True
             ).add_field(name=" ",value=" "
-            ).add_field(name="Winrate :",value=wr
+            ).add_field(name="Winrate :",value=round(wr,2)
             ).add_field(
             name="Losses :", 
             value=loose ,
@@ -788,7 +788,7 @@ async def histo(ctx):
         ).add_field(
             name="Mode de jeu",value=chaine2
         ).add_field(
-            name="WinRate :",value=f'{wr}% ')
+            name="WinRate :",value=f'{round(wr,2)}% ')
         await ctx.channel.send(embed=embed)    
     except ApiError as err :
             if err.response.status_code == 429 :

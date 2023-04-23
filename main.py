@@ -215,7 +215,8 @@ async def apod(ctx):
     await ctx.message.channel.send(embed=embed)
     
 ##########################################################################   
-    
+
+
 #cat
 
 @bot.command()
@@ -723,6 +724,7 @@ async def on_command_error(ctx, error):
 async def histo(ctx):
      
     try:
+           
         name =str(" ".join(ctx.message.content.split()[1:]))
         versions = lol_watcher.data_dragon.versions_for_region(my_region)
         
@@ -795,6 +797,157 @@ async def histo(ctx):
                  await ctx.message.channel.send("Le compte avec ce pseudo n'existe pas !")
             else:
                 raise    
+
+
+
+@bot.command()
+async def cg(ctx):
+    try:
+        link ="https://ddragon.leagueoflegends.com/cdn/13.8.1/data/en_US/champion.json"
+        f = urllib.request.urlopen(link)
+        myfile = f.read()
+        data=json.loads(myfile)
+        champ = data["data"]   
+        name =str(" ".join(ctx.message.content.split()[1:]))
+        me = lol_watcher.summoner.by_name(my_region,name)
+        cg= lol_watcher.spectator.by_summoner(my_region,me["id"])
+        blue=""
+        red =""
+        
+        for i in cg["participants"] :
+            
+            if i["teamId"]==100:
+                
+                me = lol_watcher.summoner.by_name(my_region,i["summonerName"])
+                me1= lol_watcher.league.by_summoner(my_region,me["id"])
+                
+                for cle,valeur in champ.items():
+                    if int(valeur['key'])==int(i['championId']):
+                        blue+=f'``{cle}`` **-** \t'
+                     
+                
+                
+                
+                if not  me1:
+                    rank="Unranked"
+                    div=" "
+                    lp=" "
+                
+                
+                else:
+                    if  not "RANKED_FLEX_SR" in me1[0]['queueType']:
+                        rank=me1[0]["tier"]
+                        div=me1[0]["rank"]
+                        lp=me1[0]["leaguePoints"]
+                        
+                    else :
+                        rank=me1[1]["tier"]
+                        div=me1[1]["rank"]
+                        lp=me1[1]["leaguePoints"]
+                        
+                        
+            
+
+                var=""
+                match rank.lower():
+                    case "iron":
+                        var=f"<:iron:1070669886700920872>  **{rank.lower()} {div}** {lp}"
+                    case "bronze":
+                        var=f"<:bronze:1070670261340352574>  **{rank.lower()} {div}** {lp} "
+                    case "silver":
+                        var=f"<:silver:1070670285822505080>  **{rank.lower()} {div}** {lp} "
+                    case "gold":
+                        var=f"<:gold:1070670322195509329>  **{rank.lower()} {div}** {lp} "
+                    case "platinum":
+                        var=f"<:platinum:1070670342651129966>  **{rank.lower()} {div}** {lp} "
+                    case "diamond":
+                        var=f"<:diamond:1070670360267198496>  **{rank.lower()} {div}** {lp} "
+                    case "master":
+                        var=f"<:master:1070670398074671114>  **{rank.lower()} {div}** {lp} "
+                    case "grandmaster":
+                        var=f"<:grandmaster:1070670415367778327>  **{rank.lower()} {div}** {lp} "
+                    case "challenger":
+                        var=f"<:challenger:1070670432107245578>  **{rank.lower()} {div}** {lp} "
+                    case _:
+                        var=f"<:HanakoBahYes:811668408637718558> **{rank.lower()} {div}** {lp} "    
+                        
+                blue+=f'``{i["summonerName"]}``\t**|**\t{var}\n'          
+                    
+            else :
+                me = lol_watcher.summoner.by_name(my_region,i["summonerName"])
+                me1= lol_watcher.league.by_summoner(my_region,me["id"])
+                if not  me1:
+                    rank="Unranked"
+                    div=" "
+                    lp=" "
+                for cle,valeur in champ.items():
+                    if int(valeur['key'])==int(i['championId']):
+                        red+=f'``{cle}`` **-** \t'
+                
+                else:
+                    if  not "RANKED_FLEX_SR" in me1[0]['queueType']:
+                        rank=me1[0]["tier"]
+                        div=me1[0]["rank"]
+                        lp=me1[0]["leaguePoints"]
+                        
+                    else :
+                        rank=me1[1]["tier"]
+                        div=me1[1]["rank"]
+                        lp=me1[1]["leaguePoints"]
+                        
+                        
+            
+
+                var=""
+                match rank.lower():
+                    case "iron":
+                        var=f"<:iron:1070669886700920872>  **{rank.lower()} {div}** {lp}"
+                    case "bronze":
+                        var=f"<:bronze:1070670261340352574>  **{rank.lower()} {div}** {lp}"
+                    case "silver":
+                        var=f"<:silver:1070670285822505080>  **{rank.lower()} {div}** {lp}"
+                    case "gold":
+                        var=f"<:gold:1070670322195509329>  **{rank.lower()} {div}** {lp}"
+                    case "platinum":
+                        var=f"<:platinum:1070670342651129966>  **{rank.lower()} {div}** {lp}"
+                    case "diamond":
+                        var=f"<:diamond:1070670360267198496>  **{rank.lower()} {div}** {lp}"
+                    case "master":
+                        var=f"<:master:1070670398074671114>  **{rank.lower()} {div}** {lp}"
+                    case "grandmaster":
+                        var=f"<:grandmaster:1070670415367778327>  **{rank.lower()} {div}** {lp}"
+                    case "challenger":
+                        var=f"<:challenger:1070670432107245578>  **{rank.lower()} {div}** {lp}"
+                    case _:
+                        var=f"<:HanakoBahYes:811668408637718558> **{rank.lower()} {div}** {lp}"    
+                      
+                red+=f'``{i["summonerName"]}``\t**|**\t{var}\n' 
+        
+        
+        
+                
+                        
+        
+        
+                
+        embed=discord.Embed(title='Match en cours :' ,color=discord.Color.yellow())
+        embed.add_field(name="Blue side :",value=blue,inline=False
+        ).add_field(name="Red side :",value=red )         
+        
+        await ctx.channel.send(embed=embed)   
+            
+        
+        
+                
+        
+    except ApiError as err :
+            if err.response.status_code == 429 :
+                print("Quota de requête dépassé")
+            elif err.response.status_code == 404:
+                 await ctx.message.channel.send("Le compte avec ce pseudo n'existe pas ! ou bien l'utilisateur n'est pas en game !")
+            else:
+                raise 
+
 
 @bot.event
 async def on_command_error(ctx, error):

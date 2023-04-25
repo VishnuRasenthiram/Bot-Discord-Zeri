@@ -119,7 +119,7 @@ async def ping(interaction:discord.Interaction):
 async def on_message(message):
     cheh=["https://tenor.com/view/vilebrequin-cheh-levy-gif-19953300","https://tenor.com/view/maskey-gif-17974418"]
     
-    if (not message.author == bot.user) and (not message.author.bot):
+    if (not message.author == bot.user) and (not message.author.bot) and (not message.guild.id ==332580555872927746):
 
         #if bot.user.mentioned_in(message):
         #    await message.reply("Zebi pourquoi tu me ping?")

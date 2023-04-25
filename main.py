@@ -90,12 +90,12 @@ async def on_ready():
         current_day= now.strftime("%d/%m/%Y")
         currect_daay=now2.strftime("%A")
         current_time = now2.strftime("%H:%M")
-        if currect_daay in ["Monday","Tuesday","Wednesday","Thursday"] and (current_time>="20:00" and current_time<"20:05"):
-            msg = await guuruuchanflame.send("Alors,<@185191654255362048> t'es allé à la salle ?")
-            global FLAMEID
-            FLAMEID=msg.id
-            await msg.add_reaction("✅")
-            await msg.add_reaction("❌")
+        #if currect_daay in ["Monday","Tuesday","Wednesday","Thursday"] and (current_time>="20:00" and current_time<"20:05"):
+        #    msg = await guuruuchanflame.send("Alors,<@185191654255362048> t'es allé à la salle ?")
+        #    global FLAMEID
+        #    FLAMEID=msg.id
+        #    await msg.add_reaction("✅")
+        #    await msg.add_reaction("❌")
             
         
         if current_time>"22:00" or current_time<"10:00": 
@@ -103,9 +103,9 @@ async def on_ready():
         else:
             await guild.edit(name="Karan 🍁")
             
-        if current_time>="04:00"and current_time <"04:05" :
-            await guuruuchan.send("N'oubliez pas de faire votre Loldle du jour !")
-            await guuruuchan.send("https://loldle.net/")
+        #if current_time>="04:00"and current_time <"04:05" :
+        #    await guuruuchan.send("N'oubliez pas de faire votre Loldle du jour !")
+        #    await guuruuchan.send("https://loldle.net/")
         await asyncio.sleep(300)
 	
 ##########################################################################

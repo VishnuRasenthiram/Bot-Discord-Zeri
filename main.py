@@ -90,12 +90,7 @@ async def on_ready():
         current_day= now.strftime("%d/%m/%Y")
         currect_daay=now2.strftime("%A")
         current_time = now2.strftime("%H:%M")
-        #if currect_daay in ["Monday","Tuesday","Wednesday","Thursday"] and (current_time>="20:00" and current_time<"20:05"):
-        #    msg = await guuruuchanflame.send("Alors,<@185191654255362048> t'es allé à la salle ?")
-        #    global FLAMEID
-        #    FLAMEID=msg.id
-        #    await msg.add_reaction("✅")
-        #    await msg.add_reaction("❌")
+        
             
         
         if current_time>"22:00" or current_time<"10:00": 
@@ -120,14 +115,6 @@ async def on_message(message):
     cheh=["https://tenor.com/view/vilebrequin-cheh-levy-gif-19953300","https://tenor.com/view/maskey-gif-17974418"]
     
     if (not message.author == bot.user) and (not message.author.bot) :
-
-        #if bot.user.mentioned_in(message):
-        #    await message.reply("Zebi pourquoi tu me ping?")
-        
-        #if (not message.author.id in antifeur) and not (message.author.id in antispam):
-
-            #if  message.content.lower().endswith("quoi")or message.content.lower().endswith("koi")or message.content.lower().endswith("quoi?")or message.content.lower().endswith("quoi ?"):
-            #   await message.channel.send("Feur")
             
         file = discord.File(f"env/ranked-emblem/PALU.mp4", filename=f"PALU.mp4")
         if not message.author.id in antispam:
@@ -681,28 +668,7 @@ async def on_member_remove(member):
 async def on_raw_reaction_add(emoji):
     global FLAMEID
     role = discord.utils.get(emoji.member.guild.roles, id=658408130593423371)
-    channel=discord.utils.get(emoji.member.guild.channels, id=emoji.channel_id)
-    with open("logs.json", "r") as f:
-            streak = json.load(f)
-
-            streak["streak"]
-    
-    if emoji.message_id ==FLAMEID:
-        if emoji.member.id==GUURUUID:
-            if emoji.emoji.name=='❌':
-                
-                await channel.send(f"Oh le bouffon il est pas allé à la salle et en plus il a perdu son streak de {streak['streak'][0]} séances")
-                streak["streak"][0] = 0
-                FLAMEID=0
-            elif emoji.emoji.name=='✅':
-                
-                streak['streak'][0]+=1
-                await channel.send('C\'est bien keep going !')
-                await channel.send(f"Tu as fais un streak de {streak['streak'][0]} séances")
-                FLAMEID=0
-    with open("logs.json","w") as f :
-            json.dump(streak,f)
-            
+    channel=discord.utils.get(emoji.member.guild.channels, id=emoji.channel_id)        
             
     if emoji.message_id==MESSAGE_AUTO_ROLE:
         if emoji.emoji.id==811668408637718558:

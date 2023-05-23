@@ -384,7 +384,7 @@ async def lolp(ctx):
             value=win,
             inline=True
             ).add_field(name=" ",value=" "
-            ).add_field(name="Winrate :",value=round(wr,2)
+            ).add_field(name="Winrate :",value=f'{round(wr,2)}%'
             ).add_field(
             name="Losses :", 
             value=loose ,

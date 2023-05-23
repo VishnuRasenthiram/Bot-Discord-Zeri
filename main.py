@@ -101,7 +101,7 @@ async def on_ready():
         if current_time>="04:00"and current_time <"04:05" :
             await guuruuchan.send("N'oubliez pas de faire votre Loldle du jour !")
             await guuruuchan.send("https://loldle.net/")
-        if currect_daay in ["Monday","Tuesday","Wednesday","Thursday"] and (current_time>="20:00" and current_time<"20:05"):
+        if currect_daay in ["Monday","Tuesday","Wednesday","Thursday"] and (current_time>="20:00" and current_time<"20:10"):
             msg = await guuruuchanflame.send("Alors,@Guuruu#2278 t'es allé à la salle ?")
             global FLAMEID
             FLAMEID=msg.id

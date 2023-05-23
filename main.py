@@ -101,6 +101,12 @@ async def on_ready():
         if current_time>="04:00"and current_time <"04:05" :
             await guuruuchan.send("N'oubliez pas de faire votre Loldle du jour !")
             await guuruuchan.send("https://loldle.net/")
+        if currect_daay in ["Monday","Tuesday","Wednesday","Thursday"] and (current_time>="20:00" and current_time<"20:05"):
+            msg = await guuruuchanflame.send("Alors,@Guuruu#2278 t'es allé à la salle ?")
+            global FLAMEID
+            FLAMEID=msg.id
+            await msg.add_reaction(":white_check_mark:")
+            await msg.add_reaction(":x:")
         await asyncio.sleep(300)
 	
 ##########################################################################
@@ -674,6 +680,27 @@ async def on_raw_reaction_add(emoji):
         if emoji.emoji.id==811668408637718558:
             await emoji.member.add_roles(role)
             await channel.send("")
+    with open("logs.json", "r") as f:
+            streak = json.load(f)
+
+            streak["streak"]
+    
+
+    if emoji.message_id ==FLAMEID:
+            if emoji.member.id==GUURUUID:
+                if emoji.emoji.name=='❌':
+                    
+                    await channel.send(f"Oh le bouffon il est pas allé à la salle et en plus il a perdu son streak de {streak['streak'][0]} séances")
+                    streak["streak"][0] = 0
+                    FLAMEID=0
+                elif emoji.emoji.name=='✅':
+                    
+                    streak['streak'][0]+=1
+                    await channel.send('C\'est bien keep going !')
+                    await channel.send(f"Tu as fais un streak de {streak['streak'][0]} séances")
+                    FLAMEID=0
+    with open("logs.json","w") as f :
+            json.dump(streak,f)
 
 @bot.event
 async def  on_raw_reaction_remove(payload):

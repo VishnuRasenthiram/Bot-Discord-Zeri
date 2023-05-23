@@ -105,8 +105,8 @@ async def on_ready():
             msg = await guuruuchanflame.send("Alors,@Guuruu#2278 t'es allé à la salle ?")
             global FLAMEID
             FLAMEID=msg.id
-            await msg.add_reaction(":white_check_mark:")
-            await msg.add_reaction(":x:")
+            await msg.add_reaction("✅")
+            await msg.add_reaction("❌")
         await asyncio.sleep(300)
 	
 ##########################################################################

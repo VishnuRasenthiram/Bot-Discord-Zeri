@@ -982,7 +982,7 @@ async def imposteur(ctx):
                 case _:
                     await user.send("Feur")
         with open('imposteur.json','w') as f :
-                json.dump(users,f)
+            json.dump(users,f)
         
         with open('imposteur.json','r') as f :
             jeu = json.load(f)
@@ -1042,7 +1042,7 @@ async def imposteur_simple(ctx):
             roles.remove(role)
             user= bot.get_user(i)
             users[f'{ctx.author.id}'][user.name]=role
-            await user.send(f'{user}vous êtes{role}')
+            await user.send(f'{user} vous êtes {role}')
     
         with open('imposta.json','w') as f :
             json.dump(users,f)

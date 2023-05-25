@@ -1031,7 +1031,7 @@ async def fin(ctx):
 @bot.command()
 @commands.cooldown(1, 900, commands.BucketType.user)
 async def imposteur_simple(ctx):
-    roles=["Imposteur","Crewmate","Crewmate","Crewmate","Crewmate"]
+    roles=["Imposteur","Imposteur","Crewmate","Crewmate","Crewmate"]
     dic_role={}
     with open('imposta.json','r') as f:
         users= json.load(f)

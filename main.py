@@ -959,7 +959,7 @@ async def imposteur(ctx):
     with open('imposteur.json','r') as f :
         users = json.load(f)
     users[f'{ctx.author.id}']={"game":"true"}
-    roles=["Imposteur","Droide","Serpentin","Double-face","Super-héros"]
+    roles=["Imposteur","Droide","Serpentin","Double-face","Super-héros","Imposteur"]
     task=["Flash dans le vide", "Back","Dive l'ennemi le plus proche","Va voler le buff de ton jungle (le canon d'un de tes laners si tu es jungler)","Prend un fight en utilisant aucun sort !","Fait un call nash(si il est up)","Fait un call drake sans y aller"]
     
     if len(ctx.message.raw_mentions)==5:

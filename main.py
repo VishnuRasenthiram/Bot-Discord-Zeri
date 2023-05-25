@@ -959,9 +959,9 @@ async def imposteur(ctx):
     with open('imposteur.json','r') as f :
         users = json.load(f)
     users[f'{ctx.author.id}']={"game":"true"}
-    roles=["Imposteur","Droide","Serpentin","Double-face","Super-héros","Imposteur"]
+    roles=["Imposteur","Droide","Serpentin","Double-face","Super-héros"]
     task=["Flash dans le vide", "Back","Dive l'ennemi le plus proche","Va voler le buff de ton jungle (le canon d'un de tes laners si tu es jungler)","Prend un fight en utilisant aucun sort !","Fait un call nash(si il est up)","Fait un call drake sans y aller"]
-    
+    doubleface=["Gentil","Imposteur"]
     if len(ctx.message.raw_mentions)==5:
         for i in ctx.message.raw_mentions:
             role =random.choice(roles)
@@ -994,19 +994,13 @@ async def imposteur(ctx):
             boucle=jeu[str(ctx.author.id)]["game"]
             if jeu[str(ctx.author.id)]["game"]=="true":
                 user= bot.get_user(jeu[str(ctx.author.id)]["Droide"])
+                user2= bot.get_user(jeu[str(ctx.author.id)]["Double-face"])
+                await user2.send(random.choice(doubleface))
                 await user.send(random.choice(task))
                 timer = random.randint(300,600)
                 await asyncio.sleep(timer)
-        doubleface=["Gentil","Imposteur"]
-        while(boucle=="true"):
-            with open('imposteur.json','r') as f :
-                jeu = json.load(f)
-            boucle=jeu[str(ctx.author.id)]["game"]
-            if jeu[str(ctx.author.id)]["game"]=="true":
-                user= bot.get_user(jeu[str(ctx.author.id)]["Double-face"])
-                await user.send(random.choice(doubleface))
-                timer = random.randint(180,300)
-                await asyncio.sleep(timer)    
+        
+         
     else :
         await ctx.channel.send("Le nombre de participant n'est pas valide (5)")    
         

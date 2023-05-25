@@ -60,6 +60,7 @@ CHAN_FLAME=332580555872927746
 FLAMEID=0
 GUURUUID=185191654255362048
 ALADID=517231233235812353
+
 ##########################################################################
 #MAIN
 print(current_time)
@@ -474,24 +475,24 @@ async def prison(ctx,member: discord.Member):
     await update_data(users, member,[])
     await add_role(users, member,nbrole)
 
-
-
-    for i in range(1,len(member.roles)) :
-        await member.remove_roles(member.roles[i]) 
-         
-        role = discord.utils.get(ctx.message.guild.roles, name = "🔗|Prisonnier")
-        await member.add_roles(role)
+    nbrole2= nbrole-1
+    while(nbrole2>=1) :
+        await member.remove_roles(member.roles[nbrole2])
+        nbrole2=nbrole2-1
+    role = discord.utils.get(ctx.message.guild.roles, name = "🔗|Prisonnier")
+    await member.add_roles(role)    
     with open('role.json', 'w') as f:
             json.dump(users, f)
     await ctx.message.channel.send(f'{member.name} a été envoyé en prison. ^^')
+    
 async def add_role(users,user,nbrole):
     for i in range(1,nbrole):
+        
         users[f'{user.id}']["roles"].append(str(user.roles[i]))
 
 async def update_data(users, user,role):
     if not f'{user.id}' in users:
         users[f'{user.id}'] = {}
-        
         users[f'{user.id}']["roles"] = role
 
 
@@ -673,6 +674,7 @@ async def on_member_remove(member):
 @bot.event
 async def on_raw_reaction_add(emoji):
     global FLAMEID
+    global IMPO
     role = discord.utils.get(emoji.member.guild.roles, id=658408130593423371)
     channel=discord.utils.get(emoji.member.guild.channels, id=emoji.channel_id)        
             
@@ -682,10 +684,10 @@ async def on_raw_reaction_add(emoji):
             await channel.send("")
     with open("logs.json", "r") as f:
             streak = json.load(f)
-
             streak["streak"]
     
-
+    
+            
     if emoji.message_id ==FLAMEID:
             if emoji.member.id==GUURUUID:
                 if emoji.emoji.name=='❌':
@@ -947,8 +949,11 @@ async def on_command_error(ctx, error):
      if isinstance(error, commands.MissingPermissions):
         await ctx.channel.send('Ahahaha Bouffon t\'as pas les perms <:kekw:1079185133573255210>')
         await ctx.channel.send("https://tenor.com/view/counter-i-dont-gived-you-permission-gif-23613918")
-    
-                
+
+
+
+
+                      
                 
 bot.run(os.getenv('TOKEN'))
 

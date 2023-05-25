@@ -997,7 +997,7 @@ async def imposteur(ctx):
                 user2= bot.get_user(jeu[str(ctx.author.id)]["Double-face"])
                 await user2.send(random.choice(doubleface))
                 await user.send(random.choice(task))
-                timer = random.randint(300,600)
+                timer = random.randint(180,300)
                 await asyncio.sleep(timer)
         
          

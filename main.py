@@ -953,8 +953,111 @@ async def on_command_error(ctx, error):
 
 
 
-                      
-                
+@bot.command()
+@commands.cooldown(1, 900, commands.BucketType.user)
+async def imposteur(ctx):
+    with open('imposteur.json','r') as f :
+        users = json.load(f)
+    users[f'{ctx.author.id}']={"game":"true"}
+    roles=["Imposteur","Droide","Serpentin","Double-face","Super-héros"]
+    task=["Flash dans le vide", "Back","Dive l'ennemi le plus proche","Va voler le buff de ton jungle (le canon d'un de tes laners si tu es jungler)","Prend un fight en utilisant aucun sort !","Fait un call nash(si il est up)","Fait un call drake sans y aller"]
+    
+    if len(ctx.message.raw_mentions)==5:
+        for i in ctx.message.raw_mentions:
+            role =random.choice(roles)
+            roles.remove(role)
+            user= bot.get_user(i)
+            users[f'{ctx.author.id}'][role]=user.id
+            match role:
+                case "Imposteur":
+                    await user.send(f'{user.name} Vous êtes {role} \n Faire perdre la game sans se faire démasquer ')
+                case "Droide":
+                    await user.send(f'{user.name} Vous êtes {role} \n Gagner la game en suivant les instructions reçues')
+                case "Serpentin":
+                    await user.send(f'{user.name} Vous êtes {role} \n Gagner la game en ayant le plus de morts et de dégâts de sa team')
+                case "Double-face":
+                    await user.send(f'{user.name} Vous êtes {role} \n Change de rôle aléatoirement. Doit gagner la game en tant que gentil ou perdre en imposteur')
+                case "Super-héros":
+                    await user.send(f'{user.name} Vous êtes {role} \n Gagner la game en ayant le plus de dégâts, d\'assistances et de kills.')
+                case _:
+                    await user.send("Feur")
+        with open('imposteur.json','w') as f :
+                json.dump(users,f)
+        
+        with open('imposteur.json','r') as f :
+            jeu = json.load(f)
+        boucle=jeu[str(ctx.author.id)]["game"]
+        await asyncio.sleep(300)
+        while(boucle=="true"):
+            with open('imposteur.json','r') as f :
+                jeu = json.load(f)
+            boucle=jeu[str(ctx.author.id)]["game"]
+            if jeu[str(ctx.author.id)]["game"]=="true":
+                user= bot.get_user(jeu[str(ctx.author.id)]["Droide"])
+                await user.send(random.choice(task))
+                timer = random.randint(300,600)
+                await asyncio.sleep(timer)
+        doubleface=["Gentil","Imposteur"]
+        while(boucle=="true"):
+            with open('imposteur.json','r') as f :
+                jeu = json.load(f)
+            boucle=jeu[str(ctx.author.id)]["game"]
+            if jeu[str(ctx.author.id)]["game"]=="true":
+                user= bot.get_user(jeu[str(ctx.author.id)]["Double-face"])
+                await user.send(random.choice(doubleface))
+                timer = random.randint(180,300)
+                await asyncio.sleep(timer)    
+    else :
+        await ctx.channel.send("Le nombre de participant n'est pas valide (5)")    
+        
+@bot.command()
+async def fin(ctx):
+    with open('imposteur.json','r') as f :
+        jeu = json.load(f)
+    jeu[str(ctx.author.id)]["game"]="false"
+    with open('imposteur.json','w') as f :
+            json.dump(jeu,f)
+    await ctx.channel.send("La partie est terminé voici la liste des roles : ")
+    for key,value in jeu[str(ctx.author.id)].items():
+        
+        if key!="game":
+            user= bot.get_user(jeu[str(ctx.author.id)][key])
+            await ctx.channel.send(f'{user.name} : {key}')
+    jeu[str(ctx.author.id)].clear()
+    jeu[str(ctx.author.id)]["game"]="false"
+    with open('imposteur.json','w') as f :
+            json.dump(jeu,f)
+            
+@bot.command()
+@commands.cooldown(1, 900, commands.BucketType.user)
+async def imposteur_simple(ctx):
+    roles=["Imposteur","Crewmate","Crewmate","Crewmate","Crewmate"]
+    dic_role={}
+    with open('imposta.json','r') as f:
+        users= json.load(f)
+    users[f'{ctx.author.id}']={}
+    if len(ctx.message.raw_mentions)==5:
+        for i in ctx.message.raw_mentions:
+            role =random.choice(roles)
+            roles.remove(role)
+            user= bot.get_user(i)
+            users[f'{ctx.author.id}'][user.name]=role
+            await user.send(f'{user}vous êtes{role}')
+    
+        with open('imposta.json','w') as f :
+            json.dump(users,f)
+        await ctx.channel.send("La partie a démarrer, lorsque vous avez fini veuillez tapper la commande -sus pour avoir le role de tous les participants")
+    else :
+        await ctx.channel.send("Le nombre de participant n'est pas valide (5)")                 
+@bot.command()
+async def sus(ctx):
+    with open('imposta.json','r') as f:
+        sus= json.load(f)   
+    await ctx.channel.send(f"{sus[str(ctx.author.id)]}")
+    sus[str(ctx.author.id)].clear()
+    
+    with open('imposta.json','w') as f:
+        json.dump(sus,f)
 bot.run(os.getenv('TOKEN'))
 
  

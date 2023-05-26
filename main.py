@@ -15,7 +15,8 @@ import re
 import pytz
 from dotenv import load_dotenv
 import os
-
+from gcsa.event import Event
+from gcsa.google_calendar import GoogleCalendar
 load_dotenv()
 ##########################################################################
 
@@ -1052,6 +1053,20 @@ async def sus(ctx):
     
     with open('imposta.json','w') as f:
         json.dump(sus,f)
+        
+        
+        
+        
+
+      
+@bot.command()
+async def cal(ctx):
+    calendar = GoogleCalendar(f'{ctx.message.content.split()[1]}',save_token=False,read_only=True)
+    for event in calendar:
+        await ctx.channel.send(event)    
+        
+        
+        
 bot.run(os.getenv('TOKEN'))
 
  

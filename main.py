@@ -804,7 +804,6 @@ async def cg(ctx):
         
         for i in range ( len(cg["participants"])) :
             nom = cg["participants"][i]["summonerName"] 
-            print(nom)
             if cg["participants"][i]["teamId"]==100:
                 
                 me = lol_watcher.summoner.by_name(my_region,cg["participants"][i]["summonerName"] )

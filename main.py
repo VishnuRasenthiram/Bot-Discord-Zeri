@@ -308,7 +308,7 @@ async def lolp(ctx):
                  
             
               
-                
+            
             icone =f'http://ddragon.leagueoflegends.com/cdn/{version["v"]}/img/profileicon/{me["profileIconId"]}.png'
             if not  me1:
                 rank="Unranked"
@@ -318,22 +318,16 @@ async def lolp(ctx):
                 loose="Unranked"
                 wr="Unranked"
             else:
-                if  not "RANKED_FLEX_SR" in me1[0]['queueType']:
-                    rank=me1[0]["tier"]
-                    div=me1[0]["rank"]
-                    lp=me1[0]["leaguePoints"]
-                    win=me1[0]["wins"]
-                    loose=me1[0]["losses"]
-                    wr=(win/(win+loose))*100
-                    wr=round(wr,2)
-                else :
-                    rank=me1[1]["tier"]
-                    div=me1[1]["rank"]
-                    lp=me1[1]["leaguePoints"]
-                    win=me1[1]["wins"]
-                    loose=me1[1]["losses"]
-                    wr=(win/(win+loose))*100
-                    wr=round(wr,2)
+                for i in range(len(me1)):
+                    if me1[i]['queueType']=="RANKED_SOLO_5x5":
+                        rank=me1[i]["tier"]
+                        div=me1[i]["rank"]
+                        lp=me1[i]["leaguePoints"]
+                        win=me1[i]["wins"]
+                        loose=me1[i]["losses"]
+                        wr=(win/(win+loose))*100
+                        wr=round(wr,2)
+                       
                     
             file = discord.File(f"env/ranked-emblem/zeri2.gif", filename=f"zeri2.gif")
 
@@ -829,15 +823,13 @@ async def cg(ctx):
                 
                 
                 else:
-                    if  not "RANKED_FLEX_SR" in me1[0]['queueType']:
-                        rank=me1[0]["tier"]
-                        div=me1[0]["rank"]
-                        lp=me1[0]["leaguePoints"]
-                        
-                    else :
-                        rank=me1[1]["tier"]
-                        div=me1[1]["rank"]
-                        lp=me1[1]["leaguePoints"]
+                    for i in range(len(me1)):
+                        if me1[i]['queueType']=="RANKED_SOLO_5x5":
+                            rank=me1[i]["tier"]
+                            div=me1[i]["rank"]
+                            lp=me1[i]["leaguePoints"]
+                            
+                    
                         
                         
             
@@ -879,15 +871,11 @@ async def cg(ctx):
                         red+=f'``{cle}`` **-** \t'
                 
                 else:
-                    if  not "RANKED_FLEX_SR" in me1[0]['queueType']:
-                        rank=me1[0]["tier"]
-                        div=me1[0]["rank"]
-                        lp=me1[0]["leaguePoints"]
-                        
-                    else :
-                        rank=me1[1]["tier"]
-                        div=me1[1]["rank"]
-                        lp=me1[1]["leaguePoints"]
+                    for i in range(len(me1)):
+                        if me1[i]['queueType']=="RANKED_SOLO_5x5":
+                            rank=me1[i]["tier"]
+                            div=me1[i]["rank"]
+                            lp=me1[i]["leaguePoints"]
                         
                         
             

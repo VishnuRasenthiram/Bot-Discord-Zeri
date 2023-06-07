@@ -802,20 +802,17 @@ async def cg(ctx):
         blue=""
         red =""
         
-        for i in cg["participants"] :
-            
-            if i["teamId"]==100:
+        for i in range ( len(cg["participants"])) :
+            nom = cg["participants"][i]["summonerName"] 
+            print(nom)
+            if cg["participants"][i]["teamId"]==100:
                 
-                me = lol_watcher.summoner.by_name(my_region,i["summonerName"])
+                me = lol_watcher.summoner.by_name(my_region,cg["participants"][i]["summonerName"] )
                 me1= lol_watcher.league.by_summoner(my_region,me["id"])
                 
                 for cle,valeur in champ.items():
-                    if int(valeur['key'])==int(i['championId']):
+                    if int(valeur['key'])==int(cg["participants"][i]['championId']):
                         blue+=f'``{cle}`` **-** \t'
-                     
-                
-                
-                
                 if not  me1:
                     rank="Unranked"
                     div=" "
@@ -828,11 +825,6 @@ async def cg(ctx):
                             rank=me1[i]["tier"]
                             div=me1[i]["rank"]
                             lp=me1[i]["leaguePoints"]
-                            
-                    
-                        
-                        
-            
 
                 var=""
                 match rank.lower():
@@ -857,17 +849,17 @@ async def cg(ctx):
                     case _:
                         var=f"<:HanakoBahYes:811668408637718558> **{rank.lower()} {div}** {lp} "    
                         
-                blue+=f'``{i["summonerName"]}``\t**|**\t{var}\n'          
+                blue+=f'``{nom }``\t**|**\t{var}\n'          
                     
             else :
-                me = lol_watcher.summoner.by_name(my_region,i["summonerName"])
+                me = lol_watcher.summoner.by_name(my_region,cg["participants"][i]['summonerName'])
                 me1= lol_watcher.league.by_summoner(my_region,me["id"])
                 if not  me1:
                     rank="Unranked"
                     div=" "
                     lp=" "
                 for cle,valeur in champ.items():
-                    if int(valeur['key'])==int(i['championId']):
+                    if int(valeur['key'])==int(cg["participants"][i]['championId']):
                         red+=f'``{cle}`` **-** \t'
                 
                 else:
@@ -876,7 +868,7 @@ async def cg(ctx):
                             rank=me1[i]["tier"]
                             div=me1[i]["rank"]
                             lp=me1[i]["leaguePoints"]
-                        
+                       
                         
             
 
@@ -903,7 +895,7 @@ async def cg(ctx):
                     case _:
                         var=f"<:HanakoBahYes:811668408637718558> **{rank.lower()} {div}** {lp}"    
                       
-                red+=f'``{i["summonerName"]}``\t**|**\t{var}\n' 
+                red+=f'``{nom}``\t**|**\t{var}\n' 
         
         
         
@@ -915,7 +907,6 @@ async def cg(ctx):
         embed=discord.Embed(title='Match en cours :' ,color=discord.Color.yellow())
         embed.add_field(name="Blue side :",value=blue,inline=False
         ).add_field(name="Red side :",value=red )         
-        
         await ctx.channel.send(embed=embed)   
             
         
@@ -923,6 +914,7 @@ async def cg(ctx):
                 
         
     except ApiError as err :
+            
             if err.response.status_code == 429 :
                 print("Quota de requête dépassé")
             elif err.response.status_code == 404:

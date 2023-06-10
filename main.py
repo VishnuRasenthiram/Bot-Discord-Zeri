@@ -67,11 +67,7 @@ print(current_time)
 
 @bot.event
 async def on_ready():
-    guild=bot.get_guild(614728233497133076)
-    karantest =guild.get_channel(615128656049864734)
-    guildguuruu=bot.get_guild(332580555872927746)
-    guuruuchan=guildguuruu.get_channel(CHAN_LOLDLE)
-    guuruuchanflame=guildguuruu.get_channel(CHAN_FLAME)
+    
     print("le bot est pret")
     try:
         synced= await bot.tree.sync()
@@ -85,7 +81,10 @@ async def on_ready():
         iconJour = j.read()
     
     while True:
-       
+        guild=bot.get_guild(614728233497133076)
+        guildguuruu=bot.get_guild(332580555872927746)
+        guuruuchan=guildguuruu.get_channel(CHAN_LOLDLE)
+        guuruuchanflame=guildguuruu.get_channel(CHAN_FLAME)
         
         pays = "Europe/Paris"
 

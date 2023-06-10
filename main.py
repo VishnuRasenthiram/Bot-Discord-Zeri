@@ -79,7 +79,10 @@ async def on_ready():
         print(e)
     
     
-	
+    with open("env/ranked-emblem/Karan_nuit.png", 'rb') as n,open("env/ranked-emblem/Karan_jour.png", 'rb') as j:
+        iconNuit = n.read()
+        iconJour = j.read()
+    
     while True:
        
         
@@ -95,8 +98,10 @@ async def on_ready():
         
         if current_time>"22:00" or current_time<"10:00": 
             await guild.edit(name ="Karan 🌙")
+            await guild.edit(icon=iconNuit)
         else:
             await guild.edit(name="Karan 🍁")
+            await guild.edit(icon=iconJour)
             
         if current_time>="04:00"and current_time <"04:05" :
             await guuruuchan.send("N'oubliez pas de faire votre Loldle du jour !")
@@ -268,6 +273,10 @@ async def ppdebase(ctx):
         await ctx.message.channel.send(ctx.author.avatar)
 
 @bot.command()
+async def ppserv(ctx):
+    await ctx.channel.send(ctx.guild.icon)
+
+@bot.command()
 async def banner(ctx):
     
    
@@ -285,143 +294,8 @@ async def banner(ctx):
             await ctx.channel.send("N'a pas de banniere")
         else:
             await ctx.message.channel.send(usez.banner)
-#LOL PROFILE
-
-@bot.command()
-@commands.cooldown(1, 10, commands.BucketType.user)
-async def lolp(ctx):
-        name =str(" ".join(ctx.message.content.split()[1:]))
-        versions = lol_watcher.data_dragon.versions_for_region(my_region)
-        champions_version = versions['n']['champion']
-        dd=lol_watcher.data_dragon.champions(champions_version)
-        
-        
-            
-        
-        try:
-            me = lol_watcher.summoner.by_name(my_region, name)
-            me1= lol_watcher.league.by_summoner(my_region,me["id"])
-            mastery=lol_watcher.champion_mastery.by_summoner(my_region, me["id"]) 
-           
-            
-                    
-                 
-            
-              
-            
-            icone =f'http://ddragon.leagueoflegends.com/cdn/{version["v"]}/img/profileicon/{me["profileIconId"]}.png'
-            if not  me1:
-                rank="Unranked"
-                div=" "
-                lp=" "
-                win="Unranked"
-                loose="Unranked"
-                wr="Unranked"
-            else:
-                for i in range(len(me1)):
-                    if me1[i]['queueType']=="RANKED_SOLO_5x5":
-                        rank=me1[i]["tier"]
-                        div=me1[i]["rank"]
-                        lp=me1[i]["leaguePoints"]
-                        win=me1[i]["wins"]
-                        loose=me1[i]["losses"]
-                        wr=(win/(win+loose))*100
-                        wr=round(wr,2)
-                       
-                    
-            file = discord.File(f"env/ranked-emblem/zeri2.gif", filename=f"zeri2.gif")
-
-            var=""
-            match rank.lower():
-                case "iron":
-                    var=f"<:iron:1070669886700920872>  **{rank.lower()} {div}** {lp} lps"
-                case "bronze":
-                    var=f"<:bronze:1070670261340352574>  **{rank.lower()} {div}** {lp} lps"
-                case "silver":
-                    var=f"<:silver:1070670285822505080>  **{rank.lower()} {div}** {lp} lps"
-                case "gold":
-                    var=f"<:gold:1070670322195509329>  **{rank.lower()} {div}** {lp} lps"
-                case "platinum":
-                    var=f"<:platinum:1070670342651129966>  **{rank.lower()} {div}** {lp} lps"
-                case "diamond":
-                    var=f"<:diamond:1070670360267198496>  **{rank.lower()} {div}** {lp} lps"
-                case "master":
-                    var=f"<:master:1070670398074671114>  **{rank.lower()} {div}** {lp} lps"
-                case "grandmaster":
-                    var=f"<:grandmaster:1070670415367778327>  **{rank.lower()} {div}** {lp} lps"
-                case "challenger":
-                    var=f"<:challenger:1070670432107245578>  **{rank.lower()} {div}** {lp} lps"
-                case _:
-                    var=f"<:HanakoBahYes:811668408637718558> **{rank.lower()} {div}** {lp} lps"
 
 
-            
-
-            embed=discord.Embed(title="League Profil",
-            description=f'{ctx.author.name} voici le profil de {name} ', 
-            color=discord.Color.blue()).set_thumbnail(
-            url=icone
-            ).add_field(
-            name="Pseudo :", 
-            value=me["name"], 
-            inline=True
-            ).add_field(
-            name="Niveau :",
-            value=me["summonerLevel"],
-            inline=True
-            ).add_field(
-            name="Rank :", 
-            value=var,
-            inline=True
-            ).add_field(
-            name="Wins :", 
-            value=win,
-            inline=True
-            ).add_field(name=" ",value=" "
-            ).add_field(name="Winrate :",value=f'{round(wr,2)}%'
-            ).add_field(
-            name="Losses :", 
-            value=loose ,
-            inline=False
-            ).set_image(url="attachment://zeri2.gif")
-            
-            
-            test={'1':[],'2':[],'3':[]}
-            
-            
-            
-            for i in range(3):
-                for j in dd['data']:
-                    
-                    if int(dd['data'][j]['key'])==int(mastery[i]['championId']):
-                        test[str(i+1)].append(dd['data'][j]['id'])
-                        test[str(i+1)].append(int(mastery[i]['championPoints']))
-            chaine = ""
-            for key, value in test.items():
-                chaine += key + ": " + " - ".join(str(v) for v in value) + " Pts \n"
-            lignes = chaine.split("\n")
-            for ligne in lignes:
-                elements = ligne.split("-")
-                if len(elements) > 1:
-                    nombre = ''.join(filter(str.isdigit, elements[1].strip()))  # Supprime tous les caractères non numériques de la chaîne
-                    nombre_formate = "{:,.0f}".format(int(nombre))
-                    chaine = chaine.replace(elements[1].strip(), nombre_formate + " Pts")
-            
-            embed.add_field(
-                name="Mastery :",
-                value=chaine
-            )            
-            await ctx.message.channel.send(embed=embed,file=file)
-
-#.set_image(url=f"attachment://emblem-{rank.lower()}.png")
-        
-        except ApiError as err :
-            if err.response.status_code == 429 :
-                print("Quota de requête dépassé")
-            elif err.response.status_code == 404:
-                 await ctx.message.channel.send("Le compte avec ce pseudo n'existe pas !")
-            else:
-                raise
         
 ##########################################################################        
 
@@ -707,7 +581,142 @@ async def  on_raw_reaction_remove(payload):
 bot.event
 async def on_command_error(ctx, error):
 	print(error)
+#LOL PROFILE
 
+@bot.command()
+@commands.cooldown(1, 10, commands.BucketType.user)
+async def lolp(ctx):
+        name =str(" ".join(ctx.message.content.split()[1:]))
+        versions = lol_watcher.data_dragon.versions_for_region(my_region)
+        champions_version = versions['n']['champion']
+        dd=lol_watcher.data_dragon.champions(champions_version)
+        
+        
+            
+        
+        try:
+            me = lol_watcher.summoner.by_name(my_region, name)
+            me1= lol_watcher.league.by_summoner(my_region,me["id"])
+            mastery=lol_watcher.champion_mastery.by_summoner(my_region, me["id"]) 
+           
+            
+                    
+                 
+            
+              
+            
+            icone =f'http://ddragon.leagueoflegends.com/cdn/{version["v"]}/img/profileicon/{me["profileIconId"]}.png'
+            if not  me1:
+                rank="Unranked"
+                div=" "
+                lp=" "
+                win="Unranked"
+                loose="Unranked"
+                wr="Unranked"
+            else:
+                for i in range(len(me1)):
+                    if me1[i]['queueType']=="RANKED_SOLO_5x5":
+                        rank=me1[i]["tier"]
+                        div=me1[i]["rank"]
+                        lp=me1[i]["leaguePoints"]
+                        win=me1[i]["wins"]
+                        loose=me1[i]["losses"]
+                        wr=(win/(win+loose))*100
+                        wr=round(wr,2)
+                       
+                    
+            file = discord.File(f"env/ranked-emblem/zeri2.gif", filename=f"zeri2.gif")
+
+            var=""
+            match rank.lower():
+                case "iron":
+                    var=f"<:iron:1070669886700920872>  **{rank.lower()} {div}** {lp} lps"
+                case "bronze":
+                    var=f"<:bronze:1070670261340352574>  **{rank.lower()} {div}** {lp} lps"
+                case "silver":
+                    var=f"<:silver:1070670285822505080>  **{rank.lower()} {div}** {lp} lps"
+                case "gold":
+                    var=f"<:gold:1070670322195509329>  **{rank.lower()} {div}** {lp} lps"
+                case "platinum":
+                    var=f"<:platinum:1070670342651129966>  **{rank.lower()} {div}** {lp} lps"
+                case "diamond":
+                    var=f"<:diamond:1070670360267198496>  **{rank.lower()} {div}** {lp} lps"
+                case "master":
+                    var=f"<:master:1070670398074671114>  **{rank.lower()} {div}** {lp} lps"
+                case "grandmaster":
+                    var=f"<:grandmaster:1070670415367778327>  **{rank.lower()} {div}** {lp} lps"
+                case "challenger":
+                    var=f"<:challenger:1070670432107245578>  **{rank.lower()} {div}** {lp} lps"
+                case _:
+                    var=f"<:HanakoBahYes:811668408637718558> **{rank.lower()} {div}** {lp} lps"
+
+
+            
+
+            embed=discord.Embed(title="League Profil",
+            description=f'{ctx.author.name} voici le profil de {name} ', 
+            color=discord.Color.blue()).set_thumbnail(
+            url=icone
+            ).add_field(
+            name="Pseudo :", 
+            value=me["name"], 
+            inline=True
+            ).add_field(
+            name="Niveau :",
+            value=me["summonerLevel"],
+            inline=True
+            ).add_field(
+            name="Rank :", 
+            value=var,
+            inline=True
+            ).add_field(
+            name="Wins :", 
+            value=win,
+            inline=True
+            ).add_field(name=" ",value=" "
+            ).add_field(name="Winrate :",value=f'{round(wr,2)}%'
+            ).add_field(
+            name="Losses :", 
+            value=loose ,
+            inline=False
+            ).set_image(url="attachment://zeri2.gif")
+            
+            
+            test={'1':[],'2':[],'3':[]}
+            
+            
+            
+            for i in range(3):
+                for j in dd['data']:
+                    
+                    if int(dd['data'][j]['key'])==int(mastery[i]['championId']):
+                        test[str(i+1)].append(dd['data'][j]['id'])
+                        test[str(i+1)].append(int(mastery[i]['championPoints']))
+            chaine = ""
+            for key, value in test.items():
+                chaine += key + ": " + " - ".join(str(v) for v in value) + " Pts \n"
+            lignes = chaine.split("\n")
+            for ligne in lignes:
+                elements = ligne.split("-")
+                if len(elements) > 1:
+                    nombre = ''.join(filter(str.isdigit, elements[1].strip()))  # Supprime tous les caractères non numériques de la chaîne
+                    nombre_formate = "{:,.0f}".format(int(nombre))
+                    chaine = chaine.replace(elements[1].strip(), nombre_formate + " Pts")
+            
+            embed.add_field(
+                name="Mastery :",
+                value=chaine
+            )            
+            await ctx.message.channel.send(embed=embed,file=file)
+        #.set_image(url=f"attachment://emblem-{rank.lower()}.png")
+        
+        except ApiError as err :
+            if err.response.status_code == 429 :
+                print("Quota de requête dépassé")
+            elif err.response.status_code == 404:
+                 await ctx.message.channel.send("Le compte avec ce pseudo n'existe pas !")
+            else:
+                raise
 @bot.command()
 async def histo(ctx):
      

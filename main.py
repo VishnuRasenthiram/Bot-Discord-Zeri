@@ -56,6 +56,7 @@ CHAN_REGLEMENT=657946471022329860
 MESSAGE_AUTO_ROLE=11111
 CHAN_LOLDLE=1091280421192474694
 CHAN_FLAME=332580555872927746
+ANNONCE_CHAN=634266557383442432
 FLAMEID=0
 GUURUUID=185191654255362048
 ALADID=517231233235812353
@@ -178,6 +179,17 @@ async def on_message(message):
                 await message.channel.send("https://tenor.com/view/guuruu-prank-prankex-gif-19025746535426067")
 
             
+
+@bot.event
+async def on_member_update(before,after):
+    guild=bot.get_guild(614728233497133076)
+    
+    annonce =guild.get_channel(833833047454515223)
+    if after.activity != None:
+        if after.activity.type==discord.ActivityType.streaming :
+            if after.activity.url != None:
+                await annonce.send(f"{before.name} est en live ! \n{after.activity.url}")
+    
 
 #CLEAR
 

@@ -60,7 +60,7 @@ ANNONCE_CHAN=634266557383442432
 FLAMEID=0
 GUURUUID=185191654255362048
 ALADID=517231233235812353
-
+KARAN_ID=614728233497133076
 ##########################################################################
 #MAIN
 print(current_time)
@@ -81,7 +81,7 @@ async def on_ready():
         iconJour = j.read()
     
     while True:
-        guild=bot.get_guild(614728233497133076)
+        guild=bot.get_guild(KARAN_ID)
         guildguuruu=bot.get_guild(332580555872927746)
         guuruuchan=guildguuruu.get_channel(CHAN_LOLDLE)
         guuruuchanflame=guildguuruu.get_channel(CHAN_FLAME)
@@ -181,14 +181,14 @@ async def on_message(message):
 
 @bot.event
 async def on_member_update(before,after):
-    guild=bot.get_guild(614728233497133076)
-    
-    annonce =guild.get_channel(833833047454515223)
+    guild=bot.get_guild(KARAN_ID)
+    annonce =guild.get_channel(ANNONCE_CHAN)
     if after.activity != None:
-        if after.activity.type==discord.ActivityType.streaming :
-            if after.activity.url != None:
-                await annonce.send(f"{before.name} est en live ! \n{after.activity.url}")
-    
+        if after.guild.id==KARAN_ID:
+            if after.activity.type==discord.ActivityType.streaming :
+                if after.activity.url != None:
+                    await annonce.send(f"{before.name} est en live ! \n{after.activity.url}")
+        
 
 #CLEAR
 
@@ -400,7 +400,7 @@ async def liberer(ctx, member: discord.Member):
 
 @bot.event
 async def on_message_delete(message):
-    if message.guild.id==614728233497133076:
+    if message.guild.id==KARAN_ID:
         with open("logs.json", "r") as f:
             users = json.load(f)
         msg = message.content
@@ -415,7 +415,7 @@ async def on_message_delete(message):
 @bot.command()
 @commands.cooldown(1, 60, commands.BucketType.user)
 async def snipe(ctx):
-    if ctx.guild.id==614728233497133076:
+    if ctx.guild.id==KARAN_ID:
         with open("logs.json", "r") as f:
             users = json.load(f)
         

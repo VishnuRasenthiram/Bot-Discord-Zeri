@@ -183,11 +183,15 @@ async def on_message(message):
 async def on_member_update(before,after):
     guild=bot.get_guild(KARAN_ID)
     annonce =guild.get_channel(ANNONCE_CHAN)
+    for i in guild.members:
+        if i.id==after.id:
+            dansMonServ = True
+            
+
     if after.activity != None:
-        if after.guild.id==KARAN_ID:
-            if after.activity.type==discord.ActivityType.streaming :
-                if after.activity.url != None:
-                    await annonce.send(f"{before.name} est en live ! \n{after.activity.url}")
+        if dansMonServ:
+            if after.activity.type==discord.ActivityType.streaming : 
+                await annonce.send(f"{before.name} est en live ! \n{after.activity.url}")
         
 
 #CLEAR

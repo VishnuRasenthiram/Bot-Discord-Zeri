@@ -183,6 +183,7 @@ async def on_message(message):
 async def on_member_update(before,after):
     guild=bot.get_guild(KARAN_ID)
     annonce =guild.get_channel(ANNONCE_CHAN)
+    dansMonServ=False
     for i in guild.members:
         if i.id==after.id:
             dansMonServ = True

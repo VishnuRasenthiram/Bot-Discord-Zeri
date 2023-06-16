@@ -454,7 +454,7 @@ async def on_voice_state_update(member,before,after):
         if after.channel.id ==CHAN_VOC:
 
 
-            chan = await after.channel.clone(name=f'◜⏳◞{member.name}')
+            chan = await after.channel.clone(name=f'◜⏳◞{member.display_name}')
             await member.move_to(chan)
 
 

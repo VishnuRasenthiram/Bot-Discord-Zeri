@@ -214,20 +214,40 @@ async def clear(ctx , amount=5):
 async def apod(ctx):
     apod=nasa
     
-    embed=discord.Embed(title="Photo astronomique du jour !",
-            description=f'{ctx.author.name} voici la photo du jour en astronomie !', 
-            color=discord.Color.red()).set_thumbnail(
-            url="https://www.nasa.gov/sites/default/files/thumbnails/image/nasa-logo-web-rgb.png"
-            ).set_image(url=apod.apod()["hdurl"])
+    
+    if apod.apod()["media_type"]=="image":
+    
+        embed=discord.Embed(title="Photo astronomique du jour !",
+                description=f'{ctx.author.name} voici la photo du jour en astronomie !', 
+                color=discord.Color.red()).set_thumbnail(
+                url="https://www.nasa.gov/sites/default/files/thumbnails/image/nasa-logo-web-rgb.png"
+                ).set_image(url=apod.apod()["hdurl"])
 
-    if "copyright" in apod.apod():
+        if "copyright" in apod.apod():
 
-            embed.add_field(
-            name="Auteur :", 
-            value=f'{apod.apod()["copyright"]}', 
-            inline=True
-            )
-    await ctx.message.channel.send(embed=embed)
+                embed.add_field(
+                name="Auteur :", 
+                value=f'{apod.apod()["copyright"]}', 
+                inline=True
+                )
+        await ctx.message.channel.send(embed=embed)
+    elif apod.apod()["media_type"]=="video":
+        embed=discord.Embed(title="Vidéo astronomique du jour !",
+                description=f'{ctx.author.name} voici la vidéo du jour en astronomie !', 
+                color=discord.Color.red()).set_thumbnail(
+                url="https://www.nasa.gov/sites/default/files/thumbnails/image/nasa-logo-web-rgb.png"
+                )
+
+        if "copyright" in apod.apod():
+
+                embed.add_field(
+                name="Auteur :", 
+                value=f'{apod.apod()["copyright"]}', 
+                inline=True
+                )
+        
+        await ctx.message.channel.send(embed=embed)
+        await ctx.message.channel.send(apod.apod()["url"])
     
 ##########################################################################   
 

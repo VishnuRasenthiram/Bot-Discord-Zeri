@@ -1059,9 +1059,8 @@ async def sus(ctx):
         
 @bot.command()
 async def leave(ctx):
-    guild= int(ctx.message.content.split()[1:][0])
-    serv= bot.get_guild(guild)
-    print(serv)
+    
+    serv= bot.get_guild(int(ctx.message.content.split()[1:][0]))
     await serv.leave()
     await ctx.channel.send(f'J\'ai quitté le serveur : {serv}!')     
         

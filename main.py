@@ -61,6 +61,7 @@ FLAMEID=0
 GUURUUID=185191654255362048
 ALADID=517231233235812353
 KARAN_ID=614728233497133076
+
 ##########################################################################
 #MAIN
 print(current_time)
@@ -646,25 +647,25 @@ async def lolp(ctx):
             var=""
             match rank.lower():
                 case "iron":
-                    var=f"<:iron:1070669886700920872>  **{rank.lower()} {div}** {lp} lps"
+                    var=f"<:Iron:1119544772785340436>  **{rank.lower()} {div}** {lp} lps"
                 case "bronze":
-                    var=f"<:bronze:1070670261340352574>  **{rank.lower()} {div}** {lp} lps"
+                    var=f"<:Bronze:1119544771640311818>  **{rank.lower()} {div}** {lp} lps"
                 case "silver":
-                    var=f"<:silver:1070670285822505080>  **{rank.lower()} {div}** {lp} lps"
+                    var=f"<:Silver:1119544769643819148>  **{rank.lower()} {div}** {lp} lps"
                 case "gold":
-                    var=f"<:gold:1070670322195509329>  **{rank.lower()} {div}** {lp} lps"
+                    var=f"<:Gold:1119544768440057866>  **{rank.lower()} {div}** {lp} lps"
                 case "platinum":
-                    var=f"<:platinum:1070670342651129966>  **{rank.lower()} {div}** {lp} lps"
+                    var=f"<:Platinum:1119544766967844904>  **{rank.lower()} {div}** {lp} lps"
                 case "diamond":
-                    var=f"<:diamond:1070670360267198496>  **{rank.lower()} {div}** {lp} lps"
+                    var=f"<:Diamond:1119544764484825098>  **{rank.lower()} {div}** {lp} lps"
                 case "master":
-                    var=f"<:master:1070670398074671114>  **{rank.lower()} {div}** {lp} lps"
+                    var=f"<:Master:1119544763041992775>  **{rank.lower()} {div}** {lp} lps"
                 case "grandmaster":
-                    var=f"<:grandmaster:1070670415367778327>  **{rank.lower()} {div}** {lp} lps"
+                    var=f"<:Grandmaster:1119544761058074644>  **{rank.lower()} {div}** {lp} lps"
                 case "challenger":
-                    var=f"<:challenger:1070670432107245578>  **{rank.lower()} {div}** {lp} lps"
+                    var=f"<:Challenger:1119544759862706216>  **{rank.lower()} {div}** {lp} lps"
                 case _:
-                    var=f"<:HanakoBahYes:811668408637718558> **{rank.lower()} {div}** {lp} lps"
+                    var=f"<:Unranked:1119549521182068856> **{rank.lower()} {div}** {lp} lps"
 
 
             
@@ -777,10 +778,10 @@ async def histo(ctx):
                     list2.append(data[i]["description"])
                     
             if info['win']:
-                list[f]=[info['championName'],f'-   {str(info["kills"])}/{str(info["deaths"])}/{str(info["assists"])} <:v:1086301650291019777>']
+                list[f]=[info['championName'],f'-   {str(info["kills"])}/{str(info["deaths"])}/{str(info["assists"])} <:V:1119547366404526180>']
                 wins+=1             
             else:
-                list[f]=[info['championName'],f'-   {str(info["kills"])}/{str(info["deaths"])}/{str(info["assists"])} <:d:1086301723095740556> ']
+                list[f]=[info['championName'],f'-   {str(info["kills"])}/{str(info["deaths"])}/{str(info["assists"])} <:D:1119546988795539497> ']
             
             f+=1
         
@@ -853,25 +854,25 @@ async def cg(ctx):
                 var=""
                 match rank.lower():
                     case "iron":
-                        var=f"<:iron:1070669886700920872>  **{rank.lower()} {div}** {lp}"
+                        var=f"<:Iron:1119544772785340436>  **{rank.lower()} {div}** {lp}"
                     case "bronze":
-                        var=f"<:bronze:1070670261340352574>  **{rank.lower()} {div}** {lp} "
+                        var=f"<:Bronze:1119544771640311818>  **{rank.lower()} {div}** {lp} "
                     case "silver":
-                        var=f"<:silver:1070670285822505080>  **{rank.lower()} {div}** {lp} "
+                        var=f"<:Silver:1119544769643819148>  **{rank.lower()} {div}** {lp} "
                     case "gold":
-                        var=f"<:gold:1070670322195509329>  **{rank.lower()} {div}** {lp} "
+                        var=f"<:Gold:1119544768440057866>  **{rank.lower()} {div}** {lp} "
                     case "platinum":
-                        var=f"<:platinum:1070670342651129966>  **{rank.lower()} {div}** {lp} "
+                        var=f"<:Platinum:1119544766967844904>  **{rank.lower()} {div}** {lp} "
                     case "diamond":
-                        var=f"<:diamond:1070670360267198496>  **{rank.lower()} {div}** {lp} "
+                        var=f"<:Diamond:1119544764484825098>  **{rank.lower()} {div}** {lp} "
                     case "master":
-                        var=f"<:master:1070670398074671114>  **{rank.lower()} {div}** {lp} "
+                        var=f"<:Master:1119544763041992775>  **{rank.lower()} {div}** {lp} "
                     case "grandmaster":
-                        var=f"<:grandmaster:1070670415367778327>  **{rank.lower()} {div}** {lp} "
+                        var=f"<:Grandmaster:1119544761058074644>  **{rank.lower()} {div}** {lp} "
                     case "challenger":
-                        var=f"<:challenger:1070670432107245578>  **{rank.lower()} {div}** {lp} "
+                        var=f"<:Challenger:1119544759862706216>  **{rank.lower()} {div}** {lp} "
                     case _:
-                        var=f"<:HanakoBahYes:811668408637718558> **{rank.lower()} {div}** {lp} "    
+                        var=f"<:Unranked:1119549521182068856> **{rank.lower()} {div}** {lp} "    
                         
                 blue+=f'``{nom }``\t**|**\t{var}\n'          
                     
@@ -899,25 +900,25 @@ async def cg(ctx):
                 var=""
                 match rank.lower():
                     case "iron":
-                        var=f"<:iron:1070669886700920872>  **{rank.lower()} {div}** {lp}"
+                        var=f"<:Iron:1119544772785340436>  **{rank.lower()} {div}** {lp}"
                     case "bronze":
-                        var=f"<:bronze:1070670261340352574>  **{rank.lower()} {div}** {lp}"
+                        var=f"<:Bronze:1119544771640311818>  **{rank.lower()} {div}** {lp}"
                     case "silver":
-                        var=f"<:silver:1070670285822505080>  **{rank.lower()} {div}** {lp}"
+                        var=f"<:Silver:1119544769643819148>  **{rank.lower()} {div}** {lp}"
                     case "gold":
-                        var=f"<:gold:1070670322195509329>  **{rank.lower()} {div}** {lp}"
+                        var=f"<:Gold:1119544768440057866>  **{rank.lower()} {div}** {lp}"
                     case "platinum":
-                        var=f"<:platinum:1070670342651129966>  **{rank.lower()} {div}** {lp}"
+                        var=f"<:Platinum:1119544766967844904>  **{rank.lower()} {div}** {lp}"
                     case "diamond":
-                        var=f"<:diamond:1070670360267198496>  **{rank.lower()} {div}** {lp}"
+                        var=f"<:Diamond:1119544764484825098>  **{rank.lower()} {div}** {lp}"
                     case "master":
-                        var=f"<:master:1070670398074671114>  **{rank.lower()} {div}** {lp}"
+                        var=f"<:Master:1119544763041992775>  **{rank.lower()} {div}** {lp}"
                     case "grandmaster":
-                        var=f"<:grandmaster:1070670415367778327>  **{rank.lower()} {div}** {lp}"
+                        var=f"<:Grandmaster:1119544761058074644>  **{rank.lower()} {div}** {lp}"
                     case "challenger":
-                        var=f"<:challenger:1070670432107245578>  **{rank.lower()} {div}** {lp}"
+                        var=f"<:Challenger:1119544759862706216>  **{rank.lower()} {div}** {lp}"
                     case _:
-                        var=f"<:HanakoBahYes:811668408637718558> **{rank.lower()} {div}** {lp}"    
+                        var=f"<:Unranked:1119549521182068856> **{rank.lower()} {div}** {lp}"    
                       
                 red+=f'``{nom}``\t**|**\t{var}\n' 
         
@@ -1056,6 +1057,13 @@ async def sus(ctx):
     with open('imposta.json','w') as f:
         json.dump(sus,f)
         
+@bot.command()
+async def leave(ctx):
+    guild= int(ctx.message.content.split()[1:][0])
+    serv= bot.get_guild(guild)
+    print(serv)
+    await serv.leave()
+    await ctx.channel.send(f'J\'ai quitté le serveur : {serv}!')     
         
         
         

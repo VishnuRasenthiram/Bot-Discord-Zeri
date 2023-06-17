@@ -608,28 +608,20 @@ async def lolp(ctx):
         champions_version = versions['n']['champion']
         dd=lol_watcher.data_dragon.champions(champions_version)
         
-        
-            
-        
         try:
             me = lol_watcher.summoner.by_name(my_region, name)
             me1= lol_watcher.league.by_summoner(my_region,me["id"])
             mastery=lol_watcher.champion_mastery.by_summoner(my_region, me["id"]) 
-           
-            
-                    
-                 
-            
-              
-            
+               
             icone =f'http://ddragon.leagueoflegends.com/cdn/{version["v"]}/img/profileicon/{me["profileIconId"]}.png'
-            if not  me1:
+            if not (me1):
                 rank="Unranked"
-                div=" "
-                lp=" "
+                div="Unranked"
+                lp="Unranked"
                 win="Unranked"
                 loose="Unranked"
                 wr="Unranked"
+                
             else:
                 for i in range(len(me1)):
                     if me1[i]['queueType']=="RANKED_SOLO_5x5":
@@ -639,11 +631,11 @@ async def lolp(ctx):
                         win=me1[i]["wins"]
                         loose=me1[i]["losses"]
                         wr=(win/(win+loose))*100
-                        wr=round(wr,2)
-                       
+                        wr=f'{round(wr,2)}%'
+                        
                     
             file = discord.File(f"env/ranked-emblem/zeri2.gif", filename=f"zeri2.gif")
-
+            
             var=""
             match rank.lower():
                 case "iron":
@@ -665,11 +657,11 @@ async def lolp(ctx):
                 case "challenger":
                     var=f"<:Challenger:1119544759862706216>  **{rank.lower()} {div}** {lp} lps"
                 case _:
-                    var=f"<:Unranked:1119549521182068856> **{rank.lower()} {div}** {lp} lps"
-
+                    var=f"<:Unranked:1119549521182068856> **{rank.lower()}**"
 
             
-
+            
+            
             embed=discord.Embed(title="League Profil",
             description=f'{ctx.author.name} voici le profil de {name} ', 
             color=discord.Color.blue()).set_thumbnail(
@@ -691,7 +683,7 @@ async def lolp(ctx):
             value=win,
             inline=True
             ).add_field(name=" ",value=" "
-            ).add_field(name="Winrate :",value=f'{round(wr,2)}%'
+            ).add_field(name="Winrate :",value=wr
             ).add_field(
             name="Losses :", 
             value=loose ,
@@ -723,11 +715,12 @@ async def lolp(ctx):
             embed.add_field(
                 name="Mastery :",
                 value=chaine
-            )            
+            )       
             await ctx.message.channel.send(embed=embed,file=file)
         #.set_image(url=f"attachment://emblem-{rank.lower()}.png")
         
         except ApiError as err :
+            print(err)
             if err.response.status_code == 429 :
                 print("Quota de requête dépassé")
             elif err.response.status_code == 404:
@@ -872,7 +865,7 @@ async def cg(ctx):
                     case "challenger":
                         var=f"<:Challenger:1119544759862706216>  **{rank.lower()} {div}** {lp} "
                     case _:
-                        var=f"<:Unranked:1119549521182068856> **{rank.lower()} {div}** {lp} "    
+                        var=f"<:Unranked:1119549521182068856> **{rank.lower()}**"    
                         
                 blue+=f'``{nom }``\t**|**\t{var}\n'          
                     
@@ -918,7 +911,7 @@ async def cg(ctx):
                     case "challenger":
                         var=f"<:Challenger:1119544759862706216>  **{rank.lower()} {div}** {lp}"
                     case _:
-                        var=f"<:Unranked:1119549521182068856> **{rank.lower()} {div}** {lp}"    
+                        var=f"<:Unranked:1119549521182068856> **{rank.lower()}**"    
                       
                 red+=f'``{nom}``\t**|**\t{var}\n' 
         

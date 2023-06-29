@@ -159,16 +159,16 @@ async def on_message(message):
                 
             await bot.process_commands(message)
             
-            if "guuruu"in message.content.lower().split():
-                await message.add_reaction("<:GuuruuW:1091852794568396810>")
+            #if "guuruu"in message.content.lower().split():
+            #    await message.add_reaction("<:GuuruuW:1091852794568396810>")
                 
                 
             if "merci zeri" in message.content.lower():
                 await message.reply("Derien frérot/e <:Shock:1089628155133820938>")
                 
                 
-            if "zebi" in message.content.lower().split():
-                await message.add_reaction("<:Zebi:1092526109192618074>")
+            #if "zebi" in message.content.lower().split():
+            #    await message.add_reaction("<:Zebi:1092526109192618074>")
                 
                 
             if "bonne nuit" in message.content.lower():
@@ -636,13 +636,19 @@ async def lolp(ctx):
             icone =f'http://ddragon.leagueoflegends.com/cdn/{version["v"]}/img/profileicon/{me["profileIconId"]}.png'
             if not (me1):
                 rank="Unranked"
+                rank1="Unranked"
                 div="Unranked"
+                div1="Unranked"
                 lp="Unranked"
+                lp1="Unranked"
                 win="Unranked"
                 loose="Unranked"
                 wr="Unranked"
                 
+                
             else:
+                isSolo=True
+                isFlex=True
                 for i in range(len(me1)):
                     if me1[i]['queueType']=="RANKED_SOLO_5x5":
                         rank=me1[i]["tier"]
@@ -652,11 +658,52 @@ async def lolp(ctx):
                         loose=me1[i]["losses"]
                         wr=(win/(win+loose))*100
                         wr=f'{round(wr,2)}%'
-                        
+                        isSolo=False
+                    if me1[i]['queueType']=="RANKED_FLEX_SR":
+                        rank1=me1[i]["tier"]
+                        div1=me1[i]["rank"]
+                        lp1=me1[i]["leaguePoints"]
+                        isFlex=False
+                if isSolo:
+                    rank="Unranked"
+                    div="Unranked"
+                    lp="Unranked"
+                    win="Unranked"
+                    loose="Unranked"
+                    wr="Unranked"
+                    wr="Unranked"
+                if isFlex:
+                    rank1="Unranked"
+                    div1="Unranked"
+                    lp1="Unranked"
+                    
+                     
                     
             file = discord.File(f"env/ranked-emblem/zeri2.gif", filename=f"zeri2.gif")
             
-            var=""
+            var1=""
+            match rank1.lower():
+                case "iron":
+                    var1=f"<:Iron:1119544772785340436>  **{rank1.lower()} {div1}** {lp1} lps"
+                case "bronze":
+                    var1=f"<:Bronze:1119544771640311818>  **{rank1.lower()} {div1}** {lp1} lps"
+                case "silver":
+                    var1=f"<:Silver:1119544769643819148>  **{rank1.lower()} {div1}** {lp1} lps"
+                case "gold":
+                    var1=f"<:Gold:1119544768440057866>  **{rank1.lower()} {div1}** {lp1} lps"
+                case "platinum":
+                    var1=f"<:Platinum:1119544766967844904>  **{rank1.lower()} {div1}** {lp1} lps"
+                case "diamond":
+                    var1=f"<:Diamond:1119544764484825098>  **{rank1.lower()} {div1}** {lp1} lps"
+                case "master":
+                    var1=f"<:Master:1119544763041992775>  **{rank1.lower()} {div1}** {lp1} lps"
+                case "grandmaster":
+                    var1=f"<:Grandmaster:1119544761058074644>  **{rank1.lower()} {div1}** {lp1} lps"
+                case "challenger":
+                    var1=f"<:Challenger:1119544759862706216>  **{rank1.lower()} {div1}** {lp1} lps"
+                case _:
+                    var1=f"<:Unranked:1119549521182068856> **{rank1.lower()}**"
+            var=" "
             match rank.lower():
                 case "iron":
                     var=f"<:Iron:1119544772785340436>  **{rank.lower()} {div}** {lp} lps"
@@ -678,7 +725,6 @@ async def lolp(ctx):
                     var=f"<:Challenger:1119544759862706216>  **{rank.lower()} {div}** {lp} lps"
                 case _:
                     var=f"<:Unranked:1119549521182068856> **{rank.lower()}**"
-
             
             
             
@@ -696,8 +742,8 @@ async def lolp(ctx):
             inline=True
             ).add_field(
             name="Rank :", 
-            value=var,
-            inline=True
+            value=f"Solo/duo : {var} \n Flex : {var1}",
+            inline=False
             ).add_field(
             name="Wins :", 
             value=win,

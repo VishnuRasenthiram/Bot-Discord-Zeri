@@ -15,6 +15,7 @@ import re
 import pytz
 from dotenv import load_dotenv
 import os
+from threading import Thread
 load_dotenv()
 ##########################################################################
 
@@ -61,6 +62,64 @@ FLAMEID=0
 GUURUUID=185191654255362048
 ALADID=517231233235812353
 KARAN_ID=614728233497133076
+
+##################################################################################################################################
+##################################################################################################################################
+
+def rank_to_emoji(rank,div,lp):
+    var = " "
+    match rank.lower():
+        case "iron":
+            var=f"<:Iron:1119544772785340436>  **{rank.lower()} {div}** {lp} lps"
+        case "bronze":
+            var=f"<:Bronze:1119544771640311818>  **{rank.lower()} {div}** {lp} lps"
+        case "silver":
+            var=f"<:Silver:1119544769643819148>  **{rank.lower()} {div}** {lp} lps"
+        case "gold":
+            var=f"<:Gold:1119544768440057866>  **{rank.lower()} {div}** {lp} lps"
+        case "platinum":
+            var=f"<:Platinum:1119544766967844904>  **{rank.lower()} {div}** {lp} lps"
+        case "diamond":
+            var=f"<:Diamond:1119544764484825098>  **{rank.lower()} {div}** {lp} lps"
+        case "master":
+            var=f"<:Master:1119544763041992775>  **{rank.lower()} {div}** {lp} lps"
+        case "grandmaster":
+            var=f"<:Grandmaster:1119544761058074644>  **{rank.lower()} {div}** {lp} lps"
+        case "challenger":
+            var=f"<:Challenger:1119544759862706216>  **{rank.lower()} {div}** {lp} lps"
+        case _:
+            var=f"<:Unranked:1119549521182068856> **{rank.lower()}**"
+    return var
+##################################################################################################################################
+##################################################################################################################################
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ##########################################################################
 #MAIN
@@ -115,7 +174,20 @@ async def on_ready():
         #    await msg.add_reaction("❌")
         await asyncio.sleep(300)
 	
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 ##########################################################################
+
+
 
 @bot.tree.command(name="ping")
 async def ping(interaction:discord.Interaction):
@@ -345,19 +417,18 @@ async def banner(ctx):
 
 async def spam(ctx):
         
-        if ctx.message.author.id!=688997212113600586:
-            msg =int(ctx.message.content.split()[1])
-            if msg<=100:
-                await ctx.message.delete()
-                spam =str(" ".join(ctx.message.content.split()[2:]))
-                for msg in range(msg):
-                    await ctx.message.channel.send(spam)
+        
+        msg =int(ctx.message.content.split()[1])
+        if msg<=100:
+            await ctx.message.delete()
+            spam =str(" ".join(ctx.message.content.split()[2:]))
+            for msg in range(msg):
+                await ctx.message.channel.send(spam)
 
-                await ctx.message.channel.send("https://tenor.com/view/jigm%C3%A9-hearthstone-travail-termin%C3%A9-mdr-mecredi-des-r%C3%A9ponse-gif-17412853")
-            else:
-                await ctx.message.channel.send("https://tenor.com/view/mister-v-encore-beaucoup-talking-still-thats-a-lot-there-right-gif-16825265")
-        else :
-            await ctx.message.reply("T'as pas l'age mon con")
+            await ctx.message.channel.send("https://tenor.com/view/jigm%C3%A9-hearthstone-travail-termin%C3%A9-mdr-mecredi-des-r%C3%A9ponse-gif-17412853")
+        else:
+            await ctx.message.channel.send("https://tenor.com/view/mister-v-encore-beaucoup-talking-still-thats-a-lot-there-right-gif-16825265")
+    
 
 
 
@@ -621,14 +692,111 @@ async def on_command_error(ctx, error):
 #LOL PROFILE
 
 @bot.command()
+async def set_profile(ctx):
+    name =str(" ".join(ctx.message.content.split()[1:]))
+    with open("profile.json","r") as f:
+        profile= json.load(f)
+    if not(name):
+        await ctx.channel.send("Veuillez préciser un nom d'invocateur")
+    else :
+        try:
+            me = lol_watcher.summoner.by_name(my_region, name)
+        except ApiError as err :
+            if err.response.status_code == 429 :
+                print("Quota de requête dépassé")
+            elif err.response.status_code == 404:
+                 await ctx.message.channel.send("Le compte avec ce pseudo n'existe pas !")
+            else:
+                raise
+        iconId=random.randint(0,28)
+        icon=f'http://ddragon.leagueoflegends.com/cdn/{version["v"]}/img/profileicon/{iconId}.png'
+        
+        if not str(ctx.author.id) in profile:    
+            profile[ctx.author.id]={"leagueName": name,"icon":icon,"statut":0}
+            await ctx.channel.send("Veuillez confirmer votre nom d'invocateur en tappant la commande: ```-confirm``` Apres avoir changer votre icone League of legends !")
+            await ctx.channel.send(icon)
+        else :
+            if profile[str(ctx.author.id)]["statut"]==0:
+                await ctx.channel.send("Vous avez déjà un compte en train d'être lié !")
+                await ctx.channel.send("Veuillez confirmer votre nom d'invocateur en tappant la commande: ```-confirm``` Apres avoir changer votre icone League of legends !")
+                await ctx.channel.send(profile[str(ctx.author.id)]["icon"])
+            else:
+                profile[str(ctx.author.id)]["leagueName"]=name
+                profile[str(ctx.author.id)]["statut"]=0
+                profile[str(ctx.author.id)]["icon"]=icon
+            
+        with open("profile.json","w") as f:
+            json.dump(profile,f)
+        
+
+@bot.command()
+async def del_profile(ctx):
+    with open("profile.json","r") as f:
+        profile= json.load(f)
+    if not str(ctx.author.id) in profile:
+        await ctx.channel.send("Vous n'avez pas lié de compte !")
+    else :
+        profile.pop(str(ctx.author.id))
+        await ctx.channel.send("Votre compte a bien été supprimé !")
+    
+    with open("profile.json","w") as f:
+            json.dump(profile,f)
+
+
+@bot.command()
+async def confirm(ctx):
+    
+   
+    with open("profile.json","r") as f :
+            profile = json.load(f)
+    
+    for id in profile:
+        
+        if ctx.author.id==int(id):
+            name = profile[str(ctx.author.id)]["leagueName"]
+            me = lol_watcher.summoner.by_name(my_region, name)
+            
+                
+            icone =f'http://ddragon.leagueoflegends.com/cdn/{version["v"]}/img/profileicon/{me["profileIconId"]}.png'
+            if profile[str(ctx.author.id)]["statut"]==0:
+                if profile[str(ctx.author.id)]["icon"]==icone:
+                    await ctx.channel.send("Votre compté a été lié ! Vous pouvez supprimer votre compte lié en tappant la commande : ```-del_profile```")
+                    profile[str(ctx.author.id)]["statut"]=1
+                else :
+                    await ctx.channel.send("Vous n'avez pas la bonne icône !")
+            else :
+                await ctx.channel.send("Votre compte a déjà été confirmé !")
+    with open("profile.json","w") as f:
+        json.dump(profile,f)       
+
+@bot.command()
 @commands.cooldown(1, 10, commands.BucketType.user)
 async def lolp(ctx):
+        
+        with open("profile.json","r") as f :
+            profile = json.load(f)
+        
         name =str(" ".join(ctx.message.content.split()[1:]))
+        if not(name):
+            estDansListe=True
+            for id in profile:
+                if ctx.author.id==int(id):
+                    estDansListe=False
+                    if profile[str(ctx.author.id)]["statut"]==0:
+                        await ctx.channel.send("Vous n'avez pas confirmé le profile !")
+                    else :
+                        name = profile[str(ctx.author.id)]["leagueName"]
+                    
+            if estDansListe:
+                await ctx.channel.send("Veuillez préciser un nom d'invocateur ou bien définir votre profile avec la commande : ```-set_profile```")
+                
         versions = lol_watcher.data_dragon.versions_for_region(my_region)
         champions_version = versions['n']['champion']
         dd=lol_watcher.data_dragon.champions(champions_version)
         
         try:
+        
+                
             me = lol_watcher.summoner.by_name(my_region, name)
             me1= lol_watcher.league.by_summoner(my_region,me["id"])
             mastery=lol_watcher.champion_mastery.by_summoner(my_region, me["id"]) 
@@ -636,7 +804,7 @@ async def lolp(ctx):
             icone =f'http://ddragon.leagueoflegends.com/cdn/{version["v"]}/img/profileicon/{me["profileIconId"]}.png'
             if not (me1):
                 rank="Unranked"
-                rank1="Unranked"
+                rank="Unranked"
                 div="Unranked"
                 div1="Unranked"
                 lp="Unranked"
@@ -660,9 +828,9 @@ async def lolp(ctx):
                         wr=f'{round(wr,2)}%'
                         isSolo=False
                     if me1[i]['queueType']=="RANKED_FLEX_SR":
-                        rank1=me1[i]["tier"]
-                        div1=me1[i]["rank"]
-                        lp1=me1[i]["leaguePoints"]
+                        rank_flex=me1[i]["tier"]
+                        div_flex=me1[i]["rank"]
+                        lp_flex=me1[i]["leaguePoints"]
                         isFlex=False
                 if isSolo:
                     rank="Unranked"
@@ -673,58 +841,19 @@ async def lolp(ctx):
                     wr="Unranked"
                     wr="Unranked"
                 if isFlex:
-                    rank1="Unranked"
-                    div1="Unranked"
-                    lp1="Unranked"
+                    rank_flex="Unranked"
+                    div_flex="Unranked"
+                    lp_flex="Unranked"
                     
                      
                     
             file = discord.File(f"env/ranked-emblem/zeri2.gif", filename=f"zeri2.gif")
             
-            var1=""
-            match rank1.lower():
-                case "iron":
-                    var1=f"<:Iron:1119544772785340436>  **{rank1.lower()} {div1}** {lp1} lps"
-                case "bronze":
-                    var1=f"<:Bronze:1119544771640311818>  **{rank1.lower()} {div1}** {lp1} lps"
-                case "silver":
-                    var1=f"<:Silver:1119544769643819148>  **{rank1.lower()} {div1}** {lp1} lps"
-                case "gold":
-                    var1=f"<:Gold:1119544768440057866>  **{rank1.lower()} {div1}** {lp1} lps"
-                case "platinum":
-                    var1=f"<:Platinum:1119544766967844904>  **{rank1.lower()} {div1}** {lp1} lps"
-                case "diamond":
-                    var1=f"<:Diamond:1119544764484825098>  **{rank1.lower()} {div1}** {lp1} lps"
-                case "master":
-                    var1=f"<:Master:1119544763041992775>  **{rank1.lower()} {div1}** {lp1} lps"
-                case "grandmaster":
-                    var1=f"<:Grandmaster:1119544761058074644>  **{rank1.lower()} {div1}** {lp1} lps"
-                case "challenger":
-                    var1=f"<:Challenger:1119544759862706216>  **{rank1.lower()} {div1}** {lp1} lps"
-                case _:
-                    var1=f"<:Unranked:1119549521182068856> **{rank1.lower()}**"
-            var=" "
-            match rank.lower():
-                case "iron":
-                    var=f"<:Iron:1119544772785340436>  **{rank.lower()} {div}** {lp} lps"
-                case "bronze":
-                    var=f"<:Bronze:1119544771640311818>  **{rank.lower()} {div}** {lp} lps"
-                case "silver":
-                    var=f"<:Silver:1119544769643819148>  **{rank.lower()} {div}** {lp} lps"
-                case "gold":
-                    var=f"<:Gold:1119544768440057866>  **{rank.lower()} {div}** {lp} lps"
-                case "platinum":
-                    var=f"<:Platinum:1119544766967844904>  **{rank.lower()} {div}** {lp} lps"
-                case "diamond":
-                    var=f"<:Diamond:1119544764484825098>  **{rank.lower()} {div}** {lp} lps"
-                case "master":
-                    var=f"<:Master:1119544763041992775>  **{rank.lower()} {div}** {lp} lps"
-                case "grandmaster":
-                    var=f"<:Grandmaster:1119544761058074644>  **{rank.lower()} {div}** {lp} lps"
-                case "challenger":
-                    var=f"<:Challenger:1119544759862706216>  **{rank.lower()} {div}** {lp} lps"
-                case _:
-                    var=f"<:Unranked:1119549521182068856> **{rank.lower()}**"
+            soloq=rank_to_emoji(rank,div,lp)
+            
+            
+            flex=rank_to_emoji(rank_flex,div_flex,lp_flex)
+            
             
             
             
@@ -742,7 +871,7 @@ async def lolp(ctx):
             inline=True
             ).add_field(
             name="Rank :", 
-            value=f"Solo/duo : {var} \n Flex : {var1}",
+            value=f"Solo/duo : {soloq} \n Flex : {flex}",
             inline=False
             ).add_field(
             name="Wins :", 
@@ -910,28 +1039,8 @@ async def cg(ctx):
                             div=me1[i]["rank"]
                             lp=me1[i]["leaguePoints"]
 
-                var=""
-                match rank.lower():
-                    case "iron":
-                        var=f"<:Iron:1119544772785340436>  **{rank.lower()} {div}** {lp}"
-                    case "bronze":
-                        var=f"<:Bronze:1119544771640311818>  **{rank.lower()} {div}** {lp} "
-                    case "silver":
-                        var=f"<:Silver:1119544769643819148>  **{rank.lower()} {div}** {lp} "
-                    case "gold":
-                        var=f"<:Gold:1119544768440057866>  **{rank.lower()} {div}** {lp} "
-                    case "platinum":
-                        var=f"<:Platinum:1119544766967844904>  **{rank.lower()} {div}** {lp} "
-                    case "diamond":
-                        var=f"<:Diamond:1119544764484825098>  **{rank.lower()} {div}** {lp} "
-                    case "master":
-                        var=f"<:Master:1119544763041992775>  **{rank.lower()} {div}** {lp} "
-                    case "grandmaster":
-                        var=f"<:Grandmaster:1119544761058074644>  **{rank.lower()} {div}** {lp} "
-                    case "challenger":
-                        var=f"<:Challenger:1119544759862706216>  **{rank.lower()} {div}** {lp} "
-                    case _:
-                        var=f"<:Unranked:1119549521182068856> **{rank.lower()}**"    
+                var=rank_to_emoji(rank,div,lp)
+                    
                         
                 blue+=f'``{nom }``\t**|**\t{var}\n'          
                     
@@ -956,28 +1065,8 @@ async def cg(ctx):
                         
             
 
-                var=""
-                match rank.lower():
-                    case "iron":
-                        var=f"<:Iron:1119544772785340436>  **{rank.lower()} {div}** {lp}"
-                    case "bronze":
-                        var=f"<:Bronze:1119544771640311818>  **{rank.lower()} {div}** {lp}"
-                    case "silver":
-                        var=f"<:Silver:1119544769643819148>  **{rank.lower()} {div}** {lp}"
-                    case "gold":
-                        var=f"<:Gold:1119544768440057866>  **{rank.lower()} {div}** {lp}"
-                    case "platinum":
-                        var=f"<:Platinum:1119544766967844904>  **{rank.lower()} {div}** {lp}"
-                    case "diamond":
-                        var=f"<:Diamond:1119544764484825098>  **{rank.lower()} {div}** {lp}"
-                    case "master":
-                        var=f"<:Master:1119544763041992775>  **{rank.lower()} {div}** {lp}"
-                    case "grandmaster":
-                        var=f"<:Grandmaster:1119544761058074644>  **{rank.lower()} {div}** {lp}"
-                    case "challenger":
-                        var=f"<:Challenger:1119544759862706216>  **{rank.lower()} {div}** {lp}"
-                    case _:
-                        var=f"<:Unranked:1119549521182068856> **{rank.lower()}**"    
+                var=rank_to_emoji(rank,div,lp)
+                   
                       
                 red+=f'``{nom}``\t**|**\t{var}\n' 
         
@@ -1117,6 +1206,7 @@ async def sus(ctx):
         json.dump(sus,f)
         
 @bot.command()
+@commands.has_permissions(administrator = True)
 async def leave(ctx):
     
     serv= bot.get_guild(int(ctx.message.content.split()[1:][0]))

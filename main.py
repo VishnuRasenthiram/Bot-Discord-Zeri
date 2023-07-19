@@ -788,7 +788,7 @@ async def lolp(ctx):
                         name = profile[str(ctx.author.id)]["leagueName"]
                     
             if estDansListe:
-                await ctx.channel.send("Veuillez préciser un nom d'invocateur ou bien définir votre profile avec la commande : ```-set_profile```")
+                await ctx.channel.send("Veuillez préciser un nom d'invocateur ou bien définir votre profile avec la commande : ```-set_profile <Nom d'invocateur>```")
                 
         versions = lol_watcher.data_dragon.versions_for_region(my_region)
         champions_version = versions['n']['champion']
@@ -800,23 +800,25 @@ async def lolp(ctx):
             me = lol_watcher.summoner.by_name(my_region, name)
             me1= lol_watcher.league.by_summoner(my_region,me["id"])
             mastery=lol_watcher.champion_mastery.by_summoner(my_region, me["id"]) 
-               
+           
             icone =f'http://ddragon.leagueoflegends.com/cdn/{version["v"]}/img/profileicon/{me["profileIconId"]}.png'
             if not (me1):
                 rank="Unranked"
-                rank="Unranked"
+                rank_flex="Unranked"
                 div="Unranked"
-                div1="Unranked"
+                div_flex="Unranked"
                 lp="Unranked"
-                lp1="Unranked"
+                lp_flex="Unranked"
                 win="Unranked"
                 loose="Unranked"
                 wr="Unranked"
                 
                 
+                
             else:
                 isSolo=True
                 isFlex=True
+                
                 for i in range(len(me1)):
                     if me1[i]['queueType']=="RANKED_SOLO_5x5":
                         rank=me1[i]["tier"]
@@ -827,11 +829,13 @@ async def lolp(ctx):
                         wr=(win/(win+loose))*100
                         wr=f'{round(wr,2)}%'
                         isSolo=False
+                        
                     if me1[i]['queueType']=="RANKED_FLEX_SR":
                         rank_flex=me1[i]["tier"]
                         div_flex=me1[i]["rank"]
                         lp_flex=me1[i]["leaguePoints"]
                         isFlex=False
+                        
                 if isSolo:
                     rank="Unranked"
                     div="Unranked"
@@ -840,22 +844,17 @@ async def lolp(ctx):
                     loose="Unranked"
                     wr="Unranked"
                     wr="Unranked"
+                    
                 if isFlex:
                     rank_flex="Unranked"
                     div_flex="Unranked"
                     lp_flex="Unranked"
-                    
-                     
-                    
+                          
             file = discord.File(f"env/ranked-emblem/zeri2.gif", filename=f"zeri2.gif")
             
+            
             soloq=rank_to_emoji(rank,div,lp)
-            
-            
             flex=rank_to_emoji(rank_flex,div_flex,lp_flex)
-            
-            
-            
             
             embed=discord.Embed(title="League Profil",
             description=f'{ctx.author.name} voici le profil de {name} ', 
@@ -898,6 +897,7 @@ async def lolp(ctx):
                         test[str(i+1)].append(int(mastery[i]['championPoints']))
             chaine = ""
             for key, value in test.items():
+                
                 chaine += key + ": " + " - ".join(str(v) for v in value) + " Pts \n"
             lignes = chaine.split("\n")
             for ligne in lignes:
@@ -910,7 +910,8 @@ async def lolp(ctx):
             embed.add_field(
                 name="Mastery :",
                 value=chaine
-            )       
+            )
+                   
             await ctx.message.channel.send(embed=embed,file=file)
         #.set_image(url=f"attachment://emblem-{rank.lower()}.png")
         

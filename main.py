@@ -964,7 +964,7 @@ async def histo(ctx):
             info=matchs["info"]["participants"][pos]
             info2=matchs["info"]["queueId"]
             for i in range (len(data)):
-                if data[i]['queueId']==info2:
+                if data[i]['queueId']==info2:     
                     list2.append(data[i]["description"])
                     
             if info['win']:

@@ -78,7 +78,9 @@ def rank_to_emoji(rank,div,lp):
         case "gold":
             var=f"<:Gold:1119544768440057866>  **{rank.lower()} {div}** {lp} lps"
         case "platinum":
-            var=f"<:Platinum:1119544766967844904>  **{rank.lower()} {div}** {lp} lps"
+            var=f"<:Platinum:1131518475496599572>  **{rank.lower()} {div}** {lp} lps"
+        case "emerald":
+            var=f"<:Emerald:1131518517846474782>  **{rank.lower()} {div}** {lp} lps"
         case "diamond":
             var=f"<:Diamond:1119544764484825098>  **{rank.lower()} {div}** {lp} lps"
         case "master":
@@ -852,7 +854,7 @@ async def lolp(ctx):
                           
             file = discord.File(f"env/ranked-emblem/zeri2.gif", filename=f"zeri2.gif")
             
-            
+            print(rank)
             soloq=rank_to_emoji(rank,div,lp)
             flex=rank_to_emoji(rank_flex,div_flex,lp_flex)
             

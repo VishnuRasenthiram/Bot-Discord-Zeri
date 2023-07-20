@@ -854,7 +854,6 @@ async def lolp(ctx):
                           
             file = discord.File(f"env/ranked-emblem/zeri2.gif", filename=f"zeri2.gif")
             
-            print(rank)
             soloq=rank_to_emoji(rank,div,lp)
             flex=rank_to_emoji(rank_flex,div_flex,lp_flex)
             

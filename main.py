@@ -730,6 +730,28 @@ async def set_profile(ctx):
         with open("profile.json","w") as f:
             json.dump(profile,f)
         
+@bot.command()
+
+async def pick(ctx):
+    link =f'https://ddragon.leagueoflegends.com/cdn/{version["v"]}/data/fr_FR/champion.json'
+    f = urllib.request.urlopen(link)
+    myfile = f.read()
+    champ=json.loads(myfile)
+    
+    liste= list(champ["data"].keys())
+    nbAleatoire=random.randint(0,len(liste))
+    champAleatoire=liste[nbAleatoire]
+    
+    chp=f'https://ddragon.leagueoflegends.com/cdn/{version["v"]}/img/champion/{champAleatoire}.png'
+    
+    
+    embed = discord.Embed(title="Pick Aléatoire",description='Voici le champion aléatoire :',color=discord.Color.red()).set_thumbnail(url=chp
+            ).add_field(name="Nom", value=champAleatoire)
+    
+    await ctx.message.channel.send(embed=embed)
+    
+        
+
 
 @bot.command()
 async def del_profile(ctx):
@@ -1007,7 +1029,7 @@ async def histo(ctx):
 @bot.command()
 async def cg(ctx):
     try:
-        link ="https://ddragon.leagueoflegends.com/cdn/13.8.1/data/en_US/champion.json"
+        link =f'https://ddragon.leagueoflegends.com/cdn/{version["v"]}/data/fr_FR/champion.json'
         f = urllib.request.urlopen(link)
         myfile = f.read()
         data=json.loads(myfile)

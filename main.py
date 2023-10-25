@@ -138,7 +138,7 @@ async def on_ready():
         print(e)
     
     
-    with open("/env/ranked-emblem/Karan_nuit.png", 'rb') as n,open("/env/ranked-emblem/Karan_jour.png", 'rb') as j:
+    with open("env/ranked-emblem/Karan_nuit.png", 'rb') as n,open("env/ranked-emblem/Karan_jour.png", 'rb') as j:
         iconNuit = n.read()
         iconJour = j.read()
     

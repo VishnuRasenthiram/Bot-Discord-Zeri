@@ -1026,6 +1026,8 @@ async def histo(ctx):
 
 
 
+
+
 @bot.command()
 async def cg(ctx):
     try:
@@ -1050,18 +1052,17 @@ async def cg(ctx):
                 for cle,valeur in champ.items():
                     if int(valeur['key'])==int(cg["participants"][i]['championId']):
                         blue+=f'``{cle}`` **-** \t'
-                if not  me1:
-                    rank="Unranked"
-                    div=" "
-                    lp=" "
                 
-                
-                else:
-                    for i in range(len(me1)):
-                        if me1[i]['queueType']=="RANKED_SOLO_5x5":
-                            rank=me1[i]["tier"]
-                            div=me1[i]["rank"]
-                            lp=me1[i]["leaguePoints"]
+                rank="Unranked"
+                div=" "
+                lp=" "
+      
+                for i in range(len(me1)):
+                    if me1[i]['queueType']=="RANKED_SOLO_5x5":
+                        rank=me1[i]["tier"]
+                        div=me1[i]["rank"]
+                        lp=me1[i]["leaguePoints"]
+                        print(rank,div,lp)
 
                 var=rank_to_emoji(rank,div,lp)
                     
@@ -1071,36 +1072,27 @@ async def cg(ctx):
             else :
                 me = lol_watcher.summoner.by_name(my_region,cg["participants"][i]['summonerName'])
                 me1= lol_watcher.league.by_summoner(my_region,me["id"])
-                if not  me1:
-                    rank="Unranked"
-                    div=" "
-                    lp=" "
+                
                 for cle,valeur in champ.items():
                     if int(valeur['key'])==int(cg["participants"][i]['championId']):
                         red+=f'``{cle}`` **-** \t'
                 
-                else:
-                    for i in range(len(me1)):
-                        if me1[i]['queueType']=="RANKED_SOLO_5x5":
-                            rank=me1[i]["tier"]
-                            div=me1[i]["rank"]
-                            lp=me1[i]["leaguePoints"]
-                       
-                        
-            
+                rank="Unranked"
+                div=" "
+                lp=" "
+
+                for i in range(len(me1)):
+                    if me1[i]['queueType']=="RANKED_SOLO_5x5":
+                        rank=me1[i]["tier"]
+                        div=me1[i]["rank"]
+                        lp=me1[i]["leaguePoints"]
+                        print(rank,div,lp)
 
                 var=rank_to_emoji(rank,div,lp)
                    
                       
                 red+=f'``{nom}``\t**|**\t{var}\n' 
-        
-        
-        
-                
-                        
-        
-        
-                
+     
         embed=discord.Embed(title='Match en cours :' ,color=discord.Color.yellow())
         embed.add_field(name="Blue side :",value=blue,inline=False
         ).add_field(name="Red side :",value=red )         

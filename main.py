@@ -278,6 +278,14 @@ async def on_member_update(before,after):
 async def clear(ctx , amount=5):
     
     await ctx.channel.purge(limit=amount + 1)
+
+
+@bot.command()
+@commands.has_permissions(administrator = True)
+async def filtre(ctx , amount=5):
+    guild=bot.get_guild(KARAN_ID)
+    filtre =guild.get_channel(615128656049864734)
+    await filtre.purge(limit=amount )
 ##########################################################################
 
 #apod
@@ -1062,7 +1070,7 @@ async def cg(ctx):
                         rank=me1[i]["tier"]
                         div=me1[i]["rank"]
                         lp=me1[i]["leaguePoints"]
-                        print(rank,div,lp)
+                        
 
                 var=rank_to_emoji(rank,div,lp)
                     
@@ -1086,7 +1094,7 @@ async def cg(ctx):
                         rank=me1[i]["tier"]
                         div=me1[i]["rank"]
                         lp=me1[i]["leaguePoints"]
-                        print(rank,div,lp)
+                        
 
                 var=rank_to_emoji(rank,div,lp)
                    

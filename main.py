@@ -120,7 +120,7 @@ def rank_to_emoji(rank,div,lp):
 
 
 
-
+#test
 
 
 ##########################################################################
@@ -825,6 +825,7 @@ async def lolp(ctx):
         versions = lol_watcher.data_dragon.versions_for_region(my_region)
         champions_version = versions['n']['champion']
         dd=lol_watcher.data_dragon.champions(champions_version)
+        
         
         try:
         

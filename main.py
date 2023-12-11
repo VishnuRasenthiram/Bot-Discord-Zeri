@@ -165,16 +165,8 @@ async def on_ready():
             await guild.edit(name="Karan 🍁")
             await guild.edit(icon=iconJour)
             
-        #if current_time>="04:00"and current_time <"04:05" :
-        #    await guuruuchan.send("N'oubliez pas de faire votre Loldle du jour !")
-        #    await guuruuchan.send("https://loldle.net/")
-        #if currect_daay in ["Monday","Tuesday","Wednesday","Thursday"] and (current_time>="20:00" and current_time<"20:05"):
-        #    msg = await guuruuchanflame.send("Alors,<@185191654255362048> t'es allé à la salle ?")
-        #    global FLAMEID
-        #    FLAMEID=msg.id
-        #    await msg.add_reaction("✅")
-        #    await msg.add_reaction("❌")
-        await asyncio.sleep(300)
+        
+        await asyncio.sleep(43200)
 	
  
  

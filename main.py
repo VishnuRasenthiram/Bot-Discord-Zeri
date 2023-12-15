@@ -1,6 +1,7 @@
 import discord
 from riotwatcher import LolWatcher, ApiError
 from discord.ext import commands
+from discord.ui import Select
 import asyncio
 from datetime import date, datetime
 from discord.flags import Intents 
@@ -186,7 +187,188 @@ async def on_ready():
 @bot.tree.command(name="ping")
 async def ping(interaction:discord.Interaction):
     await interaction.response.send_message("Pong! Latence: {}ms".format(round(bot.latency * 1000, 1)))
+class MyView(discord.ui.View):
+    @discord.ui.select( # the decorator that lets you specify the properties of the select menu
+        placeholder = "Choose a Flavor!", # the placeholder text that will be displayed if nothing is selected
+        min_values = 1, # the minimum number of values that must be selected by the users
+        max_values = 1, # the maximum number of values that can be selected by the users
+        options = [ # the list of options from which users can choose, a required field
+            discord.SelectOption(
+                label="Vanilla",
+                description="Pick this if you like vanilla!"
+            ),
+            discord.SelectOption(
+                label="Chocolate",
+                description="Pick this if you like chocolate!"
+            ),
+            discord.SelectOption(
+                label="Strawberry",
+                description="Pick this if you like strawberry!"
+            )
+        ]
+    )
+    async def select_callback(self, select, interaction): # the function called when the user is done selecting options
+        await interaction.response.send_message(f"Awesome! I like {select.values[0]} too!")
 
+@bot.tree.command(name="flavor")
+async def flavor(interaction:discord.Interaction):
+    await interaction.response.send_message("Choose a flavor!", view=MyView())
+    
+@bot.tree.command(name="lolp")
+
+async def lolp(interaction:discord.Interaction,pseudo:str):
+        
+
+        with open("profile.json","r") as f :
+            profile = json.load(f)
+        name=pseudo
+        
+        if not(name):
+            estDansListe=True
+            for id in profile:
+                if interaction.user.id==int(id):
+                    estDansListe=False
+                    if profile[str(interaction.user.id)]["statut"]==0:
+                        await interaction.channel.send("Vous n'avez pas confirmé le profile !")
+                    else :
+                        name = profile[str(interaction.user.id)]["leagueName"]
+                    
+            if estDansListe:
+                await interaction.channel.send("Veuillez préciser un nom d'invocateur ou bien définir votre profile avec la commande : ```-set_profile <Nom d'invocateur>```")
+                
+        versions = lol_watcher.data_dragon.versions_for_region(my_region)
+        champions_version = versions['n']['champion']
+        dd=lol_watcher.data_dragon.champions(champions_version)
+        
+        
+        try:
+        
+                
+            me = lol_watcher.summoner.by_name(my_region, name)
+            me1= lol_watcher.league.by_summoner(my_region,me["id"])
+            mastery=lol_watcher.champion_mastery.by_summoner(my_region, me["id"]) 
+           
+            icone =f'http://ddragon.leagueoflegends.com/cdn/{version["v"]}/img/profileicon/{me["profileIconId"]}.png'
+            if not (me1):
+                rank="Unranked"
+                rank_flex="Unranked"
+                div="Unranked"
+                div_flex="Unranked"
+                lp="Unranked"
+                lp_flex="Unranked"
+                win="Unranked"
+                loose="Unranked"
+                wr="Unranked"
+                
+                
+                
+            else:
+                isSolo=True
+                isFlex=True
+                
+                for i in range(len(me1)):
+                    if me1[i]['queueType']=="RANKED_SOLO_5x5":
+                        rank=me1[i]["tier"]
+                        div=me1[i]["rank"]
+                        lp=me1[i]["leaguePoints"]
+                        win=me1[i]["wins"]
+                        loose=me1[i]["losses"]
+                        wr=(win/(win+loose))*100
+                        wr=f'{round(wr,2)}%'
+                        isSolo=False
+                        
+                    if me1[i]['queueType']=="RANKED_FLEX_SR":
+                        rank_flex=me1[i]["tier"]
+                        div_flex=me1[i]["rank"]
+                        lp_flex=me1[i]["leaguePoints"]
+                        isFlex=False
+                        
+                if isSolo:
+                    rank="Unranked"
+                    div="Unranked"
+                    lp="Unranked"
+                    win="Unranked"
+                    loose="Unranked"
+                    wr="Unranked"
+                    wr="Unranked"
+                    
+                if isFlex:
+                    rank_flex="Unranked"
+                    div_flex="Unranked"
+                    lp_flex="Unranked"
+                          
+            file = discord.File(f"env/ranked-emblem/zeri2.gif", filename=f"zeri2.gif")
+            
+            soloq=rank_to_emoji(rank,div,lp)
+            flex=rank_to_emoji(rank_flex,div_flex,lp_flex)
+            
+            embed=discord.Embed(title="League Profil",
+            description=f'{interaction.user.name} voici le profil de {name} ', 
+            color=discord.Color.blue()).set_thumbnail(
+            url=icone
+            ).add_field(
+            name="Pseudo :", 
+            value=me["name"], 
+            inline=True
+            ).add_field(
+            name="Niveau :",
+            value=me["summonerLevel"],
+            inline=True
+            ).add_field(
+            name="Rank :", 
+            value=f"Solo/duo : {soloq} \n Flex : {flex}",
+            inline=False
+            ).add_field(
+            name="Wins :", 
+            value=win,
+            inline=True
+            ).add_field(name=" ",value=" "
+            ).add_field(name="Winrate :",value=wr
+            ).add_field(
+            name="Losses :", 
+            value=loose ,
+            inline=False
+            ).set_image(url="attachment://zeri2.gif")
+            
+            
+            test={'1':[],'2':[],'3':[]}
+            
+            
+            
+            for i in range(3):
+                for j in dd['data']:
+                    
+                    if int(dd['data'][j]['key'])==int(mastery[i]['championId']):
+                        test[str(i+1)].append(dd['data'][j]['id'])
+                        test[str(i+1)].append(int(mastery[i]['championPoints']))
+            chaine = ""
+            for key, value in test.items():
+                
+                chaine += key + ": " + " - ".join(str(v) for v in value) + " Pts \n"
+            lignes = chaine.split("\n")
+            for ligne in lignes:
+                elements = ligne.split("-")
+                if len(elements) > 1:
+                    nombre = ''.join(filter(str.isdigit, elements[1].strip()))  # Supprime tous les caractères non numériques de la chaîne
+                    nombre_formate = "{:,.0f}".format(int(nombre))
+                    chaine = chaine.replace(elements[1].strip(), nombre_formate + " Pts")
+            
+            embed.add_field(
+                name="Mastery :",
+                value=chaine
+            )
+                   
+            await interaction.response.send_message(embed=embed,file=file)
+        #.set_image(url=f"attachment://emblem-{rank.lower()}.png")
+        
+        except ApiError as err :
+            print(err)
+            if err.response.status_code == 429 :
+                print("Quota de requête dépassé")
+            elif err.response.status_code == 404:
+                 await interaction.response.send_message("Le compte avec ce pseudo n'existe pas !")
+            else:
+                raise
 
 @bot.event
 async def on_message(message):
@@ -225,17 +407,10 @@ async def on_message(message):
                 
             await bot.process_commands(message)
             
-            #if "guuruu"in message.content.lower().split():
-            #    await message.add_reaction("<:GuuruuW:1091852794568396810>")
-                
                 
             if "merci zeri" in message.content.lower():
                 await message.reply("Derien frérot/e <:Shock:1089628155133820938>")
-                
-                
-            #if "zebi" in message.content.lower().split():
-            #    await message.add_reaction("<:Zebi:1092526109192618074>")
-                
+                  
                 
             if "bonne nuit" in message.content.lower():
                 await message.channel.send("Bonne nuit Bg/Blg! Repose toi bien !")

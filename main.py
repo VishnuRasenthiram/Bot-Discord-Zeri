@@ -409,6 +409,7 @@ async def on_message(message):
             
                 
             if "merci zeri" in message.content.lower():
+                
                 await message.reply("Derien frérot/e <:Shock:1089628155133820938>")
                   
                 

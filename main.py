@@ -131,7 +131,7 @@ class ViewValidator(discord.ui.View):
     )
     async def select_callback(self,interaction, select): # the function called when the user is done selecting options
         await interaction.channel.send("Bien reçu, je vais procédé à la vérification")
-        with open("dossierJson/profile.json","r") as f :
+        with open("baseDeDonnéeDeWish/profile.json","r") as f :
             profile = json.load(f)
         
     
@@ -153,7 +153,7 @@ class ViewValidator(discord.ui.View):
                         
                 else :
                     await interaction.response.send_message("Votre compte a déjà été confirmé !")
-        with open("dossierJson/profile.json","w") as f:
+        with open("baseDeDonnéeDeWish/profile.json","w") as f:
             json.dump(profile,f)   
         
         
@@ -183,7 +183,7 @@ choixRegion=[app_commands.Choice(name="EUW", value="euw1"),
 @app_commands.choices(region=choixRegion)
 async def set_profile(interaction:discord.Interaction,pseudo:str,tagline:str,region:app_commands.Choice[str]):
     
-    with open("dossierJson/profile.json","r") as f:
+    with open("baseDeDonnéeDeWish/profile.json","r") as f:
         profile= json.load(f)
     
     
@@ -214,12 +214,12 @@ async def set_profile(interaction:discord.Interaction,pseudo:str,tagline:str,reg
             else:
                 await interaction.response.send_message("Vous avez déjà un compte lié !")
             
-        with open("dossierJson/profile.json","w") as f:
+        with open("baseDeDonnéeDeWish/profile.json","w") as f:
             json.dump(profile,f) 
             
 @bot.tree.command(name="supprimer_mon_profil")
 async def del_profile(interaction:discord.Interaction):
-    with open("dossierJson/profile.json","r") as f:
+    with open("baseDeDonnéeDeWish/profile.json","r") as f:
         profile= json.load(f)
     if not str(interaction.user.id) in profile:
         await interaction.response.send_message("Vous n'avez pas lié de compte !")
@@ -227,7 +227,7 @@ async def del_profile(interaction:discord.Interaction):
         profile.pop(str(interaction.user.id))
         await interaction.response.send_message("Votre compte a bien été supprimé !")
     
-    with open("dossierJson/profile.json","w") as f:
+    with open("baseDeDonnéeDeWish/profile.json","w") as f:
             json.dump(profile,f)
 
 
@@ -235,7 +235,7 @@ async def del_profile(interaction:discord.Interaction):
 @app_commands.choices(region=choixRegion)
 async def lolp(interaction:discord.Interaction,pseudo:str=None,tagline:str="euw",region:app_commands.Choice[str]="euw1"):
         
-        with open("dossierJson/profile.json","r") as f :
+        with open("baseDeDonnéeDeWish/profile.json","r") as f :
             profile = json.load(f)
         
         if not(pseudo):
@@ -622,7 +622,7 @@ async def spam(ctx):
 async def prison(ctx,member: discord.Member):
 
     
-    with open('dossierJson/role.json', 'r') as f:
+    with open('baseDeDonnéeDeWish/role.json', 'r') as f:
         users = json.load(f)
 
     nbrole= len(member.roles)
@@ -636,7 +636,7 @@ async def prison(ctx,member: discord.Member):
         nbrole2=nbrole2-1
     role = discord.utils.get(ctx.message.guild.roles, name = "🔗|Prisonnier")
     await member.add_roles(role)    
-    with open('dossierJson/role.json', 'w') as f:
+    with open('baseDeDonnéeDeWish/role.json', 'w') as f:
             json.dump(users, f)
     await ctx.message.channel.send(f'{member.name} a été envoyé en prison. ^^')
     
@@ -655,7 +655,7 @@ async def update_data(users, user,role):
 @bot.command()   
 @commands.has_permissions(administrator = True)
 async def liberer(ctx, member: discord.Member):
-    with open('dossierJson/role.json', 'r') as f:
+    with open('baseDeDonnéeDeWish/role.json', 'r') as f:
         users = json.load(f)
       
     role = discord.utils.get(ctx.message.guild.roles, name = "🔗|Prisonnier")
@@ -669,7 +669,7 @@ async def liberer(ctx, member: discord.Member):
         roled = discord.utils.get(ctx.message.guild.roles, name = b)
         await member.add_roles(roled)
     users[f'{member.id}']["roles"].clear()
-    with open('dossierJson/role.json', 'w') as f:
+    with open('baseDeDonnéeDeWish/role.json', 'w') as f:
             json.dump(users, f)
 ##########################################################################
 
@@ -678,14 +678,14 @@ async def liberer(ctx, member: discord.Member):
 @bot.event
 async def on_message_delete(message):
     if message.guild.id==KARAN_ID:
-        with open("dossierJson/logs.json", "r") as f:
+        with open("baseDeDonnéeDeWish/logs.json", "r") as f:
             users = json.load(f)
         msg = message.content
         msgAuthor = str(message.author.id)
         users["dernierMSG"] = {}
         users["dernierMSG"]["MSG"]=[msg,msgAuthor]
 
-        with open("dossierJson/logs.json","w") as f :
+        with open("baseDeDonnéeDeWish/logs.json","w") as f :
             json.dump(users,f)
 
 
@@ -693,7 +693,7 @@ async def on_message_delete(message):
 @commands.cooldown(1, 60, commands.BucketType.user)
 async def snipe(ctx):
     if ctx.guild.id==KARAN_ID:
-        with open("dossierJson/logs.json", "r") as f:
+        with open("baseDeDonnéeDeWish/logs.json", "r") as f:
             users = json.load(f)
         
         await ctx.message.channel.send(f'Le dernier message supprimé est : **"{users["dernierMSG"]["MSG"][0]}"** You got sniped bro <@!{users["dernierMSG"]["MSG"][1]}>')
@@ -895,7 +895,7 @@ async def on_command_error(ctx, error):
 @bot.command()
 @commands.cooldown(1, 900, commands.BucketType.user)
 async def imposteur(ctx):
-    with open('dossierJson/imposteur.json','r') as f :
+    with open('baseDeDonnéeDeWish/imposteur.json','r') as f :
         users = json.load(f)
     users[f'{ctx.author.id}']={"game":"true"}
     roles=["Imposteur","Droide","Serpentin","Double-face","Super-héros"]
@@ -920,15 +920,15 @@ async def imposteur(ctx):
                     await user.send(f'{user.name} Vous êtes {role} \n Gagner la game en ayant le plus de dégâts, d\'assistances et de kills.')
                 case _:
                     await user.send("Feur")
-        with open('dossierJson/imposteur.json','w') as f :
+        with open('baseDeDonnéeDeWish/imposteur.json','w') as f :
             json.dump(users,f)
         
-        with open('dossierJson/imposteur.json','r') as f :
+        with open('baseDeDonnéeDeWish/imposteur.json','r') as f :
             jeu = json.load(f)
         boucle=jeu[str(ctx.author.id)]["game"]
         await asyncio.sleep(300)
         while(boucle=="true"):
-            with open('dossierJson/imposteur.json','r') as f :
+            with open('baseDeDonnéeDeWish/imposteur.json','r') as f :
                 jeu = json.load(f)
             boucle=jeu[str(ctx.author.id)]["game"]
             if jeu[str(ctx.author.id)]["game"]=="true":
@@ -945,10 +945,10 @@ async def imposteur(ctx):
         
 @bot.command()
 async def fin(ctx):
-    with open('dossierJson/imposteur.json','r') as f :
+    with open('baseDeDonnéeDeWish/imposteur.json','r') as f :
         jeu = json.load(f)
     jeu[str(ctx.author.id)]["game"]="false"
-    with open('dossierJson/imposteur.json','w') as f :
+    with open('baseDeDonnéeDeWish/imposteur.json','w') as f :
             json.dump(jeu,f)
     await ctx.channel.send("La partie est terminé voici la liste des roles : ")
     for key,value in jeu[str(ctx.author.id)].items():
@@ -958,7 +958,7 @@ async def fin(ctx):
             await ctx.channel.send(f'{user.name} : {key}')
     jeu[str(ctx.author.id)].clear()
     jeu[str(ctx.author.id)]["game"]="false"
-    with open('dossierJson/imposteur.json','w') as f :
+    with open('baseDeDonnéeDeWish/imposteur.json','w') as f :
             json.dump(jeu,f)
             
 @bot.command()
@@ -966,7 +966,7 @@ async def fin(ctx):
 async def imposteur_simple(ctx):
     roles=["Imposteur","Imposteur","Crewmate","Crewmate","Crewmate"]
     dic_role={}
-    with open('dossierJson/imposta.json','r') as f:
+    with open('baseDeDonnéeDeWish/imposta.json','r') as f:
         users= json.load(f)
     users[f'{ctx.author.id}']={}
     if len(ctx.message.raw_mentions)==5:
@@ -977,7 +977,7 @@ async def imposteur_simple(ctx):
             users[f'{ctx.author.id}'][user.name]=role
             await user.send(f'{user} vous êtes {role}')
     
-        with open('dossierJson/imposta.json','w') as f :
+        with open('baseDeDonnéeDeWish/imposta.json','w') as f :
             json.dump(users,f)
         await ctx.channel.send("La partie a démarrer, lorsque vous avez fini veuillez tapper la commande -sus pour avoir le role de tous les participants")
     else :
@@ -986,12 +986,12 @@ async def imposteur_simple(ctx):
 
 @bot.command()
 async def sus(ctx):
-    with open('dossierJson/imposta.json','r') as f:
+    with open('baseDeDonnéeDeWish/imposta.json','r') as f:
         sus= json.load(f)   
     await ctx.channel.send(f"{sus[str(ctx.author.id)]}")
     sus[str(ctx.author.id)].clear()
     
-    with open('dossierJson/imposta.json','w') as f:
+    with open('baseDeDonnéeDeWish/imposta.json','w') as f:
         json.dump(sus,f)
         
 @bot.command()

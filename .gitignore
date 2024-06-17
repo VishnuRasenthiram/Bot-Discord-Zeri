@@ -15,3 +15,11 @@ exp.json
 profile.json
 
 agarderdeCotePourPlusTard.py
+
+__pycache__/
+riotwatcher/Handlers/RateLimit/__pycache__/
+riotwatcher/Handlers/__pycache__/
+riotwatcher/__pycache__/
+riotwatcher/_apis/__pycache__/
+riotwatcher/_apis/league_of_legends/__pycache__/
+riotwatcher/_apis/league_of_legends/urls/__pycache__/

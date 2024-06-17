@@ -43,6 +43,7 @@ def rank_to_emoji(rank,div,lp):
 
         return var
 def regionForRiotId(region:str):
+        
         europe=["euw1","eun1","tr1",'ru1']
         amerique=["na1","la1","la2","br1"]
         
@@ -54,6 +55,7 @@ def regionForRiotId(region:str):
             return "asia"
 class LOF:
     def regionForRiotId(region:str):
+        print(regionForRiotId(region))
         regionForRiotId(region)
 
     def profileLeagueOfLegends(interaction:discord.Interaction,pseudo:str,tagline:str,region:str):

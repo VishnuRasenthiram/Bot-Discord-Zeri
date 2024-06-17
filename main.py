@@ -234,7 +234,7 @@ async def del_profile(interaction:discord.Interaction):
 @bot.tree.command(name="profil_league_of_legends")
 @app_commands.choices(region=choixRegion)
 async def lolp(interaction:discord.Interaction,pseudo:str=None,tagline:str="euw",region:app_commands.Choice[str]="euw1"):
-        
+  
         with open("dossierJson/profile.json","r") as f :
             profile = json.load(f)
         
@@ -251,17 +251,18 @@ async def lolp(interaction:discord.Interaction,pseudo:str=None,tagline:str="euw"
             if not estDansListe:
                 await interaction.response.send_message("Veuillez préciser un nom d'invocateur ou bien définir votre profil avec la commande : ```/sauvegarder_mon_profil```")
         else:
-            me = lol_watcher.accountV1.by_riotid(region=LOF.regionForRiotId(region.value),summoner_name=pseudo,tagline=tagline)
-            puuid=me["puuid"]          
-        versions = lol_watcher.data_dragon.versions_for_region(region.value)
+            me = lol_watcher.accountV1.by_riotid(region=LOF.regionForRiotId(region),summoner_name=pseudo,tagline=tagline)
+            puuid=me["puuid"]
+        
+        versions = lol_watcher.data_dragon.versions_for_region(region)
         champions_version = versions['n']['champion']
         dd=lol_watcher.data_dragon.champions(champions_version)
 
         try:
 
-            myAccount= lol_watcher.summoner.by_puuid(region.value,puuid)
-            mastery=lol_watcher.champion_mastery.by_puuid(region.value,puuid)
-            me1=lol_watcher.league.by_summoner(region.value,myAccount["id"])
+            myAccount= lol_watcher.summoner.by_puuid(region,puuid)
+            mastery=lol_watcher.champion_mastery.by_puuid(region,puuid)
+            me1=lol_watcher.league.by_summoner(region,myAccount["id"])
             icone =f'http://ddragon.leagueoflegends.com/cdn/{version["v"]}/img/profileicon/{myAccount["profileIconId"]}.png'
             if not (me1):
                 rank="Unranked"
@@ -313,8 +314,11 @@ async def lolp(interaction:discord.Interaction,pseudo:str=None,tagline:str="euw"
             
             soloq=rank_to_emoji(rank,div,lp)
             flex=rank_to_emoji(rank_flex,div_flex,lp_flex)
-            regionRiotId=LOF.regionForRiotId(region.value)
+        
+            regionRiotId=LOF.regionForRiotId(region)
+            print(regionRiotId)
             nom=lol_watcher.accountV1.by_puuid(regionRiotId,puuid)["gameName"]
+            
             tagline=lol_watcher.accountV1.by_puuid(regionRiotId,puuid)["tagLine"]
             embed=discord.Embed(title="Profil League Of Legends",
             description=f'{interaction.user.name} voici le profil de {nom}#{tagline} ', 

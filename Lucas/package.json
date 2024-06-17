@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "fs": "^0.0.1-security",
+    "plotly.js-dist": "^2.33.0",
+    "ts-node": "^10.9.2",
+    "waifu2x": "^1.1.7"
+  }
+}

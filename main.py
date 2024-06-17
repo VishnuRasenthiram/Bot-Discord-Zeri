@@ -316,7 +316,7 @@ async def lolp(interaction:discord.Interaction,pseudo:str=None,tagline:str="euw"
             flex=rank_to_emoji(rank_flex,div_flex,lp_flex)
         
             regionRiotId=LOF.regionForRiotId(region)
-            print(regionRiotId)
+            print(regionForRiotId)
             nom=lol_watcher.accountV1.by_puuid(regionRiotId,puuid)["gameName"]
             
             tagline=lol_watcher.accountV1.by_puuid(regionRiotId,puuid)["tagLine"]

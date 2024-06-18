@@ -60,7 +60,7 @@ class LOF:
 
     def profileLeagueOfLegends(interaction:discord.Interaction,pseudo:str,tagline:str,region:str):
             
-        with open("baseDeDonnéeDeWish/profile.json","r") as f :
+        with open("dossierJson/profile.json","r") as f :
             profile = json.load(f)
         
         if not(pseudo):

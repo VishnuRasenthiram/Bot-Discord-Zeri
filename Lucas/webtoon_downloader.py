@@ -11,6 +11,9 @@ import shutil
 import signal
 import sys
 import time
+import json
+import subprocess
+from adition import *
 from bs4 import BeautifulSoup
 from dataclasses import dataclass, field
 from options import Options
@@ -330,7 +333,7 @@ def download_chapter(chapter_download_task_id: int, session: requests.Session, v
     log.info(f'Chapter {chapter_info.chapter_number} download complete with a total of {len(img_urls)} pages [green]✓')
     progress.remove_task(chapter_download_task_id)
     
-def download_webtoon(series_url: str, start_chapter: int, end_chapter: int, dest: str, images_format: str='jpg', download_latest_chapter=False, separate_chapters=False):
+def download_webtoon(series_url: str, start_chapter: int, end_chapter: int, dest: str='Lucas/Downloads/WebToon-Downloader-master/src', images_format: str='jpg', download_latest_chapter=False, separate_chapters=False):
     """
     downloads all chapters starting from start_chapter until end_chapter, inclusive.
     stores the downloaded chapter into the dest path.
@@ -358,72 +361,102 @@ def download_webtoon(series_url: str, start_chapter: int, end_chapter: int, dest
         separate downloaded chapters in their own folder under the dest path if true, 
         else stores all images in the dest folder.
     """
+    
+
     session = requests.session()
     session.cookies.set("needGDPR", "FALSE", domain=".webtoons.com")
     session.cookies.set("needCCPA", "FALSE", domain=".webtoons.com")
     session.cookies.set("needCOPPA", "FALSE", domain=".webtoons.com")
+    
     r = session.get(f'{series_url}', headers=headers)
     soup = BeautifulSoup(r.text, 'lxml')
     viewer_url = get_chapter_viewer_url(soup)
     series_title = get_series_title(series_url, soup)
-    if not(dest):
-        dest = series_title.replace(" ", "_") #uses title name of series as folder name if dest is None
-    if not os.path.exists(dest):
-        log.warning(f'Creading Directory: [#80BBA6]{dest}[/]')
-        os.makedirs(dest) #creates directory and sub-dirs if dest path does not exist
-    else:
-        log.warning(f'Directory Exists: [#80BBA6]{dest}[/]')
 
-    progress.console.print(f'Downloading [italic medium_spring_green]{series_title}[/] from {series_url}')
-    with progress:
-        if download_latest_chapter:
-            chapters_to_download = [get_chapters_details(session, viewer_url)[-1]]
+    with open("dossierJson/dernierChapitre.json","r") as chap:
+        nChap= json.load(chap)
 
-        else:
-            chapters_to_download = get_chapters_details(session, viewer_url, start_chapter, end_chapter)
-
-        start_chapter, end_chapter = chapters_to_download[0].chapter_number, chapters_to_download[-1].chapter_number
-        n_chapters_to_download = end_chapter - start_chapter + 1
-
-        if download_latest_chapter:
-            progress.console.log(f"[plum2]Latest Chapter[/] -> [green]{end_chapter}[/]")
-        else:
-            progress.console.log(f"[italic]start:[/] [green]{start_chapter}[/]  [italic]end:[/] [green]{end_chapter}[/] -> [italic]N of chapters:[/] [green]{n_chapters_to_download}[/]")
-        series_download_task = progress.add_task(
-            "[green]Downloading Chapters...", 
-            total=n_chapters_to_download, type='Chapters', type_color='grey93', number_format='>02d', rendered_total=n_chapters_to_download)
-
-        chapters_to_download = iter(chapters_to_download) # convert into an interable that can be consumed
-        zeros = int(math.log10(end_chapter))+1
-        with ThreadPoolExecutor(max_workers=4) as pool:
-            chapter_download_futures = set()
-            for chapter_info in itertools.islice(chapters_to_download, n_concurrent_chapters_download):
-                    chapter_dest = os.path.join(dest, f"{chapter_info.chapter_number:0{zeros}d}") if separate_chapters else dest
-                    chapter_download_task = progress.add_task(f"[plum2]Chapter {chapter_info.chapter_number}.",  type='Pages', type_color='grey85', number_format='>02d', start=False, rendered_total='??')
-                    chapter_download_futures.add(
-                        pool.submit(download_chapter, chapter_download_task, session, viewer_url, chapter_info, chapter_dest, zeros, images_format)
-                    )
-                
-            while chapter_download_futures:
-                # Wait for the next future to complete.
-                done, chapter_download_futures = concurrent.futures.wait(
-                    chapter_download_futures, return_when=concurrent.futures.FIRST_COMPLETED
-                )
-
-                for _ in done:
-                    progress.update(series_download_task, advance=1)
-                    if done_event.is_set():
-                        return
-
-                # Scheduling the next set of futures.
-                for chapter_info in itertools.islice(chapters_to_download, len(done)):
-                    chapter_dest = os.path.join(dest, f"{chapter_info.chapter_number:0{zeros}d}") if separate_chapters else dest
-                    chapter_download_task = progress.add_task(f"[plum2]Chapter {chapter_info.chapter_number}.", type='Pages', type_color='grey85', number_format='>02d', start=False, rendered_total='??')
-                    chapter_download_futures.add(
-                        pool.submit(download_chapter, chapter_download_task, session, viewer_url, chapter_info, chapter_dest, zeros, images_format)
-                    )
     
-    rich.print(f'Successfully Downloaded [red]{n_chapters_to_download}[/] {"chapter" if n_chapters_to_download <= 1 else "chapters"} of [medium_spring_green]{series_title}[/] in [italic plum2]{os.path.abspath(dest)}[/].')
+    if not series_title  in nChap:
+        nChap[series_title]={"nchap":get_chapters_details(session, viewer_url)[-1].chapter_number}
+        numChapitre=get_chapters_details(session, viewer_url)[0].chapter_number
+       
+    else:
+        numChapitre=nChap[series_title]["nchap"]
+    
+   
+    if numChapitre !=get_chapters_details(session, viewer_url)[-1].chapter_number:
+
+
+
+        dest = dest+'/'+series_title.replace(" ", "_") #uses title name of series as folder name if dest is None
+        if not os.path.exists(dest):
+            log.warning(f'Creading Directory: [#80BBA6]{dest}[/]')
+            os.makedirs(dest) #creates directory and sub-dirs if dest path does not exist
+        else:
+            for fichier in os.listdir(dest):
+                os.remove(dest+'/'+fichier)
+
+            log.warning(f'Directory Exists: [#80BBA6]{dest}[/]')
+
+        progress.console.print(f'Downloading [italic medium_spring_green]{series_title}[/] from {series_url}')
+        with progress:
+            if download_latest_chapter:
+                chapters_to_download = [get_chapters_details(session, viewer_url)[-1]]
+
+            else:
+                chapters_to_download = get_chapters_details(session, viewer_url, start_chapter, end_chapter)
+
+            start_chapter, end_chapter = chapters_to_download[0].chapter_number, chapters_to_download[-1].chapter_number
+            n_chapters_to_download = end_chapter - start_chapter + 1
+            
+            if download_latest_chapter:
+                progress.console.log(f"[plum2]Latest Chapter[/] -> [green]{end_chapter}[/]")
+            else:
+                progress.console.log(f"[italic]start:[/] [green]{start_chapter}[/]  [italic]end:[/] [green]{end_chapter}[/] -> [italic]N of chapters:[/] [green]{n_chapters_to_download}[/]")
+            series_download_task = progress.add_task(
+                "[green]Downloading Chapters...", 
+                total=n_chapters_to_download, type='Chapters', type_color='grey93', number_format='>02d', rendered_total=n_chapters_to_download)
+
+            chapters_to_download = iter(chapters_to_download) # convert into an interable that can be consumed
+            zeros = int(math.log10(end_chapter))+1
+            with ThreadPoolExecutor(max_workers=4) as pool:
+                chapter_download_futures = set()
+                for chapter_info in itertools.islice(chapters_to_download, n_concurrent_chapters_download):
+                        chapter_dest = os.path.join(dest, f"{chapter_info.chapter_number:0{zeros}d}") if separate_chapters else dest
+                        chapter_download_task = progress.add_task(f"[plum2]Chapter {chapter_info.chapter_number}.",  type='Pages', type_color='grey85', number_format='>02d', start=False, rendered_total='??')
+                        chapter_download_futures.add(
+                            pool.submit(download_chapter, chapter_download_task, session, viewer_url, chapter_info, chapter_dest, zeros, images_format)
+                        )
+                    
+                while chapter_download_futures:
+                    # Wait for the next future to complete.
+                    done, chapter_download_futures = concurrent.futures.wait(
+                        chapter_download_futures, return_when=concurrent.futures.FIRST_COMPLETED
+                    )
+
+                    for _ in done:
+                        progress.update(series_download_task, advance=1)
+                        if done_event.is_set():
+                            return
+
+                    # Scheduling the next set of futures.
+                    for chapter_info in itertools.islice(chapters_to_download, len(done)):
+                        chapter_dest = os.path.join(dest, f"{chapter_info.chapter_number:0{zeros}d}") if separate_chapters else dest
+                        chapter_download_task = progress.add_task(f"[plum2]Chapter {chapter_info.chapter_number}.", type='Pages', type_color='grey85', number_format='>02d', start=False, rendered_total='??')
+                        chapter_download_futures.add(
+                            pool.submit(download_chapter, chapter_download_task, session, viewer_url, chapter_info, chapter_dest, zeros, images_format)
+                        )
+                    nChap[series_title]["nchap"]=get_chapters_details(session, viewer_url)[-1].chapter_number
+
+        subprocess.run(["python", "Lucas/renomme.py"], check=True)
+        dossConcat= "Lucas/concat/"+series_title.replace(" ", "_")
+        concatenate_images(dest,dossConcat)
+        with open("dossierJson/dernierChapitre.json","w") as chap:
+                json.dump(nChap,chap)
+        rich.print(f'Successfully Downloaded [red]{n_chapters_to_download}[/] {"chapter" if n_chapters_to_download <= 1 else "chapters"} of [medium_spring_green]{series_title}[/] in [italic plum2]{os.path.abspath(dest)}[/].')
+        
+        
 
 def main():
     signal.signal(signal.SIGINT, exit_handler)
@@ -431,6 +464,7 @@ def main():
     parser.initialize()
     try:
         args = parser.parse()
+    
     except Exception as e:
         console.print(f'[red]Error:[/] {e}')
         return -1
@@ -442,7 +476,8 @@ def main():
             return
     series_url = args.url
     separate = args.seperate or args.separate
-    download_webtoon(series_url, args.start, args.end, args.dest, args.images_format, args.latest, separate)
+   
+    download_webtoon(series_url, args.start, args.end, 'Lucas/Downloads/WebToon-Downloader-master/src', args.images_format, args.latest, separate)
 
 if(__name__ == '__main__'):
     main()

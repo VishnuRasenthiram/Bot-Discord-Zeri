@@ -25,6 +25,10 @@ def rename_files_in_order(directory):
         os.rename(old_file, new_file)
         print(f"Renamed: {filename} to {new_filename}")
 # Exemple d'utilisation
-directory_path = "C:\\Users\\theob\\Downloads\\Webtoon-Downloader-master (1)\\Webtoon-Downloader-master\\src\\Lecteur_omniscient"
+path="Lucas/Downloads/WebToon-Downloader-master/src/"
 
-rename_files_in_order(directory_path)
+for nom in os.listdir(path):
+    rename_files_in_order(path+nom)
+
+
+

@@ -18,6 +18,10 @@ from dotenv import load_dotenv
 import os
 from threading import Thread
 import subprocess
+import sched, time
+from discord.ext import tasks, commands
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.triggers.cron import CronTrigger
 from leagueOfFunction import *
 
 from Lucas import *
@@ -79,12 +83,16 @@ KARAN_ID=614728233497133076
 #MAIN
 print(current_time)
 
+
+
+
 @bot.event
 async def on_ready():
-    subprocess.run(["python", "Lucas/teste.py"], check=True)
+    scheduler.start()
+    #subprocess.run(["python", "Lucas/teste.py"], check=True)
     guild=bot.get_guild(KARAN_ID)
-    for image in os.listdir('Lucas\concat'):
-        await guild.get_channel(615128656049864734).send(file=discord.File(f'Lucas\concat\{image}'))
+    #for image in os.listdir('Lucas\concat'):
+    #   await guild.get_channel(615128656049864734).send(file=discord.File(f'Lucas\concat\{image}'))
     print("le bot est pret")
     try:
         synced= await bot.tree.sync()
@@ -119,8 +127,22 @@ async def on_ready():
         await asyncio.sleep(43200)
 	
  
-
- 
+async def verifLecteurOmniscient():
+    guild=bot.get_guild(KARAN_ID)
+    with open("dossierJson/dernierChapitre.json","r") as chap:
+        nchap = json.load(chap)
+    chapitreActuel = nchap["Lecteur omniscient"]["nchap"]
+    subprocess.run(["python", "Lucas/webtoon_downloader.py", "https://www.webtoons.com/fr/fantasy/omniscient-reader/list?title_no=2175", "--latest"], check=True)
+    with open("dossierJson/dernierChapitre.json","r") as chap:
+        nchap = json.load(chap)
+    if chapitreActuel!=nchap["Lecteur omniscient"]["nchap"]:
+        for image in os.listdir("Lucas/concat/Lecteur_omniscient"):
+            await guild.get_channel(615128656049864734).send(file=discord.File("Lucas/concat/Lecteur_omniscient/"+image))
+    
+    
+    
+scheduler = AsyncIOScheduler()
+scheduler.add_job(verifLecteurOmniscient, CronTrigger(hour=18, minute=0))
 ##########################################################################
 
 
@@ -321,9 +343,7 @@ async def lolp(interaction:discord.Interaction,pseudo:str=None,tagline:str="euw"
             flex=rank_to_emoji(rank_flex,div_flex,lp_flex)
         
             regionRiotId=LOF.regionForRiotId(region)
-            print(regionForRiotId)
             nom=lol_watcher.accountV1.by_puuid(regionRiotId,puuid)["gameName"]
-            
             tagline=lol_watcher.accountV1.by_puuid(regionRiotId,puuid)["tagLine"]
             embed=discord.Embed(title="Profil League Of Legends",
             description=f'{interaction.user.name} voici le profil de {nom}#{tagline} ', 

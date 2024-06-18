@@ -35,19 +35,17 @@ def concatenate_images(folder_path, output_path):
     max_dimension = 65500
     total_height = concatenated_image.shape[0]
     num_segments = (total_height + max_dimension - 1) // max_dimension
-
+    for fichier in os.listdir(output_path):
+        os.remove(output_path+'/'+fichier)
     for i in range(num_segments):
         start_row = i * max_dimension
         end_row = min(start_row + max_dimension, total_height)
         segment = concatenated_image[start_row:end_row]
         segment_image = Image.fromarray(segment)
-        segment_output_path = f"{os.path.splitext(output_path)[0]}_part{i+1}.jpg"
+        segment_output_path = f"{os.path.splitext(output_path)[0]}/{output_path.split('/')[-1]}_part{i+1}.jpg"
         segment_image.save(segment_output_path)
         print(f"Saved segment {i+1} as {segment_output_path}")
 
 # Exemple d'utilisation
-folder_path = "./Lecteur_omniscient"
-output_path = "./Lucas/concat/image_concatenated.jpg"
 
-concatenate_images(folder_path, output_path)
-958
+

@@ -17,8 +17,10 @@ import pytz
 from dotenv import load_dotenv
 import os
 from threading import Thread
-
+import subprocess
 from leagueOfFunction import *
+
+from Lucas import *
 load_dotenv()
 ##########################################################################
 
@@ -79,7 +81,10 @@ print(current_time)
 
 @bot.event
 async def on_ready():
-    
+    subprocess.run(["python", "Lucas/teste.py"], check=True)
+    guild=bot.get_guild(KARAN_ID)
+    for image in os.listdir('Lucas\concat'):
+        await guild.get_channel(615128656049864734).send(file=discord.File(f'Lucas\concat\{image}'))
     print("le bot est pret")
     try:
         synced= await bot.tree.sync()
@@ -94,7 +99,7 @@ async def on_ready():
     
     while True:
         guild=bot.get_guild(KARAN_ID)
-    
+
         
         pays = "Europe/Paris"
 

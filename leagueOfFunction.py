@@ -55,8 +55,8 @@ def regionForRiotId(region:str):
             return "asia"
 class LOF:
     def regionForRiotId(region:str):
-        print(regionForRiotId(region))
-        regionForRiotId(region)
+     
+        return regionForRiotId(region)
 
     def profileLeagueOfLegends(interaction:discord.Interaction,pseudo:str,tagline:str,region:str):
             

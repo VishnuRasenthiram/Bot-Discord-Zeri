@@ -46,8 +46,8 @@ def concatenate_images(folder_path, output_path):
         print(f"Saved segment {i+1} as {segment_output_path}")
 
 # Exemple d'utilisation
-folder_path = "./upscaled"
-output_path = "image_concatenated.jpg"
+folder_path = "./Lecteur_omniscient"
+output_path = "./Lucas/concat/image_concatenated.jpg"
 
 concatenate_images(folder_path, output_path)
 958

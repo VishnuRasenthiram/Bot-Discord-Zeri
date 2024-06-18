@@ -8,7 +8,7 @@ def convert_jpg_to_png(input_path, output_path):
 
 def batch_convert_jpg_to_png(input_folder, output_folder):
     files = os.listdir(input_folder)
-    files.sort(key=lambda x: int(re.sub('\D', '', x)))  # Tri par ordre numérique
+    files.sort(key=lambda x: int(re.sub('/D', '', x)))  # Tri par ordre numérique
     for filename in files:
         if filename.endswith(".jpg"):
             input_path = os.path.join(input_folder, filename)
@@ -19,8 +19,8 @@ def batch_convert_jpg_to_png(input_folder, output_folder):
             convert_jpg_to_png(input_path, output_path)
 
 # Exemple d'utilisation
-input_folder = "C:/Users/theob/Downloads/Webtoon-Downloader-master (1)/Webtoon-Downloader-master/src/Lecteur_omniscient"
-output_folder = "C:/Users/theob/Downloads/Webtoon-Downloader-master (1)/Webtoon-Downloader-master/src/Lecteur_omniscient"
+input_folder = "C:/Users/Sathu/Documents/Dev.exe/ZeriBot/Lucas/Lecteur_omniscient"
+output_folder = "C:/Users/Sathu/Documents/Dev.exe/ZeriBot/Lucas/Lecteur_omniscient"
 
 
 batch_convert_jpg_to_png(input_folder, output_folder)

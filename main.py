@@ -186,7 +186,7 @@ async def verifLecteurOmniscient():
     
     
 scheduler = AsyncIOScheduler()
-scheduler.add_job(verifLecteurOmniscient, CronTrigger(hour=15, minute=31))
+scheduler.add_job(verifLecteurOmniscient, CronTrigger(hour=16, minute=30))
 ##########################################################################
 
 

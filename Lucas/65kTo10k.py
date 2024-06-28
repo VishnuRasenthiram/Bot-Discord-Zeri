@@ -2,8 +2,8 @@ import os
 from PIL import Image
 
 # Définir les chemins des dossiers
-input_folder = 'Lucas/Downloads/Webtoon-Downloader-master/src/haut'
-output_folder = 'Lucas/Downloads/Webtoon-Downloader-master/src/10k'
+input_folder = 'Lucas/concat/Lecteur_omniscient'
+output_folder = 'Lucas/Downloads/Webtoon-Downloader-master/10k'
 
 # Créer le dossier de sortie s'il n'existe pas
 if not os.path.exists(output_folder):

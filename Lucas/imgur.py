@@ -3,8 +3,8 @@ import os
 import base64
 
 # Remplacez par vos informations d'identification Imgur
-client_id = "fe7090d5030b943"
-access_token = "748d392956719c1bca1540572149a80121def193"
+client_id = "dbad42f279f3dc8"
+access_token = "6404b896d778328986b3e1689d2c6480601a5cdd"
 
 # Titre de l'album
 album_title = "Mon album d'images"
@@ -28,6 +28,7 @@ else:
 
 # Téléchargement des images vers l'album
 def upload_image(image_path, album_id):
+    print(album_id)
     headers = {
         "Authorization": f"Bearer {access_token}",
     }
@@ -56,12 +57,13 @@ def upload_image(image_path, album_id):
         print(f"Contenu de la réponse: {response.content}")  # Debug log
 
 # Remplacez 'images_folder' par le chemin d'accès à votre dossier d'images
-images_folder = "Lucas/concat/Lecteur_omniscient"
+images_folder = 'Lucas/Downloads/Webtoon-Downloader-master/src/Lecteur_omniscient'
 
 if album_id:
     for image_path in os.listdir(images_folder):
         full_image_path = os.path.join(images_folder, image_path)
         if os.path.isfile(full_image_path):
+            print("image upload :"+image_path)
             upload_image(full_image_path, album_id)
     # Afficher l'URL de l'album à la fin du script
     print(f"Album complet disponible à l'adresse : {album_url}")

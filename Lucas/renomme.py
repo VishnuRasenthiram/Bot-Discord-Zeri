@@ -17,7 +17,7 @@ def rename_files_in_order(directory):
         # Obtenir l'extension du fichier
         file_extension = os.path.splitext(filename)[1]
         # Créer le nouveau nom de fichier
-        new_filename = f"{index+1:03d}{file_extension}"
+        new_filename = f"{index+1:03d}.jpg"
         # Obtenir le chemin complet des fichiers
         old_file = os.path.join(directory, filename)
         new_file = os.path.join(directory, new_filename)

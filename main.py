@@ -19,7 +19,7 @@ import os
 from threading import Thread
 import subprocess
 import sched, time
-from Lucas.imgur import *
+#from Lucas.imgur import *
 from discord.ext import tasks, commands
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
@@ -84,42 +84,56 @@ KARAN_ID=614728233497133076
 #MAIN
 print(current_time)
 
+from tenacity import retry, stop_after_attempt, wait_exponential
 
-def run_script_and_get_url(script_path):
-    # Exécution du script en subprocess
-    result = subprocess.run(
-        ["python", script_path],
-        capture_output=True,  # Capture la sortie standard et d'erreur
-        text=True             # Interprète la sortie comme du texte
+
+async def run_script_and_get_url(script_path):
+    first_process = await asyncio.create_subprocess_exec(
+        "python", "Lucas/65kTo10k.py",
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE
+    )
+    await first_process.communicate()
+
+    second_process = await asyncio.create_subprocess_exec(
+        "python", script_path,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE
     )
 
-    # Vérifie si le script s'est exécuté correctement
-    if result.returncode != 0:
-        print(f"Erreur lors de l'exécution du script : {result.stderr}")
+    stdout, stderr = await second_process.communicate()
+
+    # Try decoding using utf-8, if it fails, fallback to latin-1
+    try:
+        stdout = stdout.decode('utf-8')
+    except UnicodeDecodeError:
+        stdout = stdout.decode('latin-1')
+
+    try:
+        stderr = stderr.decode('utf-8')
+    except UnicodeDecodeError:
+        stderr = stderr.decode('latin-1')
+
+    if second_process.returncode != 0:
+        print(f"Erreur lors de l'exécution du script : {stderr.strip()}")
         return None
 
-    # Parcourt la sortie pour trouver l'URL de l'album
-    for line in result.stdout.splitlines():
+    for line in stdout.splitlines():
         if "Album complet disponible à l'adresse" in line:
-            url = line.split(": ")[1]
-            return url
-    
+            parts = line.split(": ")
+            if len(parts) > 1:
+                url = parts[1].strip()
+                return url
+
     print("URL de l'album non trouvée dans la sortie du script.")
     return None
+
 @bot.event
 async def on_ready():
     scheduler.start()
-    script_path = "Lucas/imgur.py"
-    album_url = run_script_and_get_url(script_path)
     
-    if album_url:
-        print(f"L'URL de l'album est : {album_url}")
-        # Vous pouvez maintenant utiliser l'URL de l'album comme vous le souhaitez
-    else:
-        print("Échec de la création de l'album.")
     guild=bot.get_guild(KARAN_ID)
-    #for image in os.listdir('Lucas\concat'):
-    #   await guild.get_channel(615128656049864734).send(file=discord.File(f'Lucas\concat\{image}'))
+
     print("le bot est pret")
     try:
         synced= await bot.tree.sync()
@@ -165,11 +179,14 @@ async def verifLecteurOmniscient():
     if chapitreActuel!=nchap["Lecteur omniscient"]["nchap"]:
         for image in os.listdir("Lucas/concat/Lecteur_omniscient"):
             await guild.get_channel(615128656049864734).send(file=discord.File("Lucas/concat/Lecteur_omniscient/"+image))
+        
+          
+            
     
     
     
 scheduler = AsyncIOScheduler()
-scheduler.add_job(verifLecteurOmniscient, CronTrigger(hour=18, minute=0))
+scheduler.add_job(verifLecteurOmniscient, CronTrigger(hour=15, minute=31))
 ##########################################################################
 
 
@@ -1032,6 +1049,7 @@ async def leave(ctx):
         
         
         
-bot.run(os.getenv('TOKEN'))
+if __name__ == "__main__":
+    asyncio.run(bot.start(os.getenv('TOKEN')))
 
  

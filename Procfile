@@ -1,0 +1,1 @@
+worker: pyrhton main.py

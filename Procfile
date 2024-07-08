@@ -1,1 +1,1 @@
-worker: pyrhton main.py
+worker: python main.py

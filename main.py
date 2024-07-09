@@ -121,8 +121,8 @@ async def changementIconeServeur():
        
     
 scheduler = AsyncIOScheduler()
-scheduler.add_job(changementIconeServeur(), CronTrigger(hour=10, minute=1))
-scheduler.add_job(changementIconeServeur(), CronTrigger(hour=22, minute=1))
+scheduler.add_job(changementIconeServeur, CronTrigger(hour=10, minute=1))
+scheduler.add_job(changementIconeServeur, CronTrigger(hour=22, minute=1))
 ##########################################################################
 
 

@@ -24,8 +24,6 @@ from discord.ext import tasks, commands
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from leagueOfFunction import *
-
-from Lucas import *
 load_dotenv()
 ##########################################################################
 
@@ -84,55 +82,11 @@ KARAN_ID=614728233497133076
 #MAIN
 print(current_time)
 
-from tenacity import retry, stop_after_attempt, wait_exponential
 
-
-async def run_script_and_get_url(script_path):
-    first_process = await asyncio.create_subprocess_exec(
-        "python", "Lucas/65kTo10k.py",
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE
-    )
-    await first_process.communicate()
-
-    second_process = await asyncio.create_subprocess_exec(
-        "python", script_path,
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE
-    )
-
-    stdout, stderr = await second_process.communicate()
-
-    # Try decoding using utf-8, if it fails, fallback to latin-1
-    try:
-        stdout = stdout.decode('utf-8')
-    except UnicodeDecodeError:
-        stdout = stdout.decode('latin-1')
-
-    try:
-        stderr = stderr.decode('utf-8')
-    except UnicodeDecodeError:
-        stderr = stderr.decode('latin-1')
-
-    if second_process.returncode != 0:
-        print(f"Erreur lors de l'exécution du script : {stderr.strip()}")
-        return None
-
-    for line in stdout.splitlines():
-        if "Album complet disponible à l'adresse" in line:
-            parts = line.split(": ")
-            if len(parts) > 1:
-                url = parts[1].strip()
-                return url
-
-    print("URL de l'album non trouvée dans la sortie du script.")
-    return None
 
 @bot.event
 async def on_ready():
     scheduler.start()
-    
-    guild=bot.get_guild(KARAN_ID)
 
     print("le bot est pret")
     try:
@@ -142,51 +96,33 @@ async def on_ready():
         print(e)
     
     
+    
+	
+ 
+
+            
+    
+async def changementIconeServeur():
     with open("env/ranked-emblem/Karan_nuit.png", 'rb') as n,open("env/ranked-emblem/Karan_jour.png", 'rb') as j:
         iconNuit = n.read()
         iconJour = j.read()
     
-    while True:
-        guild=bot.get_guild(KARAN_ID)
-
-        
-        pays = "Europe/Paris"
-
-        now2 = datetime.now(pytz.timezone(pays))
-        current_time = now2.strftime("%H:%M")
-        
-            
-        
-        if current_time>"22:00" or current_time<"10:00": 
-            await guild.edit(name ="Karan 🌙")
-            await guild.edit(icon=iconNuit)
-        else:
-            await guild.edit(name="Karan 🍁")
-            await guild.edit(icon=iconJour)
-            
-        
-        await asyncio.sleep(43200)
-	
- 
-async def verifLecteurOmniscient():
     guild=bot.get_guild(KARAN_ID)
-    with open("dossierJson/dernierChapitre.json","r") as chap:
-        nchap = json.load(chap)
-    chapitreActuel = nchap["Lecteur omniscient"]["nchap"]
-    subprocess.run(["python", "Lucas/webtoon_downloader.py", "https://www.webtoons.com/fr/fantasy/omniscient-reader/list?title_no=2175", "--latest"], check=True)
-    with open("dossierJson/dernierChapitre.json","r") as chap:
-        nchap = json.load(chap)
-    if chapitreActuel!=nchap["Lecteur omniscient"]["nchap"]:
-        for image in os.listdir("Lucas/concat/Lecteur_omniscient"):
-            await guild.get_channel(615128656049864734).send(file=discord.File("Lucas/concat/Lecteur_omniscient/"+image))
-        
-          
+    pays = "Europe/Paris"
+    now2 = datetime.now(pytz.timezone(pays))
+    current_time = now2.strftime("%H:%M")
+    if current_time>"22:00" or current_time<"10:00": 
+        await guild.edit(name ="Karan 🌙")
+        await guild.edit(icon=iconNuit)
+    else:
+        await guild.edit(name="Karan 🍁")
+        await guild.edit(icon=iconJour)
             
-    
-    
+       
     
 scheduler = AsyncIOScheduler()
-scheduler.add_job(verifLecteurOmniscient, CronTrigger(hour=16, minute=30))
+scheduler.add_job(changementIconeServeur(), CronTrigger(hour=10, minute=1))
+scheduler.add_job(changementIconeServeur(), CronTrigger(hour=22, minute=1))
 ##########################################################################
 
 

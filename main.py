@@ -181,11 +181,7 @@ async def verifLecteurOmniscient():
             await guild.get_channel(615128656049864734).send(file=discord.File("Lucas/concat/Lecteur_omniscient/"+image))
         
           
-@bot.command()
-async def download(ctx, series_url: str, start: int, end: int):
-    await ctx.send(f'Downloading webtoon from {start} to {end}...')
-    subprocess.run(['python', 'webtoon_downloader.py', series_url, str(start), str(end)])
-    await ctx.send('Download complete!')           
+            
     
     
     

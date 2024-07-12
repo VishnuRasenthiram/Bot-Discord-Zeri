@@ -775,15 +775,17 @@ async def on_member_join(member):
     if member.guild.id==KARAN_ID:
 
         image =creerImage(member,"Bienvenue")
+        print("11")
 
         img_bytes=BytesIO()
         image.save(img_bytes,format='PNG')
         img_bytes.seek(0)
+        print("12")
 
         channel=discord.utils.get(member.guild.channels, id=CHAN_BVN)
         role = discord.utils.get(member.guild.roles, id=ROLE_NEANTIN)
         role2= discord.utils.get(member.guild.roles, id=ROLE_FAILLE)
-
+        print("13")
         await channel.send(file=discord.File(img_bytes, filename='bienvenue.png'))
         await member.add_roles(role)
         await member.add_roles(role2)
@@ -794,7 +796,7 @@ async def on_member_join(member):
 @bot.event
 async def on_member_remove(member):
     if member.guild.id==KARAN_ID:
-        
+
         image =creerImage(member,"Aurevoir")
 
         img_bytes=BytesIO()

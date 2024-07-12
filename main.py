@@ -419,8 +419,7 @@ async def on_member_update(before,after):
  
 @bot.command()
 @commands.has_permissions(administrator = True)
-async def cleaar(ctx , amount=5):
-    print(ctx.author)
+async def clear(ctx , amount=5):
     await ctx.channel.purge(limit=amount + 1)
 
 

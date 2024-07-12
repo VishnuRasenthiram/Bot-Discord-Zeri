@@ -19,7 +19,6 @@ import os
 from threading import Thread
 import subprocess
 import sched, time
-#from Lucas.imgur import *
 from discord.ext import tasks, commands
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
@@ -420,8 +419,8 @@ async def on_member_update(before,after):
  
 @bot.command()
 @commands.has_permissions(administrator = True)
-async def clear(ctx , amount=5):
-    
+async def cleaar(ctx , amount=5):
+    print(ctx.author)
     await ctx.channel.purge(limit=amount + 1)
 
 
@@ -769,35 +768,31 @@ async def help(ctx):
 
     await ctx.message.channel.send(embed=embed,file=file)
 ##########################################################################
-
+from welcomeImage import *
 @bot.event
 async def on_member_join(member):
-    channel=discord.utils.get(member.guild.channels, id=CHAN_BVN)
-    role = discord.utils.get(member.guild.roles, id=ROLE_NEANTIN)
-    role2= discord.utils.get(member.guild.roles, id=ROLE_FAILLE)
     
-    embed=discord.Embed(title="Bienvenue").set_thumbnail(url=member.avatar).add_field(name="Pseudo",value=member.name).add_field(name="Nous a rejoins le :",value=current_day)
-    
-    await channel.send(embed=embed)
-    await member.add_roles(role)
-    await member.add_roles(role2)
+    if member.guild.id==KARAN_ID:
+        creerImage(member,"Bienvenue")
+        channel=discord.utils.get(member.guild.channels, id=CHAN_BVN)
+        role = discord.utils.get(member.guild.roles, id=ROLE_NEANTIN)
+        role2= discord.utils.get(member.guild.roles, id=ROLE_FAILLE)
 
-@bot.command()
-@commands.cooldown(1, 30, commands.BucketType.user)
-async def welcome(ctx):
-    
-    embed=discord.Embed(title="Bienvenue").set_thumbnail(url=ctx.author.avatar).add_field(name="Pseudo",value=ctx.author.name
-    ).add_field(name="Nous a rejoins le :",value=current_day)
-    
-    await ctx.channel.send(embed=embed)
+        await channel.send(file=discord.File(f"Image/Bienvenue_{member.name}.png"))
+        await member.add_roles(role)
+        await member.add_roles(role2)
+        os.remove(f"Image/Bienvenue_{member.name}.png")
+
 
 
 @bot.event
 async def on_member_remove(member):
-    channel=discord.utils.get(member.guild.channels, id=CHAN_BVN)
-    embed=discord.Embed(title="Ciao").set_thumbnail(url=member.avatar).add_field(name="Pseudo",value=member.name)
-    
-    await channel.send(embed=embed)
+    if member.guild.id==KARAN_ID:
+        creerImage(member,"Aurevoir")
+        channel=discord.utils.get(member.guild.channels, id=CHAN_BVN)
+        await channel.send(file=discord.File(f"Image/Aurevoir_{member.name}.png"))
+        os.remove(f"Image/Aurevoir_{member.name}.png")
+
 ##########################################################################
 
 

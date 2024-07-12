@@ -65,4 +65,3 @@ webdriver-manager==4.0.1
 webtoon_downloader==1.0.1
 wsproto==1.2.0
 yarl==1.9.4
-BytesIO

@@ -60,8 +60,5 @@ typing_extensions==4.12.2
 tzdata==2024.1
 tzlocal==5.2
 urllib3==2.2.1
-waifu2x-ncnn-py==2.0.0
-webdriver-manager==4.0.1
-webtoon_downloader==1.0.1
 wsproto==1.2.0
 yarl==1.9.4

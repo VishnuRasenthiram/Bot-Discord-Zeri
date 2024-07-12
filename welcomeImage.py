@@ -28,7 +28,7 @@ def creerImage(member, text: str):
         final_im.paste(output, avatar_position, mask=output)
         print("4")
         texte = ImageDraw.Draw(final_im)
-        font = ImageFont.truetype("arial.ttf", 50)
+        font = ImageFont.truetype(size=50)
         print("5")
         # Obtenir les dimensions du texte
         text_bbox = texte.textbbox((0, 0), text, font=font)

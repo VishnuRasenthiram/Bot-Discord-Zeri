@@ -55,6 +55,6 @@ def creerImage(member, text: str):
         texte.text(text_position, text, font=font, fill=text_color)
         texte.text(member_position, member.name, font=font, fill=text_color)
 
-        final_im.save(f"Image/{text}_{member.name}.png")
+        return final_im
     
 

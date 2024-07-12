@@ -773,25 +773,36 @@ from welcomeImage import *
 async def on_member_join(member):
     
     if member.guild.id==KARAN_ID:
-        creerImage(member,"Bienvenue")
+
+        image =creerImage(member,"Bienvenue")
+
+        img_bytes=BytesIO()
+        image.save(img_bytes,format='PNG')
+        img_bytes.seek(0)
+
         channel=discord.utils.get(member.guild.channels, id=CHAN_BVN)
         role = discord.utils.get(member.guild.roles, id=ROLE_NEANTIN)
         role2= discord.utils.get(member.guild.roles, id=ROLE_FAILLE)
 
-        await channel.send(file=discord.File(f"Image/Bienvenue_{member.name}.png"))
+        await channel.send(file=discord.File(img_bytes, filename='bienvenue.png'))
         await member.add_roles(role)
         await member.add_roles(role2)
-        os.remove(f"Image/Bienvenue_{member.name}.png")
+       
 
 
 
 @bot.event
 async def on_member_remove(member):
     if member.guild.id==KARAN_ID:
-        creerImage(member,"Aurevoir")
+        
+        image =creerImage(member,"Aurevoir")
+
+        img_bytes=BytesIO()
+        image.save(img_bytes,format='PNG')
+        img_bytes.seek(0)
         channel=discord.utils.get(member.guild.channels, id=CHAN_BVN)
-        await channel.send(file=discord.File(f"Image/Aurevoir_{member.name}.png"))
-        os.remove(f"Image/Aurevoir_{member.name}.png")
+        await channel.send(file=discord.File(img_bytes, filename='aurevoir.png'))
+      
 
 ##########################################################################
 

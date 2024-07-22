@@ -23,6 +23,7 @@ from discord.ext import tasks, commands
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from leagueOfFunction import *
+from welcomeImage import *
 load_dotenv()
 ##########################################################################
 
@@ -240,124 +241,22 @@ async def del_profile(interaction:discord.Interaction):
 @bot.tree.command(name="profil_league_of_legends")
 @app_commands.choices(region=choixRegion)
 async def lolp(interaction: discord.Interaction, pseudo: str = None, tagline: str = "euw", region: app_commands.Choice[str] = "euw1"):
-    await interaction.response.defer()
+    await LOF.profileLeagueOfLegends(interaction,pseudo,tagline,region)
 
-    with open("dossierJson/profile.json", "r") as f:
-        profile = json.load(f)
 
-    if not pseudo:
-        estDansListe = False
-        for id in profile:
-            if interaction.user.id == int(id):
-                estDansListe = True
-                if profile[str(interaction.user.id)]["statut"] == 0:
-                    await interaction.followup.send("Vous n'avez pas confirmé le profil !")
-                    return
-                else:
-                    puuid = profile[str(interaction.user.id)]["puuid"]
+@bot.tree.command(name="historique_league_of_legends")
+@app_commands.choices(region=choixRegion)
+async def histo(interaction: discord.Interaction, pseudo: str = None, tagline: str = "euw", region: app_commands.Choice[str] = "euw1"):
+   await  LOF.historiqueLeagueOfLegends(interaction,pseudo,tagline,region)
 
-        if not estDansListe:
-            await interaction.followup.send("Veuillez préciser un nom d'invocateur ou bien définir votre profil avec la commande : ```/sauvegarder_mon_profil```")
-            return
-    else:
-        me = lol_watcher.accountV1.by_riotid(region=region, game_name=pseudo, tag_line=tagline)
-        puuid = me["puuid"]
+@bot.tree.command(name="partie_en_cours")
+@app_commands.choices(region=choixRegion)
+async def partieEnCours(interaction: discord.Interaction, pseudo: str = None, tagline: str = "euw", region: app_commands.Choice[str] = None):
+   
+  
 
-    versions = lol_watcher.data_dragon.versions_for_region(region)
-    champions_version = versions['n']['champion']
-    dd = lol_watcher.data_dragon.champions(champions_version)
+    await LOF.partieEnCours(interaction, pseudo, tagline, region)
 
-    try:
-        myAccount = lol_watcher.summoner.by_puuid(region, puuid)
-        mastery = lol_watcher.champion_mastery.by_puuid(region, puuid)
-        me1 = lol_watcher.league.by_summoner(region, myAccount["id"])
-        icone = f'http://ddragon.leagueoflegends.com/cdn/{versions["v"]}/img/profileicon/{myAccount["profileIconId"]}.png'
-
-        if not me1:
-            rank = rank_flex = div = div_flex = lp = lp_flex = win = loose = wr = "Unranked"
-        else:
-            isSolo = isFlex = True
-
-            for i in range(len(me1)):
-                if me1[i]['queueType'] == "RANKED_SOLO_5x5":
-                    rank = me1[i]["tier"]
-                    div = me1[i]["rank"]
-                    lp = me1[i]["leaguePoints"]
-                    win = me1[i]["wins"]
-                    loose = me1[i]["losses"]
-                    wr = (win / (win + loose)) * 100
-                    wr = f'{round(wr, 2)}%'
-                    isSolo = False
-
-                if me1[i]['queueType'] == "RANKED_FLEX_SR":
-                    rank_flex = me1[i]["tier"]
-                    div_flex = me1[i]["rank"]
-                    lp_flex = me1[i]["leaguePoints"]
-                    isFlex = False
-
-            if isSolo:
-                rank = div = lp = win = loose = wr = "Unranked"
-            if isFlex:
-                rank_flex = div_flex = lp_flex = "Unranked"
-
-        file = discord.File("env/ranked-emblem/zeri2.gif", filename="zeri2.gif")
-        soloq = rank_to_emoji(rank, div, lp)
-        flex = rank_to_emoji(rank_flex, div_flex, lp_flex)
-        regionRiotId = LOF.regionForRiotId(region)
-        nom=lol_watcher.accountV1.by_puuid(regionRiotId,puuid)["gameName"]
-        tagline=lol_watcher.accountV1.by_puuid(regionRiotId,puuid)["tagLine"]
-
-        embed = discord.Embed(
-            title="Profil League Of Legends",
-            description=f'{interaction.user.name} voici le profil de {nom}#{tagline}',
-            color=discord.Color.blue()
-        ).set_thumbnail(url=icone).add_field(
-            name="Pseudo :", value=nom, inline=True
-        ).add_field(
-            name="Niveau :", value=myAccount["summonerLevel"], inline=True
-        ).add_field(
-            name="Rank :", value=f"Solo/duo : {soloq} \n Flex : {flex}", inline=False
-        ).add_field(
-            name="Wins :", value=win, inline=True
-        ).add_field(
-            name=" ", value=" "
-        ).add_field(
-            name="Winrate :", value=wr
-        ).add_field(
-            name="Losses :", value=loose, inline=False
-        ).set_image(url="attachment://zeri2.gif")
-
-        test = {'1': [], '2': [], '3': []}
-
-        for i in range(3):
-            for j in dd['data']:
-                if int(dd['data'][j]['key']) == int(mastery[i]['championId']):
-                    test[str(i + 1)].append(dd['data'][j]['id'])
-                    test[str(i + 1)].append(int(mastery[i]['championPoints']))
-        
-        chaine = ""
-        for key, value in test.items():
-            chaine += key + ": " + " - ".join(str(v) for v in value) + " Pts \n"
-        lignes = chaine.split("\n")
-        for ligne in lignes:
-            elements = ligne.split("-")
-            if len(elements) > 1:
-                nombre = ''.join(filter(str.isdigit, elements[1].strip()))
-                nombre_formate = "{:,.0f}".format(int(nombre))
-                chaine = chaine.replace(elements[1].strip(), nombre_formate + " Pts")
-
-        embed.add_field(name="Mastery :", value=chaine)
-
-        await interaction.followup.send(embed=embed, file=file)
-    
-    except ApiError as err:
-        print(err)
-        if err.response.status_code == 429:
-            print("Quota de requête dépassé")
-        elif err.response.status_code == 404:
-            await interaction.followup.send("Le compte avec ce pseudo n'existe pas !")
-        else:
-            raise
 @bot.event
 async def on_message(message):
     cheh=["https://tenor.com/view/vilebrequin-cheh-levy-gif-19953300","https://tenor.com/view/maskey-gif-17974418"]
@@ -767,7 +666,7 @@ async def help(ctx):
 
     await ctx.message.channel.send(embed=embed,file=file)
 ##########################################################################
-from welcomeImage import *
+
 @bot.event
 async def on_member_join(member):
     
@@ -850,19 +749,8 @@ async def pick(ctx):
 
     
 
-@bot.command()
-@commands.cooldown(1, 10, commands.BucketType.user)
-async def lolp2(ctx):
-    await LOF.profileLeagueOfLegends(ctx)
-        
-@bot.command()
-async def histo(ctx):
-     await LOF.historiqueLeagueOfLegends(ctx)
     
 
-@bot.command()
-async def cg(ctx):
-    await LOF.partieEnCours(ctx)
 
 
 @bot.event

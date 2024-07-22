@@ -2,6 +2,7 @@ import discord
 from riotwatcher import LolWatcher, ApiError
 from discord.ext import commands
 from discord.ui import Select
+from discord.app_commands import Choice
 import urllib 
 from discord.flags import Intents 
 from discord import app_commands
@@ -11,8 +12,6 @@ import os
 load_dotenv()
 
 lol_watcher = LolWatcher(os.getenv('RIOT_API'))
-my_region = 'euw1'
-my_regionForId='europe'
 version = lol_watcher.data_dragon.versions_for_region("euw1")
 
 def rank_to_emoji(rank,div,lp):
@@ -53,13 +52,7 @@ def regionForRiotId(region:str):
             return "americas"
         else:
             return "asia"
-class LOF:
-    def regionForRiotId(region:str):
-     
-        return regionForRiotId(region)
-
-    def profileLeagueOfLegends(interaction:discord.Interaction,pseudo:str,tagline:str,region:str):
-            
+def getPuuidRegion(interaction:discord.Interaction,pseudo:str,tagline:str,region:str):
         with open("dossierJson/profile.json","r") as f :
             profile = json.load(f)
         
@@ -72,292 +65,286 @@ class LOF:
                         return interaction.response.send_message("Vous n'avez pas confirmé le profil !")
                     else :
                         puuid = profile[str(interaction.user.id)]["puuid"]
+                        region = profile[str(interaction.user.id)]["region"]
                     
             if not estDansListe:
                 return interaction.response.send_message("Veuillez préciser un nom d'invocateur ou bien définir votre profil avec la commande : ```/sauvegarder_mon_profil```")
         else:
+            if not isinstance(region,Choice):
+                region= Choice(name="defaut",value="euw1")
             me = lol_watcher.accountV1.by_riotid(region=regionForRiotId(region.value),summoner_name=pseudo,tagline=tagline)
-            puuid=me["puuid"]          
-        versions = lol_watcher.data_dragon.versions_for_region(region.value)
+            puuid=me["puuid"]
+            region= region.value
+
+        return puuid,region
+class LOF:
+    def regionForRiotId(region:str):
+     
+        return regionForRiotId(region)
+    
+
+    async def profileLeagueOfLegends(interaction:discord.Interaction,pseudo:str,tagline:str,region:str):
+            
+        await interaction.response.defer()
+
+        puuid,region=getPuuidRegion(interaction,pseudo,tagline,region)
+        
+        versions = lol_watcher.data_dragon.versions_for_region(region)
         champions_version = versions['n']['champion']
-        dd=lol_watcher.data_dragon.champions(champions_version)
+        dd = lol_watcher.data_dragon.champions(champions_version)
 
         try:
+            myAccount = lol_watcher.summoner.by_puuid(region, puuid)
+            mastery = lol_watcher.champion_mastery.by_puuid(region, puuid)
+            me1 = lol_watcher.league.by_summoner(region, myAccount["id"])
+            icone = f'http://ddragon.leagueoflegends.com/cdn/{versions["v"]}/img/profileicon/{myAccount["profileIconId"]}.png'
 
-            myAccount= lol_watcher.summoner.by_puuid(region.value,puuid)
-            mastery=lol_watcher.champion_mastery.by_puuid(region.value,puuid)
-            me1=lol_watcher.league.by_summoner(region.value,myAccount["id"])
-            icone =f'http://ddragon.leagueoflegends.com/cdn/{version["v"]}/img/profileicon/{myAccount["profileIconId"]}.png'
-            if not (me1):
-                rank="Unranked"
-                rank_flex="Unranked"
-                div="Unranked"
-                div_flex="Unranked"
-                lp="Unranked"
-                lp_flex="Unranked"
-                win="Unranked"
-                loose="Unranked"
-                wr="Unranked"
-    
+            if not me1:
+                rank = rank_flex = div = div_flex = lp = lp_flex = win = loose = wr = "Unranked"
             else:
-                isSolo=True
-                isFlex=True
-                
+                isSolo = isFlex = True
+
                 for i in range(len(me1)):
-                    if me1[i]['queueType']=="RANKED_SOLO_5x5":
-                        rank=me1[i]["tier"]
-                        div=me1[i]["rank"]
-                        lp=me1[i]["leaguePoints"]
-                        win=me1[i]["wins"]
-                        loose=me1[i]["losses"]
-                        wr=(win/(win+loose))*100
-                        wr=f'{round(wr,2)}%'
-                        isSolo=False
-                        
-                    if me1[i]['queueType']=="RANKED_FLEX_SR":
-                        rank_flex=me1[i]["tier"]
-                        div_flex=me1[i]["rank"]
-                        lp_flex=me1[i]["leaguePoints"]
-                        isFlex=False
-                        
+                    if me1[i]['queueType'] == "RANKED_SOLO_5x5":
+                        rank = me1[i]["tier"]
+                        div = me1[i]["rank"]
+                        lp = me1[i]["leaguePoints"]
+                        win = me1[i]["wins"]
+                        loose = me1[i]["losses"]
+                        wr = (win / (win + loose)) * 100
+                        wr = f'{round(wr, 2)}%'
+                        isSolo = False
+
+                    if me1[i]['queueType'] == "RANKED_FLEX_SR":
+                        rank_flex = me1[i]["tier"]
+                        div_flex = me1[i]["rank"]
+                        lp_flex = me1[i]["leaguePoints"]
+                        isFlex = False
+
                 if isSolo:
-                    rank="Unranked"
-                    div="Unranked"
-                    lp="Unranked"
-                    win="Unranked"
-                    loose="Unranked"
-                    wr="Unranked"
-                    wr="Unranked"
-                    
+                    rank = div = lp = win = loose = wr = "Unranked"
                 if isFlex:
-                    rank_flex="Unranked"
-                    div_flex="Unranked"
-                    lp_flex="Unranked"
-                          
-            file = discord.File(f"env/ranked-emblem/zeri2.gif", filename=f"zeri2.gif")
-            
-            soloq=rank_to_emoji(rank,div,lp)
-            flex=rank_to_emoji(rank_flex,div_flex,lp_flex)
-            regionRiotId=regionForRiotId(region.value)
+                    rank_flex = div_flex = lp_flex = "Unranked"
+
+            file = discord.File("env/ranked-emblem/zeri2.gif", filename="zeri2.gif")
+            soloq = rank_to_emoji(rank, div, lp)
+            flex = rank_to_emoji(rank_flex, div_flex, lp_flex)
+            regionRiotId = LOF.regionForRiotId(region)
             nom=lol_watcher.accountV1.by_puuid(regionRiotId,puuid)["gameName"]
             tagline=lol_watcher.accountV1.by_puuid(regionRiotId,puuid)["tagLine"]
-            embed=discord.Embed(title="Profil League Of Legends",
-            description=f'{interaction.user.name} voici le profil de {nom}#{tagline} ', 
-            color=discord.Color.blue()).set_thumbnail(
-            url=icone
+
+            embed = discord.Embed(
+                title="Profil League Of Legends",
+                description=f'{interaction.user.name} voici le profil de {nom}#{tagline}',
+                color=discord.Color.blue()
+            ).set_thumbnail(url=icone).add_field(
+                name="Pseudo :", value=nom, inline=True
             ).add_field(
-            name="Pseudo :", 
-            value=nom, 
-            inline=True
+                name="Niveau :", value=myAccount["summonerLevel"], inline=True
             ).add_field(
-            name="Niveau :",
-            value=myAccount["summonerLevel"],
-            inline=True
+                name="Rank :", value=f"Solo/duo : {soloq} \n Flex : {flex}", inline=False
             ).add_field(
-            name="Rank :", 
-            value=f"Solo/duo : {soloq} \n Flex : {flex}",
-            inline=False
+                name="Wins :", value=win, inline=True
             ).add_field(
-            name="Wins :", 
-            value=win,
-            inline=True
-            ).add_field(name=" ",value=" "
-            ).add_field(name="Winrate :",value=wr
+                name=" ", value=" "
             ).add_field(
-            name="Losses :", 
-            value=loose ,
-            inline=False
+                name="Winrate :", value=wr
+            ).add_field(
+                name="Losses :", value=loose, inline=False
             ).set_image(url="attachment://zeri2.gif")
-            
-            
-            test={'1':[],'2':[],'3':[]}
-            
-            
-            
+
+            test = {'1': [], '2': [], '3': []}
+
             for i in range(3):
                 for j in dd['data']:
-                    
-                    if int(dd['data'][j]['key'])==int(mastery[i]['championId']):
-                        test[str(i+1)].append(dd['data'][j]['id'])
-                        test[str(i+1)].append(int(mastery[i]['championPoints']))
+                    if int(dd['data'][j]['key']) == int(mastery[i]['championId']):
+                        test[str(i + 1)].append(dd['data'][j]['id'])
+                        test[str(i + 1)].append(int(mastery[i]['championPoints']))
+            
             chaine = ""
             for key, value in test.items():
-                
                 chaine += key + ": " + " - ".join(str(v) for v in value) + " Pts \n"
             lignes = chaine.split("\n")
             for ligne in lignes:
                 elements = ligne.split("-")
                 if len(elements) > 1:
-                    nombre = ''.join(filter(str.isdigit, elements[1].strip()))  # Supprime tous les caractères non numériques de la chaîne
+                    nombre = ''.join(filter(str.isdigit, elements[1].strip()))
                     nombre_formate = "{:,.0f}".format(int(nombre))
                     chaine = chaine.replace(elements[1].strip(), nombre_formate + " Pts")
-            
-            embed.add_field(
-                name="Mastery :",
-                value=chaine
-            )
-                   
-            return interaction.response.send_message(embed=embed,file=file)
-        #.set_image(url=f"attachment://emblem-{rank.lower()}.png")
-        
-        except ApiError as err :
+
+            embed.add_field(name="Mastery :", value=chaine)
+
+            await interaction.followup.send(embed=embed, file=file)
+    
+        except ApiError as err:
             print(err)
-            if err.response.status_code == 429 :
+            if err.response.status_code == 429:
                 print("Quota de requête dépassé")
             elif err.response.status_code == 404:
-                 return interaction.response.send_message("Le compte avec ce pseudo n'existe pas !")
+                await interaction.followup.send("Le compte avec ce pseudo n'existe pas !")
             else:
                 raise
+            
+          
 
 
 
 
 
-    def historiqueLeagueOfLegends(ctx):
+    async def historiqueLeagueOfLegends(interaction:discord.Interaction,pseudo:str,tagline:str,region:str):
+
+        await interaction.response.defer()
+
+        puuid,region=getPuuidRegion(interaction,pseudo,tagline,region)
+        
         try:
-            
-            name =str(" ".join(ctx.message.content.split()[1:]))
-            versions = lol_watcher.data_dragon.versions_for_region(my_region)
-            
-            with open('input.json','r') as f:
-                data = json.load(f)    
                 
-            
+            with open("dossierJson/input.json","r") as numPartie:
+                data = json.load(numPartie)    
                 
+        
+            histo= lol_watcher.match.matchlist_by_puuid(region,puuid)
             
-            me = lol_watcher.summoner.by_name(my_region, name)
-            histo= lol_watcher.match.matchlist_by_puuid(my_region,me["puuid"])
             
-            embed=discord.Embed(title="Historique League Of Legends",
-            description=f'{ctx.author.name} voici l\'historique league of legends sur les 20 dernieres games de {name} :', 
-            color=discord.Color.purple())
             
             list={}
             list2=[]
             wins=0
             
-            
-            f=1
+            numPartie=1
             for i in range(20):
             
-                matchs=lol_watcher.match.by_id(my_region, histo[i])
-                j=0
+                matchs=lol_watcher.match.by_id(region, histo[i])
+                
+                indiceJoueur=0
                 for i in matchs['metadata']['participants']:
-                    if i==me["puuid"]:
-                        pos=j
+                    if i==puuid:
+                        positionJoueur=indiceJoueur
                     else :
-                        j+=1
+                        indiceJoueur+=1
                         
-                info=matchs["info"]["participants"][pos]
-                info2=matchs["info"]["queueId"]
+                informationPartie=matchs["info"]["participants"][positionJoueur]
+            
+                informationTypePartie=matchs["info"]["queueId"]
+                
+             
                 for i in range (len(data)):
-                    if data[i]['queueId']==info2:     
+                    if str(informationTypePartie).startswith("18"):
+                        informationTypePartie=18
+                    if data[i]['queueId']==informationTypePartie:     
                         list2.append(data[i]["description"])
-                        
-                if info['win']:
-                    list[f]=[info['championName'],f'-   {str(info["kills"])}/{str(info["deaths"])}/{str(info["assists"])} <:V:1119547366404526180>']
+
+                nomChamp=informationPartie['championName']
+
+                if informationTypePartie==18 :
+                    nomChamp=nomChamp.replace("Strawberry_","")
+                    
+                kill=str(informationPartie["kills"])
+                death=str(informationPartie["deaths"])
+                assist=str(informationPartie["assists"])
+
+                if informationPartie['win']:
+                    list[numPartie]=[nomChamp,f'- {kill}/{death}/{assist} <:V:1119547366404526180>']
                     wins+=1             
                 else:
-                    list[f]=[info['championName'],f'-   {str(info["kills"])}/{str(info["deaths"])}/{str(info["assists"])} <:D:1119546988795539497> ']
-                
-                f+=1
+                    list[numPartie]=[nomChamp,f'- {kill}/{death}/{assist}  <:D:1119546988795539497> ']
+                numPartie+=1
             
             wr=(wins/20)*100
                 
-            chaine = ""
-            chaine2=""
+            chainePartie=""
+            chaineTypePartie=""
             for key ,value in list.items():
-                # Use join() to concatenate the values without the brackets and quotes
-                chaine += str(key)+":"+' '.join(str(elem) for elem in value)+"\n"    
-                # Print the formatted key-value pair           
+                chainePartie += str(key)+": "+' '.join(str(elem) for elem in value)+"\n"         
             for key  in list2:
-                # Use join() to concatenate the values without the brackets and quotes
-                chaine2 += str(key)+"\n"    
-                # Print the formatted key-value pair
-            chaine2 =chaine2.replace('5v5',' ').replace('Pick',' ').replace('games',' ')
-            embed.add_field(name="Historique :",value=chaine
+                chaineTypePartie += str(key)+"\n"    
+            chaineTypePartie =chaineTypePartie.replace('5v5',' ').replace('Pick',' ').replace('games',' ')
+
+            embed=discord.Embed(title="Historique League Of Legends",
+            description=f'Voici l\'historique league of legends sur les 20 dernieres games de {pseudo} :', 
+            color=discord.Color.purple()
             ).add_field(
-                name="Mode de jeu",value=chaine2
+                name="Historique :",value=chainePartie
+            ).add_field(
+                name="Mode de jeu",value=chaineTypePartie
             ).add_field(
                 name="WinRate :",value=f'{round(wr,2)}% ')
-            return ctx.channel.send(embed=embed)    
+            
+            await interaction.followup.send(embed=embed)   
         except ApiError as err :
                 if err.response.status_code == 429 :
                     print("Quota de requête dépassé")
                 elif err.response.status_code == 404:
-                    return ctx.message.channel.send("Le compte avec ce pseudo n'existe pas !")
+                    await interaction.followup.send("Le compte avec ce pseudo n'existe pas !")
                 else:
+                    print(err)
                     raise    
 
 
-    def partieEnCours(ctx):
+    async def partieEnCours(interaction:discord.Interaction,pseudo:str,tagline:str,region:str):
+        await interaction.response.defer()
+        puuid,region=getPuuidRegion(interaction,pseudo,tagline,region)
         try:
             link =f'https://ddragon.leagueoflegends.com/cdn/{version["v"]}/data/fr_FR/champion.json'
+
             f = urllib.request.urlopen(link)
             myfile = f.read()
             data=json.loads(myfile)
             champ = data["data"]   
-            name =str(" ".join(ctx.message.content.split()[1:]))
-            me = lol_watcher.summoner.by_name(my_region,name)
-            cg= lol_watcher.spectator.by_summoner(my_region,me["id"])
+            
+            regionId= LOF.regionForRiotId(region)
+            
+            cg= lol_watcher.spectator.by_puuid(region,puuid)
+            
             blue=""
             red =""
             
             for i in range ( len(cg["participants"])) :
-                nom = cg["participants"][i]["summonerName"] 
+                
+                
+                pseudo=lol_watcher.accountV1.by_puuid(regionId,cg["participants"][i]["puuid"])["gameName"]
+                invocateur= lol_watcher.league.by_summoner(region,cg["participants"][i]["summonerId"])
+                rank="Unranked"
+                div=" "
+                lp=" "
                 if cg["participants"][i]["teamId"]==100:
-                    
-                    me = lol_watcher.summoner.by_name(my_region,cg["participants"][i]["summonerName"] )
-                    me1= lol_watcher.league.by_summoner(my_region,me["id"])
-                    
+
                     for cle,valeur in champ.items():
                         if int(valeur['key'])==int(cg["participants"][i]['championId']):
                             blue+=f'``{cle}`` **-** \t'
-                    
-                    rank="Unranked"
-                    div=" "
-                    lp=" "
-        
-                    for i in range(len(me1)):
-                        if me1[i]['queueType']=="RANKED_SOLO_5x5":
-                            rank=me1[i]["tier"]
-                            div=me1[i]["rank"]
-                            lp=me1[i]["leaguePoints"]
+
+                    for i in range(len(invocateur)):
+                        if invocateur[i]['queueType']=="RANKED_SOLO_5x5":
+                            rank=invocateur[i]["tier"]
+                            div=invocateur[i]["rank"]
+                            lp=invocateur[i]["leaguePoints"]
                             
 
-                    var=rank_to_emoji(rank,div,lp)
-                        
+                    var=rank_to_emoji(rank,div,lp)  
                             
-                    blue+=f'``{nom }``\t**|**\t{var}\n'          
+                    blue+=f'``{pseudo }``\t**|**\t{var}\n'          
                         
                 else :
-                    me = lol_watcher.summoner.by_name(my_region,cg["participants"][i]['summonerName'])
-                    me1= lol_watcher.league.by_summoner(my_region,me["id"])
                     
                     for cle,valeur in champ.items():
                         if int(valeur['key'])==int(cg["participants"][i]['championId']):
                             red+=f'``{cle}`` **-** \t'
-                    
-                    rank="Unranked"
-                    div=" "
-                    lp=" "
+     
 
-                    for i in range(len(me1)):
-                        if me1[i]['queueType']=="RANKED_SOLO_5x5":
-                            rank=me1[i]["tier"]
-                            div=me1[i]["rank"]
-                            lp=me1[i]["leaguePoints"]
+                    for i in range(len(invocateur)):
+                        if invocateur[i]['queueType']=="RANKED_SOLO_5x5":
+                            rank=invocateur[i]["tier"]
+                            div=invocateur[i]["rank"]
+                            lp=invocateur[i]["leaguePoints"]
                             
 
                     var=rank_to_emoji(rank,div,lp)
-                    
-                        
-                    red+=f'``{nom}``\t**|**\t{var}\n' 
-        
+                    red+=f'``{pseudo}``\t**|**\t{var}\n' 
+            
             embed=discord.Embed(title='Match en cours :' ,color=discord.Color.yellow())
             embed.add_field(name="Blue side :",value=blue,inline=False
             ).add_field(name="Red side :",value=red )         
-            return ctx.channel.send(embed=embed)   
+            await interaction.followup.send(embed=embed)    
                 
             
             
@@ -368,7 +355,7 @@ class LOF:
                 if err.response.status_code == 429 :
                     print("Quota de requête dépassé")
                 elif err.response.status_code == 404:
-                    return  ctx.message.channel.send("Le compte avec ce pseudo n'existe pas ! ou bien l'utilisateur n'est pas en game !")
+                    await interaction.followup.send("Le compte avec ce pseudo n'existe pas ou le joueur n'est pas dans une partie!")
                 else:
                     raise
     

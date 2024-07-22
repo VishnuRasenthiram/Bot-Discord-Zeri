@@ -174,5 +174,11 @@
         "map": "Arena",
         "description": "Arena",
         "notes": null
+    },
+    {
+        "queueId": 18,
+        "map": "Swarm",
+        "description": "Swarm",
+        "notes": null
     }
 ]

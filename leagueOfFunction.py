@@ -9,6 +9,7 @@ from discord import app_commands
 import json
 from dotenv import load_dotenv
 import os
+from currentGameImage import *
 load_dotenv()
 
 lol_watcher = LolWatcher(os.getenv('RIOT_API'))
@@ -285,66 +286,14 @@ class LOF:
         await interaction.response.defer()
         puuid,region=getPuuidRegion(interaction,pseudo,tagline,region)
         try:
-            link =f'https://ddragon.leagueoflegends.com/cdn/{version["v"]}/data/fr_FR/champion.json'
-
-            f = urllib.request.urlopen(link)
-            myfile = f.read()
-            data=json.loads(myfile)
-            champ = data["data"]   
-            
             regionId= LOF.regionForRiotId(region)
-            
-            cg= lol_watcher.spectator.by_puuid(region,puuid)
-            
-            blue=""
-            red =""
-            
-            for i in range ( len(cg["participants"])) :
-                
-                
-                pseudo=lol_watcher.accountV1.by_puuid(regionId,cg["participants"][i]["puuid"])["gameName"]
-                invocateur= lol_watcher.league.by_summoner(region,cg["participants"][i]["summonerId"])
-                rank="Unranked"
-                div=" "
-                lp=" "
-                if cg["participants"][i]["teamId"]==100:
-
-                    for cle,valeur in champ.items():
-                        if int(valeur['key'])==int(cg["participants"][i]['championId']):
-                            blue+=f'``{cle}`` **-** \t'
-
-                    for i in range(len(invocateur)):
-                        if invocateur[i]['queueType']=="RANKED_SOLO_5x5":
-                            rank=invocateur[i]["tier"]
-                            div=invocateur[i]["rank"]
-                            lp=invocateur[i]["leaguePoints"]
-                            
-
-                    var=rank_to_emoji(rank,div,lp)  
-                            
-                    blue+=f'``{pseudo }``\t**|**\t{var}\n'          
-                        
-                else :
-                    
-                    for cle,valeur in champ.items():
-                        if int(valeur['key'])==int(cg["participants"][i]['championId']):
-                            red+=f'``{cle}`` **-** \t'
-     
-
-                    for i in range(len(invocateur)):
-                        if invocateur[i]['queueType']=="RANKED_SOLO_5x5":
-                            rank=invocateur[i]["tier"]
-                            div=invocateur[i]["rank"]
-                            lp=invocateur[i]["leaguePoints"]
-                            
-
-                    var=rank_to_emoji(rank,div,lp)
-                    red+=f'``{pseudo}``\t**|**\t{var}\n' 
-            
-            embed=discord.Embed(title='Match en cours :' ,color=discord.Color.yellow())
-            embed.add_field(name="Blue side :",value=blue,inline=False
-            ).add_field(name="Red side :",value=red )         
-            await interaction.followup.send(embed=embed)    
+            cg=lol_watcher.spectator.by_puuid(region,puuid)
+            image=creerImage(cg,regionId,region)
+            img_bytes=BytesIO()
+            image.save(img_bytes,format='PNG')
+            img_bytes.seek(0)
+                   
+            await interaction.followup.send(file=discord.File(img_bytes,filename="Partie_En_Cours.png"))    
                 
             
             

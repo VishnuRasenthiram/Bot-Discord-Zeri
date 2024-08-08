@@ -95,12 +95,7 @@ async def on_ready():
     except Exception as e:
         print(e)
     
-    
-    
-	
- 
 
-            
     
 async def changementIconeServeur():
     with open("env/ranked-emblem/Karan_nuit.png", 'rb') as n,open("env/ranked-emblem/Karan_jour.png", 'rb') as j:

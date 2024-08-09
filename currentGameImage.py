@@ -77,6 +77,7 @@ def getChampImage(puuid,Champ,pseudo,rank,div,lp,region):
     imgChamp=imgChamp.resize(sizeChamp)
     print("resize")
     finalImage= imgChamp.convert('RGBA')
+    print("convert")
 
     rankIcon=getRankIcon(puuid,rank,region)
     print("rank icon")

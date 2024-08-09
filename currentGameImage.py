@@ -20,17 +20,14 @@ def creerImage(cg,regionId,region):
     myfile = f.read()
     data=json.loads(myfile)
     champ = data["data"]  
-    print(1)
     with Image.open(f"Image/currentGame.png") as imageFond:
         imageFond = imageFond.resize(size)
-    print(2)
     posB=0
     posR=0
     for i in range ( len(cg["participants"])) :
         puuid=cg["participants"][i]["puuid"]
         pseudo=lol_watcher.accountV1.by_puuid(regionId,puuid)["gameName"]
         invocateur= lol_watcher.league.by_summoner(region,cg["participants"][i]["summonerId"])
-        print(i, "a")
         rank="Unranked"
         div=" "
         lp=" "
@@ -39,14 +36,12 @@ def creerImage(cg,regionId,region):
         for cle,valeur in champ.items():
             if int(valeur['key'])==int(cg["participants"][i]['championId']):
                 champion=cle
-                break
 
         for j in range(len(invocateur)):
             if invocateur[j]['queueType']=="RANKED_SOLO_5x5":
                 rank=invocateur[j]["tier"]
                 div=invocateur[j]["rank"]
                 lp=invocateur[j]["leaguePoints"]
-                break
                 
         if cg["participants"][i]["teamId"]==100:
             localisation= ((sizeChamp[0]*(posB)+65*(posB+1)) ,(60)) 
@@ -54,11 +49,9 @@ def creerImage(cg,regionId,region):
         else :
             localisation= ((sizeChamp[0]*(posR)+65*(posR+1)) ,(570))  
             posR+=1
-
-        print(i,"b")
       
         imageFond.paste(getChampImage(puuid,champion,pseudo,rank,div,lp,region),localisation)
-        print(i,"c")
+        
                         
     
     return imageFond
@@ -69,23 +62,19 @@ def getChampImage(puuid,Champ,pseudo,rank,div,lp,region):
     sizeChamp= 300,450
 
     response = requests.get(url)
-    print("url")
     img_data = response.content
-    print("reponse")
+
 
     imgChamp = Image.open(BytesIO(img_data))
     imgChamp=imgChamp.resize(sizeChamp)
-    print("resize")
+
     finalImage= imgChamp.convert('RGBA')
-    print("convert")
 
     rankIcon=getRankIcon(puuid,rank,region)
-    print("rank icon")
     finalImage.paste(rankIcon, (70, 220), rankIcon)
     
     imageFond= ImageDraw.Draw(finalImage)
     font = ImageFont.truetype("font/BeaufortforLOL-Bold.ttf",size=30)
-    print("font")
 
     rankdivlp= f'{rank} {div} {lp} lp'
 
@@ -112,27 +101,22 @@ def getChampImage(puuid,Champ,pseudo,rank,div,lp,region):
     
     imageFond.text(text_position,f"{pseudo}",font=font,fill=text_color)
     imageFond.text(divLp_position,rankdivlp,font=font,fill=text_color)
-    print(3)
+  
     return finalImage.resize(sizeChamp)     
 
 
 def getRankIcon(puuid,rank,region):
     sizeEmblem= 160,200
     sizeIcone=50,50
-    print(f"Image/RankedEmblemsLatest/Wings/{rank}.png")
-    with Image.open(f"Image/RankedEmblemsLatest/Wings/{rank}.png") as imgRank:
-        iconeFinal =imgRank.resize(sizeEmblem)
-    print("wings")
+
+    imgRank=Image.open(f'Image/Ranked Emblems Latest/Wings/{rank}.png')
 
     versions = lol_watcher.data_dragon.versions_for_region(region)
-    print("versions")
     Account = lol_watcher.summoner.by_puuid(region, puuid)
-    print("account")
     icone = f'http://ddragon.leagueoflegends.com/cdn/{versions["v"]}/img/profileicon/{Account["profileIconId"]}.png'
     
     response = requests.get(icone)
     imageIcon= BytesIO(response.content)
-    print("requete")
     mask = Image.new('L', sizeIcone, 0)
     masque = ImageDraw.Draw(mask)
     masque.ellipse((0, 0, sizeIcone[0], sizeIcone[1]), fill=255)
@@ -140,13 +124,13 @@ def getRankIcon(puuid,rank,region):
     imgIcone=Image.open(imageIcon)
 
     imgIcone=imgIcone.resize(sizeIcone)
-   
+    iconeFinal =imgRank.resize(sizeEmblem)
 
     output = ImageOps.fit(imgIcone,sizeIcone , centering=(0.5, 0.5))
     output.putalpha(mask)
     iconeFinal.paste(output,[54,94],mask=output)
     iconeFinal.convert('RGBA')
-    print(4)
+    
     return iconeFinal
     
 

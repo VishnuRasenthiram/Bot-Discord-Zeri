@@ -69,6 +69,7 @@ def getChampImage(puuid,Champ,pseudo,rank,div,lp,region):
     sizeChamp= 300,450
 
     response = requests.get(url)
+    print("url")
     img_data = response.content
 
 

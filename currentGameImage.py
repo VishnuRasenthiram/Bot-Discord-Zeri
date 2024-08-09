@@ -119,8 +119,8 @@ def getChampImage(puuid,Champ,pseudo,rank,div,lp,region):
 def getRankIcon(puuid,rank,region):
     sizeEmblem= 160,200
     sizeIcone=50,50
-
-    with Image.open(f'Image/RankedEmblemsLatest/Wings/{rank}.png') as imgRank:
+    print("avant wings")
+    with Image.open(f"Image/RankedEmblemsLatest/Wings/{rank}.png") as imgRank:
         iconeFinal =imgRank.resize(sizeEmblem)
     print("wings")
 

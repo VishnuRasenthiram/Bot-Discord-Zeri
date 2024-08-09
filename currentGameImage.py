@@ -20,14 +20,17 @@ def creerImage(cg,regionId,region):
     myfile = f.read()
     data=json.loads(myfile)
     champ = data["data"]  
+    print(1)
     with Image.open(f"Image/currentGame.png") as imageFond:
         imageFond = imageFond.resize(size)
+    print(2)
     posB=0
     posR=0
     for i in range ( len(cg["participants"])) :
         puuid=cg["participants"][i]["puuid"]
         pseudo=lol_watcher.accountV1.by_puuid(regionId,puuid)["gameName"]
         invocateur= lol_watcher.league.by_summoner(region,cg["participants"][i]["summonerId"])
+        print(i, "a")
         rank="Unranked"
         div=" "
         lp=" "
@@ -36,12 +39,14 @@ def creerImage(cg,regionId,region):
         for cle,valeur in champ.items():
             if int(valeur['key'])==int(cg["participants"][i]['championId']):
                 champion=cle
+                break
 
         for j in range(len(invocateur)):
             if invocateur[j]['queueType']=="RANKED_SOLO_5x5":
                 rank=invocateur[j]["tier"]
                 div=invocateur[j]["rank"]
                 lp=invocateur[j]["leaguePoints"]
+                break
                 
         if cg["participants"][i]["teamId"]==100:
             localisation= ((sizeChamp[0]*(posB)+65*(posB+1)) ,(60)) 
@@ -49,9 +54,11 @@ def creerImage(cg,regionId,region):
         else :
             localisation= ((sizeChamp[0]*(posR)+65*(posR+1)) ,(570))  
             posR+=1
+
+        print(i,"b")
       
         imageFond.paste(getChampImage(puuid,champion,pseudo,rank,div,lp,region),localisation)
-        
+        print(i,"c")
                         
     
     return imageFond
@@ -101,7 +108,7 @@ def getChampImage(puuid,Champ,pseudo,rank,div,lp,region):
     
     imageFond.text(text_position,f"{pseudo}",font=font,fill=text_color)
     imageFond.text(divLp_position,rankdivlp,font=font,fill=text_color)
-  
+    print(3)
     return finalImage.resize(sizeChamp)     
 
 
@@ -130,7 +137,7 @@ def getRankIcon(puuid,rank,region):
     output.putalpha(mask)
     iconeFinal.paste(output,[54,94],mask=output)
     iconeFinal.convert('RGBA')
-    
+    print(4)
     return iconeFinal
     
 

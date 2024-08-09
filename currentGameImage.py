@@ -71,18 +71,20 @@ def getChampImage(puuid,Champ,pseudo,rank,div,lp,region):
     response = requests.get(url)
     print("url")
     img_data = response.content
-
+    print("reponse")
 
     imgChamp = Image.open(BytesIO(img_data))
     imgChamp=imgChamp.resize(sizeChamp)
-
+    print("resize")
     finalImage= imgChamp.convert('RGBA')
 
     rankIcon=getRankIcon(puuid,rank,region)
+    print("rank icon")
     finalImage.paste(rankIcon, (70, 220), rankIcon)
     
     imageFond= ImageDraw.Draw(finalImage)
     font = ImageFont.truetype("font/BeaufortforLOL-Bold.ttf",size=30)
+    print("font")
 
     rankdivlp= f'{rank} {div} {lp} lp'
 

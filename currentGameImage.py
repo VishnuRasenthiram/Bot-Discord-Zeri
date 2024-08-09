@@ -120,13 +120,17 @@ def getRankIcon(puuid,rank,region):
     sizeIcone=50,50
 
     imgRank=Image.open(f'Image/Ranked Emblems Latest/Wings/{rank}.png')
+    print("wings")
 
     versions = lol_watcher.data_dragon.versions_for_region(region)
+    print("versions")
     Account = lol_watcher.summoner.by_puuid(region, puuid)
+    print("account")
     icone = f'http://ddragon.leagueoflegends.com/cdn/{versions["v"]}/img/profileicon/{Account["profileIconId"]}.png'
     
     response = requests.get(icone)
     imageIcon= BytesIO(response.content)
+    print("requete")
     mask = Image.new('L', sizeIcone, 0)
     masque = ImageDraw.Draw(mask)
     masque.ellipse((0, 0, sizeIcone[0], sizeIcone[1]), fill=255)

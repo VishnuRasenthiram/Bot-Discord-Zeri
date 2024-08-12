@@ -109,7 +109,7 @@ def getRankIcon(puuid,rank,region):
     sizeEmblem= 160,200
     sizeIcone=50,50
 
-    imgRank=Image.open(f'Image/Ranked Emblems Latest/Wings/{rank}.png')
+    imgRank=Image.open(f'Image/RANKICON/Wings/{rank}.png')
 
     versions = lol_watcher.data_dragon.versions_for_region(region)
     Account = lol_watcher.summoner.by_puuid(region, puuid)

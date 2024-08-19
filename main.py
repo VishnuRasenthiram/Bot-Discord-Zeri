@@ -31,7 +31,7 @@ load_dotenv()
 
 nasa=Client(api_key=os.getenv('NASA_API'))
 lol_watcher = LolWatcher(os.getenv('RIOT_API'))
-
+database_url=os.getenv('DATABASE_URL')
 
 
 ##########################################################################

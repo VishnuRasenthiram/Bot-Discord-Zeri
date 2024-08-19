@@ -106,6 +106,7 @@ def getChampImage(puuid,Champ,pseudo,rank,div,lp,region):
 
 
 def getRankIcon(puuid,rank,region):
+
     sizeEmblem= 160,200
     sizeIcone=50,50
 

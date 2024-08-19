@@ -24,6 +24,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from leagueOfFunction import *
 from welcomeImage import *
+from baseDeDonne import *
 load_dotenv()
 ##########################################################################
 
@@ -31,7 +32,7 @@ load_dotenv()
 
 nasa=Client(api_key=os.getenv('NASA_API'))
 lol_watcher = LolWatcher(os.getenv('RIOT_API'))
-database_url=os.getenv('DATABASE_URL')
+
 
 
 ##########################################################################
@@ -133,30 +134,25 @@ class ViewValidator(discord.ui.View):
     )
     async def select_callback(self,interaction, select): # the function called when the user is done selecting options
         await interaction.channel.send("Bien reçu, je vais procédé à la vérification")
-        with open("dossierJson/profile.json","r") as f :
-            profile = json.load(f)
         
     
-        for id in profile:
+        profile=get_player_data(interaction.user.id)
+                
+                
+        meIcon=lol_watcher.summoner.by_puuid(region=profile[3],encrypted_puuid=profile[1])
             
-            if interaction.user.id==int(id):
+        icone =f'http://ddragon.leagueoflegends.com/cdn/{version["v"]}/img/profileicon/{meIcon["profileIconId"]}.png'
+        if profile[4]==0:
+            if profile[2]==icone:
+                await interaction.response.send_message("Votre compte est lié !")
+                update_player_statut(interaction.user.id,1)
+            else :
+                await interaction.response.send_message("Vous n'avez pas la bonne icône !")
+                await interaction.channel.send("Valider ici :", view=ViewValidator())
                 
-                
-                meIcon=lol_watcher.summoner.by_puuid(region=profile[str(interaction.user.id)]["region"],encrypted_puuid=profile[str(interaction.user.id)]["puuid"])
-                    
-                icone =f'http://ddragon.leagueoflegends.com/cdn/{version["v"]}/img/profileicon/{meIcon["profileIconId"]}.png'
-                if profile[str(interaction.user.id)]["statut"]==0:
-                    if profile[str(interaction.user.id)]["icon"]==icone:
-                        await interaction.response.send_message("Votre compte est lié !")
-                        profile[str(interaction.user.id)]["statut"]=1
-                    else :
-                        await interaction.response.send_message("Vous n'avez pas la bonne icône !")
-                        await interaction.channel.send("Valider ici :", view=ViewValidator())
-                        
-                else :
-                    await interaction.response.send_message("Votre compte a déjà été confirmé !")
-        with open("dossierJson/profile.json","w") as f:
-            json.dump(profile,f)   
+        else :
+            await interaction.response.send_message("Votre compte a déjà été confirmé !")
+        
         
         
 
@@ -184,11 +180,7 @@ choixRegion=[app_commands.Choice(name="EUW", value="euw1"),
 @bot.tree.command(name="sauvegarder_mon_profil")
 @app_commands.choices(region=choixRegion)
 async def set_profile(interaction:discord.Interaction,pseudo:str,tagline:str,region:app_commands.Choice[str]):
-    
-    with open("dossierJson/profile.json","r") as f:
-        profile= json.load(f)
-    
-    
+   
         try:
             me = lol_watcher.accountV1.by_riotid(region=LOF.regionForRiotId(region.value),summoner_name=pseudo,tagline=tagline)
         except ApiError as err :
@@ -200,37 +192,42 @@ async def set_profile(interaction:discord.Interaction,pseudo:str,tagline:str,reg
                 raise
         iconId=random.randint(0,28)
         icon=f'http://ddragon.leagueoflegends.com/cdn/{version["v"]}/img/profileicon/{iconId}.png'
+        profile=get_player_data(interaction.user.id)
         
-        if not str(interaction.user.id) in profile:    
-            profile[interaction.user.id]={"puuid": me['puuid'],"icon":icon,"region":region.value,"statut":0}
+        if profile == None:    
+            
+            player_data={
+                "id":interaction.user.id,
+                "puuid": me['puuid'],
+                "icon":icon,
+                "region":region.value,
+                "statut":0
+            }
+            insert_player_data(player_data)
             await interaction.channel.send("Profile Trouvé !")
             await LOF.profileLeagueOfLegends(interaction,pseudo,tagline,region)
             await interaction.channel.send("Veuillez confirmer votre compte en modifiant votre icone par celui ci : ")
             await interaction.channel.send(icon)
             await interaction.channel.send("Valider ici:", view=ViewValidator())
         else :
-            if profile[str(interaction.user.id)]["statut"]==0:
+            if profile[4]==0:
                 await interaction.channel.send("Vous avez déjà un compte en train d'être lié !")
                 await interaction.channel.send(profile[str(interaction.user.id)]["icon"])
                 await interaction.response.send_message("Valider ici :", view=ViewValidator())
             else:
                 await interaction.response.send_message("Vous avez déjà un compte lié !")
             
-        with open("dossierJson/profile.json","w") as f:
-            json.dump(profile,f) 
+        
             
 @bot.tree.command(name="supprimer_mon_profil")
 async def del_profile(interaction:discord.Interaction):
-    with open("dossierJson/profile.json","r") as f:
-        profile= json.load(f)
-    if not str(interaction.user.id) in profile:
+    etat=delete_player_data(interaction.user.id)
+    if etat==0:
         await interaction.response.send_message("Vous n'avez pas lié de compte !")
     else :
-        profile.pop(str(interaction.user.id))
+        
         await interaction.response.send_message("Votre compte a bien été supprimé !")
-    
-    with open("dossierJson/profile.json","w") as f:
-            json.dump(profile,f)
+
 
 
 @bot.tree.command(name="profil_league_of_legends")

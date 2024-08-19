@@ -10,6 +10,7 @@ import json
 from dotenv import load_dotenv
 import os
 from currentGameImage import *
+from baseDeDonne import *
 load_dotenv()
 
 lol_watcher = LolWatcher(os.getenv('RIOT_API'))
@@ -54,22 +55,22 @@ def regionForRiotId(region:str):
         else:
             return "asia"
 def getPuuidRegion(interaction:discord.Interaction,pseudo:str,tagline:str,region:str):
-        with open("dossierJson/profile.json","r") as f :
-            profile = json.load(f)
+        
         
         if not(pseudo):
-            estDansListe=False
-            for id in profile:
-                if interaction.user.id==int(id):
-                    estDansListe=True
-                    if profile[str(interaction.user.id)]["statut"]==0:
-                        return interaction.response.send_message("Vous n'avez pas confirmé le profil !")
-                    else :
-                        puuid = profile[str(interaction.user.id)]["puuid"]
-                        region = profile[str(interaction.user.id)]["region"]
+            
+            profile=get_player_data(interaction.user.id)
+            print(profile)
+            if profile!=None:
+                
+                if profile[4]==0:
+                    return interaction.response.send_message("Vous n'avez pas confirmé le profil !")
+                else :
+                    puuid = profile[1]
+                    region = profile[3]
                     
-            if not estDansListe:
-                return interaction.response.send_message("Veuillez préciser un nom d'invocateur ou bien définir votre profil avec la commande : ```/sauvegarder_mon_profil```")
+            else:
+                return interaction.response.send_message("Veuillez préciser un nom d'invocateur ou bien sauvegarder votre profil avec la commande : ```/sauvegarder_mon_profil```")
         else:
             if not isinstance(region,Choice):
                 region= Choice(name="defaut",value="euw1")

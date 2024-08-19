@@ -60,7 +60,7 @@ def getPuuidRegion(interaction:discord.Interaction,pseudo:str,tagline:str,region
         if not(pseudo):
             
             profile=get_player_data(interaction.user.id)
-            print(profile)
+        
             if profile!=None:
                 
                 if profile[4]==0:
@@ -90,7 +90,6 @@ class LOF:
         await interaction.response.defer()
 
         puuid,region=getPuuidRegion(interaction,pseudo,tagline,region)
-        
         versions = lol_watcher.data_dragon.versions_for_region(region)
         champions_version = versions['n']['champion']
         dd = lol_watcher.data_dragon.champions(champions_version)

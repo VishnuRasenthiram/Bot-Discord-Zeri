@@ -72,11 +72,8 @@ def delete_player_data(player_id):
     cur.execute("DELETE FROM player_data WHERE id = %s", (player_id,))
     conn.commit()
     if cur.rowcount == 0:
-            print("Aucune donnée trouvée pour cet ID.")
             etat =0
-
     else:
-            print("Les données du joueur ont été supprimées.")
             etat =1
     cur.close()
     conn.close()

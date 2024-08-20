@@ -74,7 +74,7 @@ def getChampImage(puuid,Champ,pseudo,rank,div,lp,region):
     finalImage.paste(rankIcon, (70, 220), rankIcon)
     
     imageFond= ImageDraw.Draw(finalImage)
-    font = ImageFont.truetype("font/BeaufortforLOL-Bold.ttf",size=30)
+    font = ImageFont.truetype("font/BeaufortforLOL-Bold.ttf",size=25)
 
     rankdivlp= f'{rank} {div} {lp} lp'
 
@@ -109,7 +109,6 @@ def getRankIcon(puuid,rank,region):
 
     sizeEmblem= 160,200
     sizeIcone=50,50
-
     imgRank=Image.open(f'Image/RANKICON/Wings/{rank}.png')
 
     versions = lol_watcher.data_dragon.versions_for_region(region)

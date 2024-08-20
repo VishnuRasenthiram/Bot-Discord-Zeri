@@ -25,6 +25,7 @@ from apscheduler.triggers.cron import CronTrigger
 from leagueOfFunction import *
 from welcomeImage import *
 from baseDeDonne import *
+from tenorApi import *
 load_dotenv()
 ##########################################################################
 
@@ -388,6 +389,12 @@ async def dog(ctx):
     myfile = f.read()
     foto=json.loads(myfile)
     await ctx.message.channel.send(foto[0]["url"])
+
+@bot.command()
+@commands.cooldown(1, 5, commands.BucketType.user)
+async def pat(ctx):
+    
+    await ctx.message.channel.send(getRandomGIf("pat pat"))
 ##########################################################################
 #SAY
 

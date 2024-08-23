@@ -231,13 +231,13 @@ async def del_profile(interaction:discord.Interaction):
 
 
 
-@bot.tree.command(name="profil_league_of_legends")
+@bot.tree.command(name="profil")
 @app_commands.choices(region=choixRegion)
 async def lolp(interaction: discord.Interaction, pseudo: str = None, tagline: str = "euw", region: app_commands.Choice[str] = "euw1"):
     await LOF.profileLeagueOfLegends(interaction,pseudo,tagline,region)
 
 
-@bot.tree.command(name="historique_league_of_legends")
+@bot.tree.command(name="historique")
 @app_commands.choices(region=choixRegion)
 async def histo(interaction: discord.Interaction, pseudo: str = None, tagline: str = "euw", region: app_commands.Choice[str] = "euw1"):
    await  LOF.historiqueLeagueOfLegends(interaction,pseudo,tagline,region)
@@ -252,7 +252,7 @@ async def partieEnCours(interaction: discord.Interaction, pseudo: str = None, ta
 
 @bot.event
 async def on_message(message):
-    cheh=["https://tenor.com/view/vilebrequin-cheh-levy-gif-19953300","https://tenor.com/view/maskey-gif-17974418"]
+    cheh=["https://tenor.com/view/nelson-monfort-cheh-i-hear-cheh-in-my-oreillette-gif-15977955","https://tenor.com/view/maskey-gif-17974418","https://tenor.com/view/wavesives-waves-ives-waves-ives-waves-cheh-gif-1692370554913806768","https://tenor.com/view/capitaine-groscheh-gros-cheh-cheh-m%C3%A9rit%C3%A9-mange-ton-seum-gif-12396020753961179573","https://tenor.com/view/cheh-bienfaits-duh-gif-12323680"]
     
     if (not message.author == bot.user) and (not message.author.bot) :
             
@@ -278,7 +278,7 @@ async def on_message(message):
             
         if "merci zeri" in message.content.lower():
             
-            await message.reply("Derien frérot/e <:Shock:1089628155133820938>")
+            await message.reply("Derien Bebou <:Shock:1089628155133820938>")
                 
             
         if "bonne nuit" in message.content.lower():

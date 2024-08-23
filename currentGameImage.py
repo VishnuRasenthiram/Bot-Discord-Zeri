@@ -9,7 +9,7 @@ import json
 load_dotenv()
 lol_watcher = LolWatcher(os.getenv('RIOT_API'))
 version = lol_watcher.data_dragon.versions_for_region("euw1")
-
+font = ImageFont.truetype("font/BeaufortforLOL-Bold.ttf",size=25)
 
 def creerImage(cg,regionId,region):
     size = 1920, 1080
@@ -74,7 +74,7 @@ def getChampImage(puuid,Champ,pseudo,rank,div,lp,region):
     finalImage.paste(rankIcon, (70, 220), rankIcon)
     
     imageFond= ImageDraw.Draw(finalImage)
-    font = ImageFont.truetype("font/BeaufortforLOL-Bold.ttf",size=25)
+
 
     rankdivlp= f'{rank} {div} {lp} lp'
 

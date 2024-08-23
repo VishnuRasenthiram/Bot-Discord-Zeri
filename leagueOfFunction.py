@@ -11,6 +11,7 @@ from dotenv import load_dotenv
 import os
 from currentGameImage import *
 from baseDeDonne import *
+from historiqueImage import *
 load_dotenv()
 
 lol_watcher = LolWatcher(os.getenv('RIOT_API'))
@@ -186,10 +187,6 @@ class LOF:
             else:
                 raise
             
-          
-
-
-
 
 
     async def historiqueLeagueOfLegends(interaction:discord.Interaction,pseudo:str,tagline:str,region:str):
@@ -199,79 +196,11 @@ class LOF:
         puuid,region=getPuuidRegion(interaction,pseudo,tagline,region)
         
         try:
-                
-            with open("dossierJson/input.json","r") as numPartie:
-                data = json.load(numPartie)    
-                
-        
-            histo= lol_watcher.match.matchlist_by_puuid(region,puuid)
-            
-            
-            
-            list={}
-            list2=[]
-            wins=0
-            
-            numPartie=1
-            for i in range(20):
-            
-                matchs=lol_watcher.match.by_id(region, histo[i])
-                
-                indiceJoueur=0
-                for i in matchs['metadata']['participants']:
-                    if i==puuid:
-                        positionJoueur=indiceJoueur
-                    else :
-                        indiceJoueur+=1
-                        
-                informationPartie=matchs["info"]["participants"][positionJoueur]
-            
-                informationTypePartie=matchs["info"]["queueId"]
-                
-             
-                for i in range (len(data)):
-                    if str(informationTypePartie).startswith("18"):
-                        informationTypePartie=18
-                    if data[i]['queueId']==informationTypePartie:     
-                        list2.append(data[i]["description"])
-
-                nomChamp=informationPartie['championName']
-
-                if informationTypePartie==18 :
-                    nomChamp=nomChamp.replace("Strawberry_","")
-                    
-                kill=str(informationPartie["kills"])
-                death=str(informationPartie["deaths"])
-                assist=str(informationPartie["assists"])
-
-                if informationPartie['win']:
-                    list[numPartie]=[nomChamp,f'- {kill}/{death}/{assist} <:V:1119547366404526180>']
-                    wins+=1             
-                else:
-                    list[numPartie]=[nomChamp,f'- {kill}/{death}/{assist}  <:D:1119546988795539497> ']
-                numPartie+=1
-            
-            wr=(wins/20)*100
-                
-            chainePartie=""
-            chaineTypePartie=""
-            for key ,value in list.items():
-                chainePartie += str(key)+": "+' '.join(str(elem) for elem in value)+"\n"         
-            for key  in list2:
-                chaineTypePartie += str(key)+"\n"    
-            chaineTypePartie =chaineTypePartie.replace('5v5',' ').replace('Pick',' ').replace('games',' ')
-
-            embed=discord.Embed(title="Historique League Of Legends",
-            description=f'Voici l\'historique league of legends sur les 20 dernieres games de {pseudo} :', 
-            color=discord.Color.purple()
-            ).add_field(
-                name="Historique :",value=chainePartie
-            ).add_field(
-                name="Mode de jeu",value=chaineTypePartie
-            ).add_field(
-                name="WinRate :",value=f'{round(wr,2)}% ')
-            
-            await interaction.followup.send(embed=embed)   
+                image =creeImageHistorique(puuid,region)
+                img_bytes=BytesIO()
+                image.save(img_bytes,format='PNG')
+                img_bytes.seek(0)
+                await interaction.followup.send(file=discord.File(img_bytes,filename="Historique.png"))
         except ApiError as err :
                 if err.response.status_code == 429 :
                     print("Quota de requête dépassé")
@@ -294,10 +223,7 @@ class LOF:
             img_bytes.seek(0)
                    
             await interaction.followup.send(file=discord.File(img_bytes,filename="Partie_En_Cours.png"))    
-                
-            
-            
-                    
+      
             
         except ApiError as err :
                 

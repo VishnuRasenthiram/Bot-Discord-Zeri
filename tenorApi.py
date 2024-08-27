@@ -19,7 +19,7 @@ def getRandomGIf(search_term):
         # load the GIFs using the urls for the smaller GIF sizes
         gif = json.loads(r.content)
         
-        return gif['results'][random.randint(0,9)]['url']
+        return gif['results'][random.randint(0,9)]['media_formats']['gif']['url']
     else:
         gif = None
         return gif

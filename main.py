@@ -594,10 +594,11 @@ async def ban(ctx, member : discord.Member, *, reason = None):
 async def on_voice_state_update(member,before,after):
     if not after.channel==None:
 
-        if after.channel.id ==CHAN_VOC:
-
-
-            chan = await after.channel.clone(name=f'◜⏳◞{member.display_name}')
+        if after.channel.id ==CHAN_VOC or after.channel.id==1235199112257994792 :
+            if after.channel.id ==CHAN_VOC:
+                chan = await after.channel.clone(name=f'◜⏳◞{member.display_name}')
+            else :
+                chan = await after.channel.clone(name=f'◜⏳◞Gaming Session')
             await member.move_to(chan)
 
 

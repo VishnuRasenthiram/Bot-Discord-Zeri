@@ -116,7 +116,7 @@ def insert_player_liste(data):
     cur.execute("""
         INSERT INTO liste_player(pseudo,tagline,region,derniereGame)
         VALUES (%s, %s,%s,%s)
-    """, (data['pseudo'], data['tagline'],data['region'],"Null"))
+    """, (data['pseudo'], data['tagline'],data['region'],"0"))
     conn.commit()
     cur.close()
     conn.close()

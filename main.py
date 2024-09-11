@@ -24,6 +24,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from leagueOfFunction import *
 from welcomeImage import *
+from currentGameImage import *
 from baseDeDonne import *
 from tenorApi import *
 load_dotenv()
@@ -89,13 +90,17 @@ print(current_time)
 @bot.event
 async def on_ready():
     scheduler.start()
-
+    
     print("le bot est pret")
     try:
         synced= await bot.tree.sync()
         print(f"Synced {synced} commands")
     except Exception as e:
         print(e)
+
+    while True:
+            await verifGameEnCour()
+            await asyncio.sleep(300)
     
 
     
@@ -154,11 +159,6 @@ class ViewValidator(discord.ui.View):
         else :
             await interaction.response.send_message("Votre compte a déjà été confirmé !")
         
-        
-        
-
-
-
 
 
 choixRegion=[app_commands.Choice(name="EUW", value="euw1"),
@@ -229,6 +229,90 @@ async def del_profile(interaction:discord.Interaction):
         
         await interaction.response.send_message("Votre compte a bien été supprimé !")
 
+@bot.tree.command(name="suivre_profil")
+@app_commands.choices(region=choixRegion)
+async def add_profile_liste(interaction:discord.Interaction,pseudo:str,tagline:str,region:app_commands.Choice[str]):
+   
+        try:
+            me = lol_watcher.accountV1.by_riotid(region=LOF.regionForRiotId(region.value),summoner_name=pseudo,tagline=tagline)
+        except ApiError as err :
+            if err.response.status_code == 429 :
+                print("Quota de requête dépassé")
+            elif err.response.status_code == 404:
+                 await interaction.response.send_message("Le compte avec ce pseudo n'existe pas !")
+            else:
+                raise
+        
+        liste=get_player_liste()
+        trouvé=False
+        if liste != None:
+            for pseudoL in liste:
+                if pseudoL==pseudo :
+                    trouvé=True
+            
+        if trouvé==False :    
+            
+            player_data={
+                "pseudo":pseudo,
+                "tagline":tagline,
+                "region":region.value,
+
+            }
+            insert_player_liste(player_data)
+            await interaction.channel.send("Profil ajouté !")
+          
+       
+        else :
+                await interaction.response.send_message("Ce profil est déjà suivit !")
+
+@bot.tree.command(name="suppr_profil_suivit")
+@app_commands.choices(region=choixRegion)
+async def del_profile_liste(interaction:discord.Interaction,pseudo:str,tagline:str,region:app_commands.Choice[str]):
+    player_data={
+                "pseudo":pseudo,
+                "tagline":tagline,
+                "region":region.value,
+    }
+    etat=delete_player_liste(player_data)
+    if etat==0:
+        await interaction.response.send_message("Ce profil n'est pas dans la base de donée!")
+    else :
+        
+        await interaction.response.send_message("Ce profil a bien été supprimé !")
+
+async def verifGameEnCour():
+    liste = get_player_liste()
+    guild=bot.get_guild(KARAN_ID)
+    salon =guild.get_channel(1283540354523463701)
+    
+    if liste!= None:
+        for i in liste:
+            puuid,region=getPuuidRegion(None,i[1],i[2],i[3])
+            try:
+                cg=lol_watcher.spectator.by_puuid(region,puuid)
+                if cg["gameId"]!=(int) (i[4]):
+                    player_data={
+                    "pseudo":i[1],
+                    "tagline":i[2],
+                    "derniereGame":cg["gameId"],
+                    }
+
+                    update_derniereGame(player_data)
+                    regionId= LOF.regionForRiotId(region)
+                    image=creerImage(cg,regionId,region)
+                    img_bytes=BytesIO()
+                    image.save(img_bytes,format='PNG')
+                    img_bytes.seek(0)
+
+                    await salon.send(file=discord.File(img_bytes,filename="Partie_En_Cours.png"))
+            except ApiError as err :
+                if err.response.status_code == 429 :
+                    print("Quota de requête dépassé")
+                    
+            
+            
+
+
 
 
 @bot.tree.command(name="profil")
@@ -278,12 +362,7 @@ async def on_message(message):
             
         if "merci zeri" in message.content.lower():
             
-            await message.reply("Derien Bebou <:Shock:1089628155133820938>")
-                
-            
-        if "bonne nuit" in message.content.lower():
-            await message.channel.send("Bonne nuit Bg/Blg! Repose toi bien !")
-            
+            await message.reply("Derien Bebou <:Eheh:1280080977418260483>")
             
         if "prankex" in message.content.lower().split():
             await message.channel.send("https://tenor.com/view/guuruu-prank-prankex-gif-19025746535426067")
@@ -867,10 +946,10 @@ async def sus(ctx):
 @bot.command()
 @commands.has_permissions(administrator = True)
 async def leave(ctx):
-    
-    serv= bot.get_guild(int(ctx.message.content.split()[1:][0]))
-    await serv.leave()
-    await ctx.channel.send(f'J\'ai quitté le serveur : {serv}!')     
+    if ctx.author.id==517231233235812353:
+        serv= bot.get_guild(int(ctx.message.content.split()[1:][0]))
+        await serv.leave()
+        await ctx.channel.send(f'J\'ai quitté le serveur : {serv}!')     
         
         
         

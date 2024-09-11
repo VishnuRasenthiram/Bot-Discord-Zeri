@@ -84,3 +84,77 @@ def delete_player_data(player_id):
 
 
 
+def initTableListePlayer():
+
+    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+
+    # Créer un curseur pour exécuter des commandes SQL
+    cur = conn.cursor()
+
+    # Création de la table
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS liste_player (
+            id SERIAL PRIMARY KEY,
+            pseudo VARCHAR(128),
+            tagline VARCHAR(64),
+            region VARCHAR(64),
+            derniereGame VARCHAR(128)
+           
+        )
+    """)
+
+    # Valider les modifications
+    conn.commit()
+
+    # Fermer le curseur et la connexion
+    cur.close()
+    conn.close()
+
+def insert_player_liste(data):
+    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+    cur = conn.cursor()
+    cur.execute("""
+        INSERT INTO liste_player(pseudo,tagline,region,derniereGame)
+        VALUES (%s, %s,%s,%s)
+    """, (data['pseudo'], data['tagline'],data['region'],"Null"))
+    conn.commit()
+    cur.close()
+    conn.close()
+
+def delete_player_liste(data):
+    
+    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+    cur = conn.cursor()
+    cur.execute("DELETE FROM liste_player WHERE pseudo = %s AND tagline =%s AND region=%s" , (data["pseudo"],data["tagline"],data["region"]))
+    conn.commit()
+    if cur.rowcount == 0:
+            etat =0
+    else:
+            etat =1
+    cur.close()
+    conn.close()
+
+    return etat    
+
+def update_derniereGame(data):
+    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+    cur = conn.cursor()
+    cur.execute("""
+        UPDATE liste_player 
+        SET derniereGame=%s
+        WHERE pseudo=%s and tagline=%s;
+    """, (data["derniereGame"],data['pseudo'], data['tagline']))
+    conn.commit()
+    cur.close()
+    conn.close()
+
+
+
+def get_player_liste():
+    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM liste_player ")
+    player_liste = cur.fetchall()
+    cur.close()
+    conn.close()
+    return player_liste

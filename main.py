@@ -259,7 +259,7 @@ async def add_profile_liste(interaction:discord.Interaction,pseudo:str,tagline:s
 
             }
             insert_player_liste(player_data)
-            await interaction.channel.send("Profil ajouté !")
+            await interaction.response.send_message("Profil ajouté !")
           
        
         else :

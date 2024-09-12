@@ -11,7 +11,7 @@ lol_watcher = LolWatcher(os.getenv('RIOT_API'))
 version = lol_watcher.data_dragon.versions_for_region("euw1")
 font = ImageFont.truetype("font/BeaufortforLOL-Bold.ttf",size=25)
 
-def creerImage(cg,regionId,region):
+def creerImageCG(cg,regionId,region):
     size = 1920, 1080
     sizeChamp= 308,400
     link =f'https://ddragon.leagueoflegends.com/cdn/{version["v"]}/data/fr_FR/champion.json'

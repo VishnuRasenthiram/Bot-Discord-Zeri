@@ -4,7 +4,7 @@ from io import BytesIO
 
 
 
-def creerImage(member, text: str):
+def creerImageBVN(member, text: str):
     size = 1024, 500
     size_avatar = 200, 200
   

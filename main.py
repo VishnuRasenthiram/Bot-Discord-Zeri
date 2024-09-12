@@ -299,7 +299,7 @@ async def verifGameEnCour():
 
                     update_derniereGame(player_data)
                     regionId= LOF.regionForRiotId(region)
-                    image=creerImage(cg,regionId,region)
+                    image=creerImageCG(cg,regionId,region)
                     img_bytes=BytesIO()
                     image.save(img_bytes,format='PNG')
                     img_bytes.seek(0)
@@ -751,7 +751,7 @@ async def on_member_join(member):
     
     if member.guild.id==KARAN_ID:
 
-        image =creerImage(member,"Bienvenue")
+        image =creerImageBVN(member,"Bienvenue")
       
 
         img_bytes=BytesIO()
@@ -774,7 +774,7 @@ async def on_member_join(member):
 async def on_member_remove(member):
     if member.guild.id==KARAN_ID:
 
-        image =creerImage(member,"Aurevoir")
+        image =creerImageBVN(member,"Aurevoir")
 
         img_bytes=BytesIO()
         image.save(img_bytes,format='PNG')

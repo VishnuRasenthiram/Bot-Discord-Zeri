@@ -301,7 +301,7 @@ async def verif_game_en_cours():
 
                 update_derniereGame(player_data)
                 regionId = LOF.regionForRiotId(region)
-                image = creerImageCG(cg, regionId, region)
+                image = await creerImageCG(cg, regionId, region)
                 img_bytes = BytesIO()
                 image.save(img_bytes, format='PNG')
                 img_bytes.seek(0)

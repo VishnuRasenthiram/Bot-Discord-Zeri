@@ -217,7 +217,7 @@ class LOF:
         try:
             regionId= LOF.regionForRiotId(region)
             cg=lol_watcher.spectator.by_puuid(region,puuid)
-            image=creerImageCG(cg,regionId,region)
+            image=await creerImageCG(cg,regionId,region)
             img_bytes=BytesIO()
             image.save(img_bytes,format='PNG')
             img_bytes.seek(0)

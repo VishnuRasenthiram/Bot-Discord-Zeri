@@ -98,11 +98,11 @@ async def on_ready():
     except Exception as e:
         print(e)
 
-    while True:
-            await verifGameEnCour()
-            await asyncio.sleep(300)
+    periodic_check.start()
     
-
+@tasks.loop(seconds=60)
+async def periodic_check():
+    await verif_game_en_cours()
     
 async def changementIconeServeur():
     with open("env/ranked-emblem/Karan_nuit.png", 'rb') as n,open("env/ranked-emblem/Karan_jour.png", 'rb') as j:
@@ -280,35 +280,41 @@ async def del_profile_liste(interaction:discord.Interaction,pseudo:str,tagline:s
         
         await interaction.response.send_message("Ce profil a bien été supprimé !")
 
-async def verifGameEnCour():
+async def verif_game_en_cours():
     liste = get_player_liste()
-    guild=bot.get_guild(KARAN_ID)
-    salon =guild.get_channel(1283540354523463701)
+    guild = bot.get_guild(KARAN_ID)
+    salon = guild.get_channel(1283540354523463701)
     
-    if liste!= None:
-        for i in liste:
-            puuid,region=getPuuidRegion(None,i[1],i[2],i[3])
-            try:
-                cg=lol_watcher.spectator.by_puuid(region,puuid)
-                if cg["gameId"]!=(int) (i[4]):
-                    player_data={
-                    "pseudo":i[1],
-                    "tagline":i[2],
-                    "derniereGame":cg["gameId"],
-                    }
+    if liste is None:
+        return
+    
+    for i in liste:
+        puuid, region = getPuuidRegion(None, i[1], i[2], i[3])
+        try:
+            cg = lol_watcher.spectator.by_puuid(region, puuid)
+            if cg["gameId"] != int(i[4]):
+                player_data = {
+                    "pseudo": i[1],
+                    "tagline": i[2],
+                    "derniereGame": cg["gameId"],
+                }
 
-                    update_derniereGame(player_data)
-                    regionId= LOF.regionForRiotId(region)
-                    image=creerImageCG(cg,regionId,region)
-                    img_bytes=BytesIO()
-                    image.save(img_bytes,format='PNG')
-                    img_bytes.seek(0)
+                update_derniereGame(player_data)
+                regionId = LOF.regionForRiotId(region)
+                image = creerImageCG(cg, regionId, region)
+                img_bytes = BytesIO()
+                image.save(img_bytes, format='PNG')
+                img_bytes.seek(0)
 
-                    await salon.send(file=discord.File(img_bytes,filename="Partie_En_Cours.png"))
-            except ApiError as err :
-                if err.response.status_code == 429 :
-                    print("Quota de requête dépassé")
-                    
+                await salon.send(file=discord.File(img_bytes, filename="Partie_En_Cours.png"))
+        except ApiError as err:
+            status_code = err.response.status_code
+            if status_code == 429:
+                print("Quota de requête dépassé")
+            elif status_code == 404:
+                pass
+            else:
+                print(f"Erreur inconnue: {err}")
             
             
 

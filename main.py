@@ -284,6 +284,10 @@ async def verif_game_en_cours():
     guild = bot.get_guild(KARAN_ID)
     salon = guild.get_channel(1283540354523463701)
     
+    gameDejaSend = []
+
+    for gameId in liste:
+        gameDejaSend.append((int)(gameId[4]))
     if liste is None:
         return
     
@@ -291,7 +295,7 @@ async def verif_game_en_cours():
         puuid, region = getPuuidRegion(None, i[1], i[2], i[3])
         try:
             cg = lol_watcher.spectator.by_puuid(region, puuid)
-            if cg["gameId"] != int(i[4]):
+            if (cg["gameId"] != int(i[4]) )and (cg["gameId"] not in gameDejaSend) :
                 player_data = {
                     "pseudo": i[1],
                     "tagline": i[2],

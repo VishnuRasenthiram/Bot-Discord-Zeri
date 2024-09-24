@@ -233,7 +233,7 @@ async def del_profile(interaction:discord.Interaction):
 async def add_profile_liste(interaction:discord.Interaction,pseudo:str,tagline:str,region:app_commands.Choice[str]):
    
         try:
-            me = lol_watcher.accountV1.by_riotid(region=LOF.regionForRiotId(region.value),summoner_name=pseudo,tagline=tagline)
+            lol_watcher.accountV1.by_riotid(region=LOF.regionForRiotId(region.value),summoner_name=pseudo,tagline=tagline)
         except ApiError as err :
             if err.response.status_code == 429 :
                 print("Quota de requête dépassé")
@@ -295,7 +295,7 @@ async def verif_game_en_cours():
         puuid, region = getPuuidRegion(None, i[1], i[2], i[3])
         try:
             cg = lol_watcher.spectator.by_puuid(region, puuid)
-            if (cg["gameId"] != int(i[4]) )and (cg["gameId"] not in gameDejaSend) :
+            if (cg["gameId"] != int(i[4]) )and (cg["gameId"] not in gameDejaSend) and (cg["gameQueueConfigId"] != 1700) :
                 player_data = {
                     "pseudo": i[1],
                     "tagline": i[2],
@@ -857,7 +857,26 @@ async def imposteur(ctx):
         users = json.load(f)
     users[f'{ctx.author.id}']={"game":"true"}
     roles=["Imposteur","Droide","Serpentin","Double-face","Super-héros"]
-    task=["Flash dans le vide", "Back","Dive l'ennemi le plus proche","Va voler le buff de ton jungle (le canon d'un de tes laners si tu es jungler)","Prend un fight en utilisant aucun sort !","Fait un call nash(si il est up)","Fait un call drake sans y aller"]
+    task=[
+            "Flash dans le vide",
+            "Back",
+            "Dive l'ennemi le plus proche",
+            "Va voler le buff de ton jungle (le canon d'un de tes laners si tu es jungler)",
+            "Prend un fight en utilisant aucun sort !",
+            "Doit aller sur une lane ( split push )",
+            "Doit revendre un objet et en acheter un autre",
+            "Tu n'as plus le droit de prendre les cs range ( si tu es jg tu n'as plus le droit de prendre tes loups et corbin )",
+            "Engage un fight et te plaindre de la team apres",
+            "Reste caché dans un buisson pendant 30 secondes",
+            "Suivre l'ennemi jusqu’à sa base",
+            "Ne pas toucher aux sbires canon",
+            "Prends des items totalement inutiles pour ton champion",
+            "Pose une ward dans ta propre base",
+            "Essayez d'aider un ennemi",
+            "Dodge les compétences de tes alliés",
+            "Insta-back après avoir quitté la base"
+           
+        ]
     doubleface=["Gentil","Imposteur"]
     if len(ctx.message.raw_mentions)==5:
         for i in ctx.message.raw_mentions:
@@ -869,7 +888,7 @@ async def imposteur(ctx):
                 case "Imposteur":
                     await user.send(f'{user.name} Vous êtes {role} \n Faire perdre la game sans se faire démasquer ')
                 case "Droide":
-                    await user.send(f'{user.name} Vous êtes {role} \n Gagner la game en suivant les instructions reçues')
+                    await user.send(f'{user.name} Vous êtes {role} \n Gagner la game en suivant les instructions reçues ')
                 case "Serpentin":
                     await user.send(f'{user.name} Vous êtes {role} \n Gagner la game en ayant le plus de morts et de dégâts de sa team')
                 case "Double-face":

@@ -15,7 +15,7 @@ font = ImageFont.truetype("font/BeaufortforLOL-Bold.ttf",size=25)
 with open("3.json","r") as f:
     summonnerData= json.load(f)
 
-def creerImageCG(cg,regionId,region):
+async def creerImageCG(cg,regionId,region):
     
     size = 1920, 1080
     sizeChamp= 308,400
@@ -159,10 +159,3 @@ def getRankIcon(puuid,rank,region):
     
     return iconeFinal
 
-with open("1.json","r") as f:
-    cg = json.load(f)
-
-
-a =creerImageCG(cg,"europe","euw1")
-
-a.save("test.png")

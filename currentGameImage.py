@@ -7,12 +7,15 @@ from dotenv import load_dotenv
 import urllib 
 import json
 import asyncio
+from historiqueImage import add_item_to_slot
 load_dotenv()
 lol_watcher = LolWatcher(os.getenv('RIOT_API'))
 version = lol_watcher.data_dragon.versions_for_region("euw1")
 font = ImageFont.truetype("font/BeaufortforLOL-Bold.ttf",size=25)
+with open("3.json","r") as f:
+    summonnerData= json.load(f)
 
-async def creerImageCG(cg,regionId,region):
+def creerImageCG(cg,regionId,region):
     
     size = 1920, 1080
     sizeChamp= 308,400
@@ -28,6 +31,9 @@ async def creerImageCG(cg,regionId,region):
     posR=0
     for i in range ( len(cg["participants"])) :
         puuid=cg["participants"][i]["puuid"]
+        spellid1=get_summoner_name_by_key(summonnerData,cg["participants"][i]["spell1Id"])
+        spellid2=get_summoner_name_by_key(summonnerData,cg["participants"][i]["spell2Id"])
+        spells= [spellid1,spellid2]
         pseudo=lol_watcher.accountV1.by_puuid(regionId,puuid)["gameName"]
         invocateur= lol_watcher.league.by_summoner(region,cg["participants"][i]["summonerId"])
         rank="Unranked"
@@ -52,29 +58,47 @@ async def creerImageCG(cg,regionId,region):
             localisation= ((sizeChamp[0]*(posR)+65*(posR+1)) ,(570))  
             posR+=1
       
-        imageFond.paste(getChampImage(puuid,champion,pseudo,rank,div,lp,region),localisation)
+        imageFond.paste(getChampImage(puuid,champion,pseudo,rank,div,lp,spells,region),localisation)
         
                         
     
     return imageFond
     
+def get_summoner_name_by_key(summoners_dict, key):
+    for summoner_id, summoner_data in summoners_dict["data"].items():
+        
+        if (int)(summoner_data['key'])==key:
+            return summoner_id
+            
+  
 
-def getChampImage(puuid,Champ,pseudo,rank,div,lp,region):
+    
+def getChampImage(puuid,Champ,pseudo,rank,div,lp,spell,region):
+    versions = lol_watcher.data_dragon.versions_for_region(region)
     url = f"https://ddragon.leagueoflegends.com/cdn/img/champion/loading/{Champ}_0.jpg"
-    sizeChamp= 300,450
+    
 
+    sizeChamp= 300,450
     response = requests.get(url)
     img_data = response.content
-
-
+ 
     imgChamp = Image.open(BytesIO(img_data))
     imgChamp=imgChamp.resize(sizeChamp)
 
     finalImage= imgChamp.convert('RGBA')
-
     rankIcon=getRankIcon(puuid,rank,region)
-    finalImage.paste(rankIcon, (70, 220), rankIcon)
-    
+    finalImage.paste(rankIcon, (70, 190), rankIcon)
+
+    imageSumm=Image.open(f"Image/empty_summ_slot.png")
+    combined_image = Image.new('RGB', (128, 64), color='black')
+    for summ in range(2): 
+        icone = f'https://ddragon.leagueoflegends.com/cdn/{versions["v"]}/img/spell/{spell[summ]}.png'
+        slot= add_item_to_slot(imageSumm,icone)
+        combined_image.paste(slot, (summ * 64, 0))
+        
+           
+    combined_image =combined_image.resize((96,48))
+    finalImage.paste(combined_image,(5,400))
     imageFond= ImageDraw.Draw(finalImage)
 
 
@@ -82,14 +106,14 @@ def getChampImage(puuid,Champ,pseudo,rank,div,lp,region):
 
     text_bbox = imageFond.textbbox((0, 0), pseudo, font=font)
     text_width = text_bbox[2] - text_bbox[0]
-    text_height = text_bbox[3] - text_bbox[1]
+
 
     rank_bbox= imageFond.textbbox((0,0),rankdivlp,font)
     rank_width=rank_bbox[2]-rank_bbox[0]
     rank_height= rank_bbox[3]-rank_bbox[1]
 
-    text_position = ((sizeChamp[0] - text_width) // 2, 5)
-    divLp_position=((sizeChamp[0] - rank_width) // 2, (sizeChamp[1] - rank_height) // 2 + 190)
+    text_position = (((sizeChamp[0] - text_width) // 2), 5)
+    divLp_position=(((sizeChamp[0] - rank_width) // 2), (sizeChamp[1] - rank_height) // 2 + 150)
     
     text_color = "#F0E6D2"
     border_color = "#010A13"
@@ -134,4 +158,11 @@ def getRankIcon(puuid,rank,region):
     iconeFinal.convert('RGBA')
     
     return iconeFinal
-    
+
+with open("1.json","r") as f:
+    cg = json.load(f)
+
+
+a =creerImageCG(cg,"europe","euw1")
+
+a.save("test.png")

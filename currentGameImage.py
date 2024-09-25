@@ -12,7 +12,7 @@ load_dotenv()
 lol_watcher = LolWatcher(os.getenv('RIOT_API'))
 version = lol_watcher.data_dragon.versions_for_region("euw1")
 font = ImageFont.truetype("font/BeaufortforLOL-Bold.ttf",size=25)
-with open("3.json","r") as f:
+with open("dossierJson/summoner_info.json","r") as f:
     summonnerData= json.load(f)
 
 async def creerImageCG(cg,regionId,region):

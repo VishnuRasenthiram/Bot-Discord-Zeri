@@ -25,7 +25,7 @@ async def creerImageCG(cg,regionId,region):
     myfile = f.read()
     data=json.loads(myfile)
     champ = data["data"]  
-    with Image.open(f"Image/currentGame.png") as imageFond:
+    with Image.open(f"Image/Zeri_CG.png") as imageFond:
         imageFond = imageFond.resize(size)
     posB=0
     posR=0

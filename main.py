@@ -1,9 +1,10 @@
 import discord
 from riotwatcher import LolWatcher, ApiError
-from discord.ext import commands
+from discord.ext import *
 from discord.ui import Select
 import asyncio
 from datetime import date, datetime
+from datetime import timedelta
 from discord.flags import Intents 
 from discord import app_commands
 import urllib
@@ -96,8 +97,17 @@ async def on_ready():
         print(f"Synced {synced} commands")
     except Exception as e:
         print(e)
-
     periodic_check.start()
+
+    while True:
+        try:
+            with open("test.json", "r") as f:
+                m= f.read()
+                messageId= json.loads(m)
+            if messageId is not None:
+                await checkpoll((int)(messageId))
+        except Exception as e:
+            print(e)
     
 @tasks.loop(seconds=60)
 async def periodic_check():
@@ -295,11 +305,11 @@ async def verif_game_en_cours():
         puuid, region = getPuuidRegion(None, i[1], i[2], i[3])
         try:
             cg = lol_watcher.spectator.by_puuid(region, puuid)
-            if (cg["gameId"] != int(i[4]) )and (cg["gameId"] not in gameDejaSend) and (cg["gameQueueConfigId"] != 1700) :
+            if (cg["gameStartTime"] != int(i[4]) )and ((int)(cg["gameStartTime"]) not in gameDejaSend) and (cg["gameQueueConfigId"] != 1700) :
                 player_data = {
                     "pseudo": i[1],
                     "tagline": i[2],
-                    "derniereGame": cg["gameId"],
+                    "derniereGame": cg["gameStartTime"],
                 }
 
                 update_derniereGame(player_data)
@@ -937,40 +947,7 @@ async def fin(ctx):
     jeu[str(ctx.author.id)]["game"]="false"
     with open('dossierJson/imposteur.json','w') as f :
             json.dump(jeu,f)
-            
-@bot.command()
-@commands.cooldown(1, 900, commands.BucketType.user)
-async def imposteur_simple(ctx):
-    roles=["Imposteur","Imposteur","Crewmate","Crewmate","Crewmate"]
-    dic_role={}
-    with open('dossierJson/imposta.json','r') as f:
-        users= json.load(f)
-    users[f'{ctx.author.id}']={}
-    if len(ctx.message.raw_mentions)==5:
-        for i in ctx.message.raw_mentions:
-            role =random.choice(roles)
-            roles.remove(role)
-            user= bot.get_user(i)
-            users[f'{ctx.author.id}'][user.name]=role
-            await user.send(f'{user} vous êtes {role}')
-    
-        with open('dossierJson/imposta.json','w') as f :
-            json.dump(users,f)
-        await ctx.channel.send("La partie a démarrer, lorsque vous avez fini veuillez tapper la commande -sus pour avoir le role de tous les participants")
-    else :
-        await ctx.channel.send("Le nombre de participant n'est pas valide (5)") 
-
-
-@bot.command()
-async def sus(ctx):
-    with open('dossierJson/imposta.json','r') as f:
-        sus= json.load(f)   
-    await ctx.channel.send(f"{sus[str(ctx.author.id)]}")
-    sus[str(ctx.author.id)].clear()
-    
-    with open('dossierJson/imposta.json','w') as f:
-        json.dump(sus,f)
-        
+                
 @bot.command()
 @commands.has_permissions(administrator = True)
 async def leave(ctx):
@@ -981,12 +958,46 @@ async def leave(ctx):
         
         
         
+@bot.command()
+@commands.has_permissions(administrator = True)
+async def poll(ctx, question="Quelle est votre couleur préférée ?"):
+    try:
+       
+       
 
-      
-    
+        poll = discord.Poll(question, duration=timedelta(hours=1))
+        poll.add_answer(text="Bleu")
+        poll.add_answer(text="Rouge")
+
+        message =await ctx.send(poll=poll)
+        print(message.id)
+        with open("test.json","w") as f:
+            json.dump((str)(message.id),f)
+        temps = timedelta(seconds=10)
+        sec = timedelta(seconds=1)
+        while temps>timedelta(seconds=0):
+            await asyncio.sleep(1)
+            temps=temps-sec 
+            if temps==timedelta(seconds=0):
+                await poll.end()
+
+       
         
-        
-        
+    except Exception as e:
+        await ctx.send(f"Une erreur s'est produite lors de la création du sondage : {e}")
+
+@bot.command()
+async def checkpoll(id):
+    try:
+        print(id)
+        channel= bot.get_channel(615128656049864734)
+        message = await channel.fetch_message(id)
+        poll = message.poll
+        if poll.is_finalised():
+            await channel.send(poll.get_answer(1).vote_count)
+    except Exception as e :
+        print(e)
+
 if __name__ == "__main__":
     asyncio.run(bot.start(os.getenv('TOKEN')))
 

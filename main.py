@@ -99,15 +99,7 @@ async def on_ready():
         print(e)
     periodic_check.start()
 
-    while True:
-        try:
-            with open("test.json", "r") as f:
-                m= f.read()
-                messageId= json.loads(m)
-            if messageId is not None:
-                await checkpoll((int)(messageId))
-        except Exception as e:
-            print(e)
+   
     
 @tasks.loop(seconds=60)
 async def periodic_check():

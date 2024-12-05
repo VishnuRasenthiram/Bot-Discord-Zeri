@@ -59,7 +59,7 @@ async def creerImageCG(cg,regionId,region):
             posR+=1
       
         imageFond.paste(getChampImage(puuid,champion,pseudo,rank,div,lp,spells,region),localisation)
-        
+
                         
     
     return imageFond

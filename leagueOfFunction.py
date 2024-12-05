@@ -134,7 +134,7 @@ class LOF:
             regionRiotId = LOF.regionForRiotId(region)
             nom=lol_watcher.accountV1.by_puuid(regionRiotId,puuid)["gameName"]
             tagline=lol_watcher.accountV1.by_puuid(regionRiotId,puuid)["tagLine"]
-
+            print(nom,tagline)
             embed = discord.Embed(
                 title="Profil League Of Legends",
                 description=f'{interaction.user.name} voici le profil de {nom}#{tagline}',
@@ -217,7 +217,7 @@ class LOF:
         try:
             regionId= LOF.regionForRiotId(region)
             cg=lol_watcher.spectator.by_puuid(region,puuid)
-            image=await creerImageCG(cg,regionId,region)
+            image=await creer_image_avec_reessai(cg, regionId, region)
             img_bytes=BytesIO()
             image.save(img_bytes,format='PNG')
             img_bytes.seek(0)
@@ -232,5 +232,20 @@ class LOF:
                 elif err.response.status_code == 404:
                     await interaction.followup.send("Le compte avec ce pseudo n'existe pas ou le joueur n'est pas dans une partie!")
                 else:
+                    print(err)
                     raise
-    
+
+
+async def creer_image_avec_reessai(cg, regionId, region):
+    attempt = True
+    while attempt :
+        try:
+            image = await creerImageCG(cg, regionId, region)
+            attempt =False
+            return image 
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 503:
+                await asyncio.sleep(1) 
+            else:
+                raise e
+    raise Exception("Échec après plusieurs tentatives : le service reste indisponible.")

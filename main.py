@@ -306,7 +306,7 @@ async def verif_game_en_cours():
 
                 update_derniereGame(player_data)
                 regionId = LOF.regionForRiotId(region)
-                image = await creerImageCG(cg, regionId, region)
+                image = await creer_image_avec_reessai(cg, regionId, region)
                 img_bytes = BytesIO()
                 image.save(img_bytes, format='PNG')
                 img_bytes.seek(0)
@@ -340,8 +340,6 @@ async def histo(interaction: discord.Interaction, pseudo: str = None, tagline: s
 @bot.tree.command(name="partie_en_cours")
 @app_commands.choices(region=choixRegion)
 async def partieEnCours(interaction: discord.Interaction, pseudo: str = None, tagline: str = "euw", region: app_commands.Choice[str] = None):
-   
-  
 
     await LOF.partieEnCours(interaction, pseudo, tagline, region)
 

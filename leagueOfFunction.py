@@ -241,7 +241,6 @@ async def creer_image_avec_reessai(cg, regionId, region):
     while attempt :
         try:
             image = await creerImageCG(cg, regionId, region)
-            attempt =False
             return image 
         except requests.exceptions.HTTPError as e:
             if e.response.status_code == 503:

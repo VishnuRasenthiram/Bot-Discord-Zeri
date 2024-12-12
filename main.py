@@ -28,6 +28,7 @@ from welcomeImage import *
 from currentGameImage import *
 from baseDeDonne import *
 from tenorApi import *
+import hashlib  
 load_dotenv()
 ##########################################################################
 
@@ -297,11 +298,12 @@ async def verif_game_en_cours():
         puuid, region = getPuuidRegion(None, i[1], i[2], i[3])
         try:
             cg = lol_watcher.spectator.by_puuid(region, puuid)
-            if (cg["gameStartTime"] != int(i[4]) )and ((int)(cg["gameStartTime"]) not in gameDejaSend) and (cg["gameQueueConfigId"] != 1700) :
+            code =getCode(cg)
+            if (code not in gameDejaSend) and (cg["gameQueueConfigId"] != 1700) :
                 player_data = {
                     "pseudo": i[1],
                     "tagline": i[2],
-                    "derniereGame": cg["gameStartTime"],
+                    "derniereGame": code,
                 }
 
                 update_derniereGame(player_data)
@@ -321,10 +323,16 @@ async def verif_game_en_cours():
             else:
                 print(f"Erreur inconnue: {err}")
             
-            
-
-
-
+         
+def getCode(cg):
+    liste=[]
+    for i in range ( len(cg["participants"])) :
+        liste.append(str(cg["participants"][i]["summonerId"])+str(cg["participants"][i]["championId"]))   
+    liste.sort()
+    id=','.join(liste)
+    hash_object = hashlib.sha256(id.encode('utf-8'))
+    unique_id = int(hash_object.hexdigest(), 16)
+    return unique_id % (10**8)
 
 @bot.tree.command(name="profil")
 @app_commands.choices(region=choixRegion)

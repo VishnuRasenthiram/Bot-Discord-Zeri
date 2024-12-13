@@ -72,6 +72,7 @@ CHAN_LOLDLE=1091280421192474694
 CHAN_FLAME=332580555872927746
 ANNONCE_CHAN=634266557383442432
 KARAN_ID=614728233497133076
+SALON_NASA=1317082270875652180
 
 ##################################################################################################################################
 ##################################################################################################################################
@@ -119,6 +120,7 @@ async def changementIconeServeur():
         await guild.edit(name ="Karan 🌙")
         await guild.edit(icon=iconNuit)
     else:
+        await apodAut()
         await guild.edit(name="Karan 🍁")
         await guild.edit(icon=iconJour)
             
@@ -318,10 +320,8 @@ async def verif_game_en_cours():
             status_code = err.response.status_code
             if status_code == 429:
                 print("Quota de requête dépassé")
-            elif status_code == 404:
-                pass
             else:
-                print(f"Erreur inconnue: {err}")
+                pass
             
          
 def getCode(cg):
@@ -421,17 +421,25 @@ async def filtre(ctx , amount=5):
 
 #apod
 
+async def apodAut():
+    guild=bot.get_guild(KARAN_ID)
+    salonNasa =guild.get_channel(SALON_NASA)
+    await imageNasa(salonNasa)
+
 
 @bot.command()
 @commands.cooldown(1, 30, commands.BucketType.user)
 async def apod(ctx):
+    await imageNasa(ctx.message.channel)
+
+async def imageNasa(channel):
     apod=nasa
     
     
     if apod.apod()["media_type"]=="image":
     
         embed=discord.Embed(title="Photo astronomique du jour !",
-                description=f'{ctx.author.name} voici la photo du jour en astronomie !', 
+                description=f'Voici la photo du jour en astronomie !', 
                 color=discord.Color.red()).set_thumbnail(
                 url="https://www.nasa.gov/sites/default/files/thumbnails/image/nasa-logo-web-rgb.png"
                 ).set_image(url=apod.apod()["hdurl"])
@@ -443,10 +451,10 @@ async def apod(ctx):
                 value=f'{apod.apod()["copyright"]}', 
                 inline=True
                 )
-        await ctx.message.channel.send(embed=embed)
+        await channel.send(embed=embed)
     elif apod.apod()["media_type"]=="video":
         embed=discord.Embed(title="Vidéo astronomique du jour !",
-                description=f'{ctx.author.name} voici la vidéo du jour en astronomie !', 
+                description=f'Voici la vidéo du jour en astronomie !', 
                 color=discord.Color.red()).set_thumbnail(
                 url="https://www.nasa.gov/sites/default/files/thumbnails/image/nasa-logo-web-rgb.png"
                 )
@@ -459,8 +467,8 @@ async def apod(ctx):
                 inline=True
                 )
         
-        await ctx.message.channel.send(embed=embed)
-        await ctx.message.channel.send(apod.apod()["url"])
+        await channel.send(embed=embed)
+        await channel.send(apod.apod()["url"])
     
 ##########################################################################   
 

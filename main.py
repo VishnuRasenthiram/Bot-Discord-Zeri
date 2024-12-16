@@ -279,7 +279,7 @@ async def del_profile_liste(interaction:discord.Interaction,pseudo:str,tagline:s
     }
     etat=delete_player_liste(player_data)
     if etat==0:
-        await interaction.response.send_message("Ce profil n'est pas dans la base de donée!")
+        await interaction.response.send_message("Ce profil n'est pas dans la base de donnée!")
     else :
         
         await interaction.response.send_message("Ce profil a bien été supprimé !")
@@ -301,6 +301,7 @@ async def verif_game_en_cours():
         try:
             cg = lol_watcher.spectator.by_puuid(region, puuid)
             code =getCode(cg)
+            gameDejaSend.append(code)
             if (code not in gameDejaSend) and (cg["gameQueueConfigId"] != 1700) :
                 player_data = {
                     "pseudo": i[1],

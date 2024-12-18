@@ -301,8 +301,9 @@ async def verif_game_en_cours():
         try:
             cg = lol_watcher.spectator.by_puuid(region, puuid)
             code =getCode(cg)
-            gameDejaSend.append(code)
+            
             if (code not in gameDejaSend) and (cg["gameQueueConfigId"] != 1700) :
+                gameDejaSend.append(code)
                 player_data = {
                     "pseudo": i[1],
                     "tagline": i[2],

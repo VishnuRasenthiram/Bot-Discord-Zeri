@@ -73,7 +73,9 @@ CHAN_FLAME=332580555872927746
 ANNONCE_CHAN=634266557383442432
 KARAN_ID=614728233497133076
 SALON_NASA=1317082270875652180
-
+GUURUU_ID=1282820405626671164
+CHANNEL_SUIVIT=1283540354523463701
+CHANNEL_SUIVIT_GUURUU=1320482473217490975
 ##################################################################################################################################
 ##################################################################################################################################
 
@@ -287,9 +289,9 @@ async def del_profile_liste(interaction:discord.Interaction,pseudo:str,tagline:s
 async def verif_game_en_cours():
     liste = get_player_liste()
     guild = bot.get_guild(KARAN_ID)
-    guildGuuruu=bot.get_guild(1282820405626671164)
-    salon = guild.get_channel(1283540354523463701)
-    salonGuuruu=guildGuuruu.get_channel(1320482473217490975)
+    guildGuuruu=bot.get_guild(GUURUU_ID)
+    salon = guild.get_channel(CHANNEL_SUIVIT)
+    salonGuuruu=guildGuuruu.get_channel(CHANNEL_SUIVIT_GUURUU)
     gameDejaSend = []
 
     for gameId in liste:

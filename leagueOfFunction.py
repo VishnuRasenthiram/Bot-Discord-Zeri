@@ -134,7 +134,6 @@ class LOF:
             regionRiotId = LOF.regionForRiotId(region)
             nom=lol_watcher.accountV1.by_puuid(regionRiotId,puuid)["gameName"]
             tagline=lol_watcher.accountV1.by_puuid(regionRiotId,puuid)["tagLine"]
-            print(nom,tagline)
             embed = discord.Embed(
                 title="Profil League Of Legends",
                 description=f'{interaction.user.name} voici le profil de {nom}#{tagline}',

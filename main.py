@@ -192,7 +192,7 @@ async def set_profile(interaction:discord.Interaction,pseudo:str,tagline:str,reg
             if err.response.status_code == 429 :
                 print("Quota de requête dépassé")
             elif err.response.status_code == 404:
-                 await interaction.response.send_message("Le compte avec ce pseudo n'existe pas !")
+                 await interaction.response.send_message("Le compte avec ce pseudo n'existe pas !",ephemeral=True)
             else:
                 raise
         iconId=random.randint(0,28)
@@ -209,18 +209,18 @@ async def set_profile(interaction:discord.Interaction,pseudo:str,tagline:str,reg
                 "statut":0
             }
             insert_player_data(player_data)
-            await interaction.channel.send("Profile Trouvé !")
+            await interaction.user.send("Profile Trouvé !")
             await LOF.profileLeagueOfLegends(interaction,pseudo,tagline,region)
-            await interaction.channel.send("Veuillez confirmer votre compte en modifiant votre icone par celui ci : ")
-            await interaction.channel.send(icon)
-            await interaction.channel.send("Valider ici:", view=ViewValidator())
+            await interaction.user.send("Veuillez confirmer votre compte en modifiant votre icone par celui ci : ")
+            await interaction.user.send(icon)
+            await interaction.user.send("Valider ici:", view=ViewValidator())
         else :
             if profile[4]==0:
-                await interaction.channel.send("Vous avez déjà un compte en train d'être lié !")
-                await interaction.channel.send(profile[str(interaction.user.id)]["icon"])
-                await interaction.response.send_message("Valider ici :", view=ViewValidator())
+                await interaction.user.send("Vous avez déjà un compte en train d'être lié !")
+                await interaction.user.send(profile[str(interaction.user.id)]["icon"])
+                await interaction.user.send("Valider ici :", view=ViewValidator())
             else:
-                await interaction.response.send_message("Vous avez déjà un compte lié !")
+                await interaction.response.send_message("Vous avez déjà un compte lié !",ephemeral=True)
             
         
             
@@ -228,10 +228,10 @@ async def set_profile(interaction:discord.Interaction,pseudo:str,tagline:str,reg
 async def del_profile(interaction:discord.Interaction):
     etat=delete_player_data(interaction.user.id)
     if etat==0:
-        await interaction.response.send_message("Vous n'avez pas lié de compte !")
+        await interaction.response.send_message("Vous n'avez pas lié de compte !",ephemeral=True)
     else :
         
-        await interaction.response.send_message("Votre compte a bien été supprimé !")
+        await interaction.response.send_message("Votre compte a bien été supprimé !",ephemeral=True)
 
 @bot.tree.command(name="suivre_profil")
 @app_commands.choices(region=choixRegion)
@@ -243,7 +243,7 @@ async def add_profile_liste(interaction:discord.Interaction,pseudo:str,tagline:s
             if err.response.status_code == 429 :
                 print("Quota de requête dépassé")
             elif err.response.status_code == 404:
-                 await interaction.response.send_message("Le compte avec ce pseudo n'existe pas !")
+                 await interaction.response.send_message("Le compte avec ce pseudo n'existe pas !",ephemeral=True)
             else:
                 raise
         
@@ -263,11 +263,11 @@ async def add_profile_liste(interaction:discord.Interaction,pseudo:str,tagline:s
 
             }
             insert_player_liste(player_data)
-            await interaction.response.send_message("Profil ajouté !")
+            await interaction.response.send_message("Profil ajouté !",ephemeral=True)
           
        
         else :
-                await interaction.response.send_message("Ce profil est déjà suivit !")
+                await interaction.response.send_message("Ce profil est déjà suivit !",ephemeral=True)
 
 @bot.tree.command(name="suppr_profil_suivit")
 @app_commands.choices(region=choixRegion)
@@ -279,10 +279,10 @@ async def del_profile_liste(interaction:discord.Interaction,pseudo:str,tagline:s
     }
     etat=delete_player_liste(player_data)
     if etat==0:
-        await interaction.response.send_message("Ce profil n'est pas dans la base de donnée!")
+        await interaction.response.send_message("Ce profil n'est pas dans la base de donnée!",ephemeral=True)
     else :
         
-        await interaction.response.send_message("Ce profil a bien été supprimé !")
+        await interaction.response.send_message("Ce profil a bien été supprimé !",ephemeral=True)
 
 async def verif_game_en_cours():
     liste = get_player_liste()

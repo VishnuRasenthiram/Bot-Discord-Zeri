@@ -319,9 +319,10 @@ async def verif_game_en_cours():
                 img_bytes = BytesIO()
                 image.save(img_bytes, format='PNG')
                 img_bytes.seek(0)
-
-                await salon.send(file=discord.File(img_bytes, filename="Partie_En_Cours.png"))
-                await salonGuuruu.send(file=discord.File(img_bytes, filename="Partie_En_Cours.png"))
+                file=discord.File(img_bytes, filename="Partie_En_Cours.png")
+                await salon.send(file=file)
+                img_bytes.seek(0)
+                await salonGuuruu.send(file=file)
         except ApiError as err:
             status_code = err.response.status_code
             if status_code == 429:

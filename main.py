@@ -288,7 +288,7 @@ async def verif_game_en_cours():
     liste = get_player_liste()
     guild = bot.get_guild(KARAN_ID)
     salon = guild.get_channel(1283540354523463701)
-    
+    salonGuuruu=guild.get_channel(1320482473217490975)
     gameDejaSend = []
 
     for gameId in liste:
@@ -318,6 +318,7 @@ async def verif_game_en_cours():
                 img_bytes.seek(0)
 
                 await salon.send(file=discord.File(img_bytes, filename="Partie_En_Cours.png"))
+                await salonGuuruu.send(file=discord.File(img_bytes, filename="Partie_En_Cours.png"))
         except ApiError as err:
             status_code = err.response.status_code
             if status_code == 429:

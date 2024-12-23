@@ -154,16 +154,16 @@ class LOF:
                 name="Losses :", value=loose, inline=False
             ).set_image(url="attachment://zeri2.gif")
 
-            test = {'1': [], '2': [], '3': []}
+            masteryChampions = {'1': [], '2': [], '3': []}
 
             for i in range(3):
                 for j in dd['data']:
                     if int(dd['data'][j]['key']) == int(mastery[i]['championId']):
-                        test[str(i + 1)].append(dd['data'][j]['id'])
-                        test[str(i + 1)].append(int(mastery[i]['championPoints']))
+                        masteryChampions[str(i + 1)].append(dd['data'][j]['id'])
+                        masteryChampions[str(i + 1)].append(int(mastery[i]['championPoints']))
             
             chaine = ""
-            for key, value in test.items():
+            for key, value in masteryChampions.items():
                 chaine += key + ": " + " - ".join(str(v) for v in value) + " Pts \n"
             lignes = chaine.split("\n")
             for ligne in lignes:

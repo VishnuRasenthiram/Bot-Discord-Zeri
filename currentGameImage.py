@@ -47,7 +47,8 @@ async def creerImageCG(cg,regionId,region):
                 champion=cle
                 for idMastery in range(len(mastery)):
                     if int(mastery[idMastery]['championId'])==int(cg["participants"][i]['championId']):
-                        masteryPTS="{:,.0f}".format(int(mastery[i]['championPoints']))
+                        print(mastery[idMastery]['championId'])
+                        masteryPTS="{:,.0f}".format(int(mastery[idMastery]['championPoints']))
                         break
                 break        
         for j in range(len(invocateur)):
@@ -200,3 +201,12 @@ def getRankIcon(Account,rank,region):
     
     return iconeFinal
 
+#with open("1.json","r") as f :
+#    cg= json.load(f)
+
+
+
+
+#image =creerImageCG(cg,"europe","euw1")
+
+#image.save("test.png")

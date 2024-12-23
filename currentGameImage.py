@@ -16,7 +16,7 @@ fontLvl = ImageFont.truetype("font/BeaufortforLOL-Bold.ttf",size=20)
 with open("dossierJson/summoner_info.json","r") as f:
     summonnerData= json.load(f)
 
-def creerImageCG(cg,regionId,region):
+async def creerImageCG(cg,regionId,region):
     
     size = 1920, 1080
     sizeChamp= 308,400
@@ -200,12 +200,3 @@ def getRankIcon(Account,rank,region):
     
     return iconeFinal
 
-with open("1.json","r") as f :
-    cg= json.load(f)
-
-
-
-
-image =creerImageCG(cg,"europe","euw1")
-
-image.save("test.png")

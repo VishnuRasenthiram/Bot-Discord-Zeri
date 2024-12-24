@@ -12,6 +12,7 @@ import os
 from currentGameImage import *
 from baseDeDonne import *
 from historiqueImage import *
+from main import getPuuidRegion
 load_dotenv()
 
 lol_watcher = LolWatcher(os.getenv('RIOT_API'))
@@ -55,42 +56,16 @@ def regionForRiotId(region:str):
             return "americas"
         else:
             return "asia"
-def getPuuidRegion(interaction:discord.Interaction,pseudo:str,tagline:str,region:str):
-        
-        
-        if not(pseudo):
-            
-            profile=get_player_data(interaction.user.id)
-        
-            if profile!=None:
-                
-                if profile[4]==0:
-                    return interaction.response.send_message("Vous n'avez pas confirmé le profil !")
-                else :
-                    puuid = profile[1]
-                    region = profile[3]
-                    
-            else:
-                return interaction.response.send_message("Veuillez préciser un nom d'invocateur ou bien sauvegarder votre profil avec la commande : ```/sauvegarder_mon_profil```")
-        else:
-            if not isinstance(region,Choice):
-                region= Choice(name="defaut",value="euw1")
-            me = lol_watcher.accountV1.by_riotid(region=regionForRiotId(region.value),summoner_name=pseudo,tagline=tagline)
-            puuid=me["puuid"]
-            region= region.value
 
-        return puuid,region
 class LOF:
     def regionForRiotId(region:str):
      
         return regionForRiotId(region)
     
 
-    async def profileLeagueOfLegends(interaction:discord.Interaction,pseudo:str,tagline:str,region:str):
+    async def profileLeagueOfLegends(interaction:discord.Interaction,puuid:str,region:str):
             
         await interaction.response.defer()
-
-        puuid,region=getPuuidRegion(interaction,pseudo,tagline,region)
         versions = lol_watcher.data_dragon.versions_for_region(region)
         champions_version = versions['n']['champion']
         dd = lol_watcher.data_dragon.champions(champions_version)
@@ -188,11 +163,9 @@ class LOF:
             
 
 
-    async def historiqueLeagueOfLegends(interaction:discord.Interaction,pseudo:str,tagline:str,region:str):
+    async def historiqueLeagueOfLegends(interaction:discord.Interaction,puuid:str,region:str):
 
         await interaction.response.defer()
-
-        puuid,region=getPuuidRegion(interaction,pseudo,tagline,region)
         
         try:
                 image =creeImageHistorique(puuid,region)
@@ -210,9 +183,8 @@ class LOF:
                     raise    
 
 
-    async def partieEnCours(interaction:discord.Interaction,pseudo:str,tagline:str,region:str):
+    async def partieEnCours(interaction:discord.Interaction,puuid:str,region:str):
         await interaction.response.defer()
-        puuid,region=getPuuidRegion(interaction,pseudo,tagline,region)
         try:
             regionId= LOF.regionForRiotId(region)
             cg=lol_watcher.spectator.by_puuid(region,puuid)

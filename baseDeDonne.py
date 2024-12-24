@@ -95,8 +95,7 @@ def initTableListePlayer():
     cur.execute("""
         CREATE TABLE IF NOT EXISTS liste_player (
             id SERIAL PRIMARY KEY,
-            pseudo VARCHAR(128),
-            tagline VARCHAR(64),
+            puuid VARCHAR(128),
             region VARCHAR(64),
             derniereGame VARCHAR(128)
            
@@ -114,9 +113,9 @@ def insert_player_liste(data):
     conn = psycopg2.connect(DATABASE_URL, sslmode='require')
     cur = conn.cursor()
     cur.execute("""
-        INSERT INTO liste_player(pseudo,tagline,region,derniereGame)
-        VALUES (%s, %s,%s,%s)
-    """, (data['pseudo'], data['tagline'],data['region'],"0"))
+        INSERT INTO liste_player(puuid,region,derniereGame)
+        VALUES (%s,%s,%s)
+    """, (data['puuid'],data['region'],"0"))
     conn.commit()
     cur.close()
     conn.close()
@@ -125,7 +124,7 @@ def delete_player_liste(data):
     
     conn = psycopg2.connect(DATABASE_URL, sslmode='require')
     cur = conn.cursor()
-    cur.execute("DELETE FROM liste_player WHERE pseudo = %s AND tagline =%s AND region=%s" , (data["pseudo"],data["tagline"],data["region"]))
+    cur.execute("DELETE FROM liste_player WHERE puuid = %sAND region=%s" , (data["puuid"],data["region"]))
     conn.commit()
     if cur.rowcount == 0:
             etat =0
@@ -142,8 +141,8 @@ def update_derniereGame(data):
     cur.execute("""
         UPDATE liste_player 
         SET derniereGame=%s
-        WHERE pseudo=%s and tagline=%s;
-    """, (data["derniereGame"],data['pseudo'], data['tagline']))
+        WHERE puuid=%s ;
+    """, (data["derniereGame"],data['puuid']))
     conn.commit()
     cur.close()
     conn.close()
@@ -158,3 +157,21 @@ def get_player_liste():
     cur.close()
     conn.close()
     return player_liste
+
+def clear_player_liste():
+    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+    cur = conn.cursor()
+    cur.execute("DELETE FROM liste_player")
+    conn.commit()
+    cur.close()
+    conn.close()
+    
+def drop_player_table():
+    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+    cur = conn.cursor()
+    cur.execute("DROP TABLE IF EXISTS liste_player")
+    conn.commit()
+    cur.close()
+    conn.close()
+
+

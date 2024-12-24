@@ -165,6 +165,50 @@ class ViewValidator(discord.ui.View):
         else :
             await interaction.response.send_message("Votre compte a déjà été confirmé !")
         
+async def getMe(interaction:discord.Interaction,pseudo,tagline,region):
+    if not isinstance(region,Choice):
+            region= Choice(name="defaut",value="euw1")
+    try:
+        me =lol_watcher.accountV1.by_riotid(region=regionForRiotId(region.value),summoner_name=pseudo,tagline=tagline),region.value
+        return me
+    
+    except ApiError as err:
+        if err.response.status_code == 429 :
+                print("Quota de requête dépassé")
+        elif err.response.status_code == 404:
+            await interaction.response.send_message("Le compte avec ce pseudo n'existe pas !",ephemeral=True)
+
+async def verifFormatRiotId(interaction:discord.Interaction,pseudo:str):
+    tagline=None
+    if pseudo!=None and pseudo.find("#")!=-1:
+        pseudo,tagline=pseudo.lower().split("#")[0],pseudo.lower().split("#")[1]
+    
+    else:
+        await interaction.response.send_message("Veuillez entrer votre pseudo avec le # !",ephemeral=True)
+    return pseudo,tagline
+async def getPuuidRegion(interaction:discord.Interaction,pseudo:str,region:str):
+        if pseudo:
+            pseudo,tagline=await verifFormatRiotId(interaction,pseudo)
+        if not(pseudo):
+            
+            profile=get_player_data(interaction.user.id)
+        
+            if profile!=None:
+                
+                if profile[4]==0:
+                    await interaction.response.send_message("Vous n'avez pas confirmé le profil !",ephemeral=True)
+                else :
+                    puuid = profile[1]
+                    region = profile[3]
+                    
+            else:
+                await interaction.response.send_message("Veuillez entrer votre Riot ID comme ceci : Pseudo#0000\nVous avez la possibilité de lié votre compte via la commande : **/sauvegarder_mon_profil**",ephemeral=True)
+        else:
+            me,region=await getMe(interaction,pseudo,tagline,region)
+            puuid=me["puuid"]
+
+
+        return puuid,region            
 
 
 choixRegion=[app_commands.Choice(name="EUW", value="euw1"),
@@ -186,10 +230,11 @@ choixRegion=[app_commands.Choice(name="EUW", value="euw1"),
     
 @bot.tree.command(name="sauvegarder_mon_profil")
 @app_commands.choices(region=choixRegion)
-async def set_profile(interaction:discord.Interaction,pseudo:str,tagline:str,region:app_commands.Choice[str]):
+async def set_profile(interaction:discord.Interaction,pseudo:str,region:app_commands.Choice[str]="euw1"):
    
         try:
-            me = lol_watcher.accountV1.by_riotid(region=LOF.regionForRiotId(region.value),summoner_name=pseudo,tagline=tagline)
+            pseudo,tagline=await verifFormatRiotId(interaction,pseudo)
+            me,region=await getMe(interaction,pseudo,tagline,region)
         except ApiError as err :
             if err.response.status_code == 429 :
                 print("Quota de requête dépassé")
@@ -207,15 +252,15 @@ async def set_profile(interaction:discord.Interaction,pseudo:str,tagline:str,reg
                 "id":interaction.user.id,
                 "puuid": me['puuid'],
                 "icon":icon,
-                "region":region.value,
+                "region":region,
                 "statut":0
             }
             insert_player_data(player_data)
-            await interaction.user.send("Profile Trouvé !")
-            await LOF.profileLeagueOfLegends(interaction,pseudo,tagline,region)
+            await interaction.response.send_message("Profile Trouvé !")
             await interaction.user.send("Veuillez confirmer votre compte en modifiant votre icone par celui ci : ")
             await interaction.user.send(icon)
             await interaction.user.send("Valider ici:", view=ViewValidator())
+            await interaction.user.send("Pour annuler utilisez la commande : **/supprimer_mon_profil** ")
         else :
             if profile[4]==0:
                 await interaction.user.send("Vous avez déjà un compte en train d'être lié !")
@@ -237,47 +282,73 @@ async def del_profile(interaction:discord.Interaction):
 
 @bot.tree.command(name="suivre_profil")
 @app_commands.choices(region=choixRegion)
-async def add_profile_liste(interaction:discord.Interaction,pseudo:str,tagline:str,region:app_commands.Choice[str]):
+async def add_profile_liste(interaction:discord.Interaction,pseudo:str,region:app_commands.Choice[str]="euw1"):
    
         try:
-            lol_watcher.accountV1.by_riotid(region=LOF.regionForRiotId(region.value),summoner_name=pseudo,tagline=tagline)
+            pseudo,tagline=await verifFormatRiotId(interaction,pseudo)
+            me,region=await getMe(interaction,pseudo,tagline,region)
+            puuid=me["puuid"]
         except ApiError as err :
             if err.response.status_code == 429 :
                 print("Quota de requête dépassé")
             elif err.response.status_code == 404:
                  await interaction.response.send_message("Le compte avec ce pseudo n'existe pas !",ephemeral=True)
-            else:
-                raise
-        
         liste=get_player_liste()
-        trouvé=False
-        if liste != None:
-            for pseudoL in liste:
-                if pseudoL==pseudo :
-                    trouvé=True
-            
-        if trouvé==False :    
-            
+        trouvé=True
+        
+        if len(liste)!=0:
+            for puuidL in liste:
+                if puuidL==puuid :
+                    trouvé=False
+ 
+        if trouvé :
             player_data={
-                "pseudo":pseudo,
-                "tagline":tagline,
-                "region":region.value,
-
+                "puuid":puuid,
+                "region":region,
             }
             insert_player_liste(player_data)
             await interaction.response.send_message("Profil ajouté !",ephemeral=True)
-          
        
         else :
-                await interaction.response.send_message("Ce profil est déjà suivit !",ephemeral=True)
+            await interaction.response.send_message("Ce profil est déjà suivit !",ephemeral=True)
+async def getPuuidRegion(interaction:discord.Interaction,pseudo:str,region:str):
+        if pseudo:
+            pseudo,tagline=await verifFormatRiotId(interaction,pseudo)
+        if not(pseudo):
+            
+            profile=get_player_data(interaction.user.id)
+        
+            if profile!=None:
+                
+                if profile[4]==0:
+                    await interaction.response.send_message("Vous n'avez pas confirmé le profil !",ephemeral=True)
+                else :
+                    puuid = profile[1]
+                    region = profile[3]
+                    
+            else:
+                await interaction.response.send_message("Veuillez entrer votre Riot ID comme ceci : Pseudo#0000\nVous avez la possibilité de lié votre compte via la commande : **/sauvegarder_mon_profil**",ephemeral=True)
+        else:
+            me,region=await getMe(interaction,pseudo,tagline,region)
+            puuid=me["puuid"]
+
+
+        return puuid,region            
+
+
+
+
+
 
 @bot.tree.command(name="suppr_profil_suivit")
 @app_commands.choices(region=choixRegion)
-async def del_profile_liste(interaction:discord.Interaction,pseudo:str,tagline:str,region:app_commands.Choice[str]):
+async def del_profile_liste(interaction:discord.Interaction,pseudo:str,region:app_commands.Choice[str]="euw1"):
+    pseudo,tagline=await verifFormatRiotId(interaction,pseudo)
+    me,region=await getMe(interaction,pseudo,tagline,region)
+    puuid=me["puuid"]
     player_data={
-                "pseudo":pseudo,
-                "tagline":tagline,
-                "region":region.value,
+                "puuid":puuid,
+                "region":region,
     }
     etat=delete_player_liste(player_data)
     if etat==0:
@@ -300,16 +371,14 @@ async def verif_game_en_cours():
         return
     
     for i in liste:
-        puuid, region = getPuuidRegion(None, i[1], i[2], i[3])
+        puuid, region =await getPuuidRegion(None, i[1], i[2], i[3])
         try:
             cg = lol_watcher.spectator.by_puuid(region, puuid)
 
-            
             if (cg["gameId"] not in gameDejaSend) and (cg["gameQueueConfigId"] != 1700) :
                 gameDejaSend.append(cg["gameId"])
                 player_data = {
-                    "pseudo": i[1],
-                    "tagline": i[2],
+                    "puuid": i[1],
                     "derniereGame": cg["gameId"],
                 }
 
@@ -329,34 +398,27 @@ async def verif_game_en_cours():
                 print("Quota de requête dépassé")
             else:
                 pass
-            
-         
-def getCode(cg):
-    liste=[]
-    for i in range ( len(cg["participants"])) :
-        liste.append(str(cg["participants"][i]["summonerId"])+str(cg["participants"][i]["championId"]))   
-    liste.sort()
-    id=','.join(liste)
-    hash_object = hashlib.sha256(id.encode('utf-8'))
-    unique_id = int(hash_object.hexdigest(), 16)
-    return unique_id % (10**8)
+
 
 @bot.tree.command(name="profil")
 @app_commands.choices(region=choixRegion)
-async def lolp(interaction: discord.Interaction, pseudo: str = None, tagline: str = "euw", region: app_commands.Choice[str] = "euw1"):
-    await LOF.profileLeagueOfLegends(interaction,pseudo,tagline,region)
+async def lolp(interaction: discord.Interaction, pseudo: str = None, region: app_commands.Choice[str] = "euw1"):  
+    puuid,region=await getPuuidRegion(interaction,pseudo,region)
+    await LOF.profileLeagueOfLegends(interaction,puuid,region)
+
 
 
 @bot.tree.command(name="historique")
 @app_commands.choices(region=choixRegion)
-async def histo(interaction: discord.Interaction, pseudo: str = None, tagline: str = "euw", region: app_commands.Choice[str] = "euw1"):
-   await  LOF.historiqueLeagueOfLegends(interaction,pseudo,tagline,region)
+async def histo(interaction: discord.Interaction, pseudo: str = None, region: app_commands.Choice[str] = "euw1"):
+    puuid,region=await getPuuidRegion(interaction,pseudo,region)
+    await  LOF.historiqueLeagueOfLegends(interaction,puuid,region)
 
 @bot.tree.command(name="partie_en_cours")
 @app_commands.choices(region=choixRegion)
-async def partieEnCours(interaction: discord.Interaction, pseudo: str = None, tagline: str = "euw", region: app_commands.Choice[str] = None):
-
-    await LOF.partieEnCours(interaction, pseudo, tagline, region)
+async def partieEnCours(interaction: discord.Interaction, pseudo: str = None, region: app_commands.Choice[str] = None):
+    puuid,region=await getPuuidRegion(interaction,pseudo,region)
+    await LOF.partieEnCours(interaction,puuid, region)
 
 @bot.event
 async def on_message(message):

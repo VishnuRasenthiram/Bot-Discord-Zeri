@@ -364,21 +364,20 @@ async def verif_game_en_cours():
     salon = guild.get_channel(CHANNEL_SUIVIT)
     salonGuuruu=guildGuuruu.get_channel(CHANNEL_SUIVIT_GUURUU)
     gameDejaSend = []
-
-    for gameId in liste:
-        gameDejaSend.append((int)(gameId[4]))
     if liste is None:
         return
+
+    for gameId in liste:
+        gameDejaSend.append((int)(gameId[3]))
     
     for i in liste:
-        puuid, region =await getPuuidRegion(None, i[1], i[2], i[3])
+        puuid, region = i[1], i[2]
         try:
             cg = lol_watcher.spectator.by_puuid(region, puuid)
-
             if (cg["gameId"] not in gameDejaSend) and (cg["gameQueueConfigId"] != 1700) :
                 gameDejaSend.append(cg["gameId"])
                 player_data = {
-                    "puuid": i[1],
+                    "puuid": puuid,
                     "derniereGame": cg["gameId"],
                 }
 

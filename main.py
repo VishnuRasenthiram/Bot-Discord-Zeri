@@ -52,7 +52,7 @@ now = datetime.now()
 current_day= now.strftime("%d/%m/%Y")
 currect_daay=now2.strftime("%A")
 current_time = now2.strftime("%H:%M")
-print(currect_daay)
+
 
 
 version = lol_watcher.data_dragon.versions_for_region("euw1")

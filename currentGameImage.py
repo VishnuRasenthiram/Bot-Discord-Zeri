@@ -47,7 +47,6 @@ async def creerImageCG(cg,regionId,region):
                 champion=cle
                 for idMastery in range(len(mastery)):
                     if int(mastery[idMastery]['championId'])==int(cg["participants"][i]['championId']):
-                        print(mastery[idMastery]['championId'])
                         masteryPTS="{:,.0f}".format(int(mastery[idMastery]['championPoints']))
                         break
                 break        

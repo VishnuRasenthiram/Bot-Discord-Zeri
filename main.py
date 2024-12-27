@@ -29,6 +29,7 @@ from currentGameImage import *
 from baseDeDonne import *
 from tenorApi import *
 import hashlib  
+from zeriMoney import *
 load_dotenv()
 ##########################################################################
 
@@ -53,7 +54,7 @@ current_day= now.strftime("%d/%m/%Y")
 currect_daay=now2.strftime("%A")
 current_time = now2.strftime("%H:%M")
 
-
+Zeri_Money=ZeriMoney(bot)
 
 version = lol_watcher.data_dragon.versions_for_region("euw1")
 ##########################################################################
@@ -131,6 +132,7 @@ async def changementIconeServeur():
 scheduler = AsyncIOScheduler()
 scheduler.add_job(changementIconeServeur, CronTrigger(hour=10, minute=1))
 scheduler.add_job(changementIconeServeur, CronTrigger(hour=22, minute=1))
+scheduler.add_job(Zeri_Money.update_daily, CronTrigger(hour=0, minute=0))
 ##########################################################################
 
 
@@ -399,7 +401,7 @@ async def verif_game_en_cours():
                 pass
 
 
-@bot.tree.command(name="profil")
+@bot.tree.command(name="profil_lol")
 @app_commands.choices(region=choixRegion)
 async def lolp(interaction: discord.Interaction, pseudo: str = None, region: app_commands.Choice[str] = "euw1"):  
     puuid,region=await getPuuidRegion(interaction,pseudo,region)
@@ -451,8 +453,58 @@ async def on_message(message):
             
         if "prankex" in message.content.lower().split():
             await message.channel.send("https://tenor.com/view/guuruu-prank-prankex-gif-19025746535426067")
+        
+        await Zeri_Money.add_xp(message,calculer_xp(message))
 
-            
+last_message_time = {}
+COOLDOWN = 10      
+def calculer_xp(message):
+    user_id = message.author.id
+    current_time = time.time()
+    
+    if user_id in last_message_time:
+        elapsed_time = current_time - last_message_time[user_id]
+        if elapsed_time < COOLDOWN:
+            return 0 
+    
+    last_message_time[user_id] = current_time
+    
+    longueur_message = len(str(message.content.lower()).lstrip())
+    coef = math.log(longueur_message + 1) * 10
+    return min(int(coef), 100)
+
+@bot.tree.command(name="profil",description="Affiche le profil de l'utilisateur")
+async def profil( interaction: discord.Interaction):
+    await interaction.response.defer()
+    await Zeri_Money.profile(interaction)
+
+@bot.tree.command(name="leaderboard", description="Affiche le classement des utilisateurs en fonction de leur solde")
+async def leaderboard(interaction: discord.Interaction):
+    await interaction.response.defer()
+    await Zeri_Money.leaderboard(interaction)
+@bot.tree.command(name="leaderboard_level", description="Affiche le classement des utilisateurs en fonction de leur niveau")
+async def leaderboard(interaction: discord.Interaction):
+    await interaction.response.defer()
+    await Zeri_Money.leaderboard_level(interaction)
+
+@bot.tree.command(name="daily", description="Réclame votre récompense quotidienne")
+async def daily(interaction: discord.Interaction):
+    await interaction.response.defer()
+    await Zeri_Money.daily(interaction)
+
+@bot.tree.command(name="balance", description="Affiche le solde de l'utilisateur")
+async def balance( interaction: discord.Interaction):
+    await interaction.response.defer()
+    await Zeri_Money.balance(interaction)
+
+
+choixPOF=[app_commands.Choice(name="Pile", value="Pile"),
+    app_commands.Choice(name="Face", value="Face")]
+@bot.tree.command(name="pile_ou_face")
+@app_commands.choices(choix=choixPOF)
+async def pile_ou_face(interaction: discord.Interaction, mise: int, choix: app_commands.Choice[str]):
+    await interaction.response.defer()
+    await Zeri_Money.pile_ou_face(interaction, mise, choix.value)
 
 @bot.event
 async def on_member_update(before,after):
@@ -462,6 +514,7 @@ async def on_member_update(before,after):
     for i in guild.members:
         if i.id==after.id:
             dansMonServ = True
+            break
             
 
     if after.activity != None:

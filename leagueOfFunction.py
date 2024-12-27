@@ -12,7 +12,7 @@ import os
 from currentGameImage import *
 from baseDeDonne import *
 from historiqueImage import *
-from main import getPuuidRegion
+
 load_dotenv()
 
 lol_watcher = LolWatcher(os.getenv('RIOT_API'))

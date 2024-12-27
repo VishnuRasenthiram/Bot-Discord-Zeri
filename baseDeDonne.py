@@ -175,3 +175,65 @@ def drop_player_table():
     conn.close()
 
 
+def init_user_table():
+
+    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+
+    cur = conn.cursor()
+
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS user_profile (
+            id BIGINT PRIMARY KEY,
+            money INT,
+            level INT,
+            xp INT,
+            daily INT, 
+            nb_daily INT
+        )
+    """)
+
+    conn.commit()
+    cur.close()
+    conn.close()
+
+def insert_user_profile(data):
+    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+    cur = conn.cursor()
+    cur.execute("""
+        INSERT INTO user_profile (id, money, level, xp, daily, nb_daily)
+        VALUES (%s, %s, %s, %s, %s, %s)
+        ON CONFLICT (id) DO NOTHING
+    """, (data['id'], data['money'], data['level'], data['xp'], data['daily'], data['nb_daily']))
+    conn.commit()
+    cur.close()
+    conn.close()    
+def get_user_liste():
+    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM user_profile ")
+    player_liste = cur.fetchall()
+    cur.close()
+    conn.close()
+    return player_liste
+def get_user_profile(user_id):
+    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM user_profile WHERE id = %s", (user_id,))
+    user = cur.fetchone()
+    cur.close()
+    conn.close()
+    return user
+
+def update_user_profile(user_id, new_money, new_level, new_xp, new_daily, new_nb_daily):
+    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+    cur = conn.cursor()
+    cur.execute("""
+        UPDATE user_profile
+        SET money = %s, level = %s, xp = %s, daily = %s, nb_daily = %s
+        WHERE id = %s
+    """, (new_money, new_level, new_xp, new_daily, new_nb_daily, user_id))
+    conn.commit()
+    cur.close()
+    conn.close()
+    
+init_user_table()

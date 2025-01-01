@@ -620,6 +620,54 @@ async def dog(ctx):
 async def pat(ctx):
     
     await ctx.message.channel.send(getRandomGIf("pat pat"))
+def generate_interaction_text(value, M1, M2):
+    interaction_texts = {
+        "hug anime": f"{M1} fait un câlin chaleureux à {M2} 🫂.",
+        "run away anime": f"{M1} fuit {M2} 🏃💨.",
+        "kiss anime": f"{M1} donne une bise à {M2} 💋.",
+        "kiss romantic anime": f"{M1} embrasse tendrement {M2} ❤️.",
+        "hold hands anime": f"{M1} prend doucement la main de {M2} 🤝.",
+        "pat anime": f"{M1} tapote la tête de {M2} avec affection 🤗.",
+        "warm smile anime": f"{M1} sourit chaleureusement à {M2} 😊.",
+        "ignore anime": f"{M1} ignore complètement {M2} 🫥.",
+        "punch anime": f"{M1} frappe {M2} de toute ses forces 🤜💥.",
+        "push anime": f"{M1} pousse {M2} ✋.",
+        "threaten anime": f"{M1} menace {M2} avec un regard intense ⚡.",
+        "shout anime": f"{M1} crie en direction de {M2} 😡.",
+        "stare anime": f"{M1} fixe {M2} avec insistance 👀.",
+        "wink anime": f"{M1} fait un clin d’œil à {M2} 😉.",
+        "gun shoot anime": f"{M1} piou piou pan pan pan sur {M2} 🔫.",
+        "laught at anime": f"{M1} se fout de la gueule de {M2} 😆."
+    }
+    return interaction_texts.get(value, f"Interaction inconnue entre {M1} et {M2} 🤔.")
+choixInteraction = [
+    app_commands.Choice(name="Câlin", value="hug anime"),
+    app_commands.Choice(name="Se moquer", value="laught at anime"),
+    app_commands.Choice(name="Fuit", value="run away anime"),
+    app_commands.Choice(name="Bise", value="kiss anime"),
+    app_commands.Choice(name="Embrasse", value="kiss romantic anime"),
+    app_commands.Choice(name="Prend par la main", value="hold hands anime"),
+    app_commands.Choice(name="Pat", value="pat anime"),
+    app_commands.Choice(name="Sourit", value="warm smile anime"),
+    app_commands.Choice(name="Ignore", value="ignore anime"),
+    app_commands.Choice(name="Frappe", value="punch anime"),
+    app_commands.Choice(name="Pousse", value="push anime"),
+    app_commands.Choice(name="Menace", value="threaten anime"),
+    app_commands.Choice(name="Crie", value="shout anime"),
+    app_commands.Choice(name="Fixe avec insistance", value="stare anime"),
+    app_commands.Choice(name="Clin d’œil", value="wink anime"),
+    app_commands.Choice(name="Tire", value="gun shoot anime")
+
+]
+
+@bot.tree.command(name="interaction")
+@app_commands.choices(type=choixInteraction)
+async def interaction(interaction: discord.Interaction, type:app_commands.Choice[str], membre: discord.Member):
+    await interaction.response.defer()
+    embed= discord.Embed(description=generate_interaction_text(type.value, interaction.user.mention, membre.mention), color=discord.Color.random())
+    embed.set_image(url=getRandomGIf(type.value))
+    await interaction.delete_original_response()
+    await interaction.channel.send(membre.mention,embed=embed)
 ##########################################################################
 #SAY
 

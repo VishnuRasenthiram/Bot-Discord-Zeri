@@ -46,7 +46,7 @@ class ZeriMoney:
         if user==None:
            await  self.register(id)
         if user[4] == 0:
-            if user[5]==5:
+            if user[5]==7:
                 newDaily=5
                 newMoney=user[1]+(500*newDaily)+1000
             else:

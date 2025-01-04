@@ -615,11 +615,7 @@ async def dog(ctx):
     foto=json.loads(myfile)
     await ctx.message.channel.send(foto[0]["url"])
 
-@bot.command()
-@commands.cooldown(1, 5, commands.BucketType.user)
-async def pat(ctx):
-    
-    await ctx.message.channel.send(getRandomGIf("pat pat"))
+ 
 def generate_interaction_text(value, M1, M2):
     interaction_texts = {
         "hug anime": f"{M1} fait un câlin chaleureux à {M2} 🫂.",
@@ -637,8 +633,30 @@ def generate_interaction_text(value, M1, M2):
         "stare anime": f"{M1} fixe {M2} avec insistance 👀.",
         "wink anime": f"{M1} fait un clin d’œil à {M2} 😉.",
         "gun shoot anime": f"{M1} piou piou pan pan pan sur {M2} 🔫.",
-        "laught at anime": f"{M1} se fout de la gueule de {M2} 😆."
+        "laught at anime": f"{M1} se fout de la gueule de {M2} 😆.",
+        "shy anime": f"{M1} est gêné devant {M2} et rougit timidement 😳.",
+        "cry anime": f"{M1} pleure à chaudes larmes devant {M2} 😭.",
+        "pout anime": f"{M1} boude en direction de {M2} 🙁.",
+        "drool anime": f"{M1} bave un peu en regardant {M2} 🤤.",
+        "feed anime": f"{M1} donne à manger à {M2} 🍲.",
+        "sit anime": f"{M1} s’assoit tranquillement à côté de {M2} 🪑.",
+        "sleep with anime": f"{M1} s’endort paisiblement à côté de {M2} 😴."
     }
+    interaction_texts_none = {
+        "cry anime": f"{M1} pleure à chaudes larmes 😭.",
+        "shy anime": f"{M1} est gêné et rougit 😳.",
+        "sleep anime": f"{M1} s’endort paisiblement 😴.",
+        "bored anime": f"{M1} s’ennuie profondément🥱.",
+        "drool anime": f"{M1} bave un peu en rêvassant 🤤.",
+        "hungry anime": f"{M1} a faim et se tient le ventre 🍴.",
+        "disappear anime": f"{M1} disparaît mystérieusement✨.",
+        "depress anime": f"{M1} semble déprimé, dans un coin 😔.",
+        "happy anime": f"{M1} est heureux, une belle journée 😄.",
+        "wake up anime": f"{M1} se réveille en sursaut😯.",
+        "sit anime": f"{M1} s’assoit tranquillement, profitant du moment 🪑."
+    }
+    if M2 == None:
+        return interaction_texts_none.get(value, f"Interaction inconnue de {M1} 🤔.")
     return interaction_texts.get(value, f"Interaction inconnue entre {M1} et {M2} 🤔.")
 choixInteraction = [
     app_commands.Choice(name="Câlin", value="hug anime"),
@@ -656,8 +674,27 @@ choixInteraction = [
     app_commands.Choice(name="Crie", value="shout anime"),
     app_commands.Choice(name="Fixe avec insistance", value="stare anime"),
     app_commands.Choice(name="Clin d’œil", value="wink anime"),
-    app_commands.Choice(name="Tire", value="gun shoot anime")
+    app_commands.Choice(name="Tire", value="gun shoot anime"),
+    app_commands.Choice(name="Gêné", value="shy anime"),
+    app_commands.Choice(name="Pleure", value="cry anime"),
+    app_commands.Choice(name="Boude", value="pout anime"),
+    app_commands.Choice(name="Donne à manger", value="feed anime"),
+    app_commands.Choice(name="S’assoit", value="sit anime"),
+    app_commands.Choice(name="Dort", value="sleep with anime")
+]
 
+choixAction=[
+    app_commands.Choice(name="Gêné", value="shy anime"),
+    app_commands.Choice(name="S’ennuie", value="bored anime"),
+    app_commands.Choice(name="Pleure", value="cry anime"),
+    app_commands.Choice(name="Bave", value="drool anime"),
+    app_commands.Choice(name="Affamé", value="hungry anime"),
+    app_commands.Choice(name="Disparaît", value="disappear anime"),
+    app_commands.Choice(name="Déprimé", value="depress anime"),
+    app_commands.Choice(name="Heureux", value="happy anime"),
+    app_commands.Choice(name="Dort", value="sleep anime"),
+    app_commands.Choice(name="S’assoit", value="sit anime"),
+    app_commands.Choice(name="Se reveille", value="wake up anime")
 ]
 
 @bot.tree.command(name="interaction")
@@ -668,6 +705,15 @@ async def interaction(interaction: discord.Interaction, type:app_commands.Choice
     embed.set_image(url=getRandomGIf(type.value))
     await interaction.delete_original_response()
     await interaction.channel.send(membre.mention,embed=embed)
+
+@bot.tree.command(name="action")
+@app_commands.choices(type=choixAction)
+async def interaction(interaction: discord.Interaction, type:app_commands.Choice[str]):
+    await interaction.response.defer()
+    embed= discord.Embed(description=generate_interaction_text(type.value, interaction.user.mention,None), color=discord.Color.random())
+    embed.set_image(url=getRandomGIf(type.value))
+    await interaction.delete_original_response()
+    await interaction.channel.send(embed=embed)
 ##########################################################################
 #SAY
 
@@ -675,7 +721,6 @@ async def interaction(interaction: discord.Interaction, type:app_commands.Choice
 @bot.command()
 @commands.cooldown(1, 60, commands.BucketType.user)
 async def say(ctx):
-    
         mesg = str(" ".join(ctx.message.content.split()[1:]))
         await ctx.message.delete()
         await ctx.message.channel.send(mesg)
@@ -711,8 +756,7 @@ async def ppserv(ctx):
 
 @bot.command()
 async def banner(ctx):
-    
-   
+
     if  len(ctx.message.mentions)>0:
         user=ctx.message.mentions[0]
         usez =await bot.fetch_user(user.id)

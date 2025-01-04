@@ -636,8 +636,8 @@ def generate_interaction_text(value, M1, M2):
         "laught at anime": f"{M1} se fout de la gueule de {M2} 😆.",
         "shy anime": f"{M1} est gêné devant {M2} et rougit timidement 😳.",
         "cry anime": f"{M1} pleure à chaudes larmes devant {M2} 😭.",
-        "pout anime": f"{M1} boude en direction de {M2} 🙁.",
-        "drool anime": f"{M1} bave un peu en regardant {M2} 🤤.",
+        "pout anime": f"{M1} boude {M2} 🙁.",
+        "drool anime": f"{M1} bave en regardant {M2} 🤤.",
         "feed anime": f"{M1} donne à manger à {M2} 🍲.",
         "sit anime": f"{M1} s’assoit tranquillement à côté de {M2} 🪑.",
         "sleep with anime": f"{M1} s’endort paisiblement à côté de {M2} 😴."
@@ -650,8 +650,8 @@ def generate_interaction_text(value, M1, M2):
         "drool anime": f"{M1} bave un peu en rêvassant 🤤.",
         "hungry anime": f"{M1} a faim et se tient le ventre 🍴.",
         "disappear anime": f"{M1} disparaît mystérieusement✨.",
-        "depress anime": f"{M1} semble déprimé, dans un coin 😔.",
-        "happy anime": f"{M1} est heureux, une belle journée 😄.",
+        "depress anime": f"{M1} semble déprimer 😔.",
+        "happy anime": f"{M1} est heureux😄.",
         "wake up anime": f"{M1} se réveille en sursaut😯.",
         "sit anime": f"{M1} s’assoit tranquillement, profitant du moment 🪑."
     }

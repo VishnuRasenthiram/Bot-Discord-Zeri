@@ -8,11 +8,16 @@ import urllib
 import json
 import asyncio
 from historiqueImage import add_item_to_slot
+from historiqueImage import getTypePartieFromCode
 load_dotenv()
 lol_watcher = LolWatcher(os.getenv('RIOT_API'))
 version = lol_watcher.data_dragon.versions_for_region("euw1")
 font = ImageFont.truetype("font/BeaufortforLOL-Bold.ttf",size=25)
 fontLvl = ImageFont.truetype("font/BeaufortforLOL-Bold.ttf",size=20)
+fontMode= ImageFont.truetype("font/BeaufortforLOL-Bold.ttf",size=35)
+dataRunes=requests.get(f"https://ddragon.leagueoflegends.com/cdn/{version["v"]}/data/en_US/runesReforged.json")
+dataRunes=dataRunes.json()
+
 with open("dossierJson/summoner_info.json","r") as f:
     summonnerData= json.load(f)
 
@@ -36,6 +41,11 @@ async def creerImageCG(cg,regionId,region):
         spellid1=get_summoner_name_by_key(summonnerData,cg["participants"][i]["spell1Id"])
         spellid2=get_summoner_name_by_key(summonnerData,cg["participants"][i]["spell2Id"])
         spells= [spellid1,spellid2]
+        runes={"primaryId":cg["participants"][i]["perks"]["perkStyle"], 
+               "primaryRune":cg["participants"][i]["perks"]["perkIds"][0],
+               "secondaryId":cg["participants"][i]["perks"]["perkSubStyle"]}
+        modeDeJeu=cg["gameQueueConfigId"]
+
         pseudo=lol_watcher.accountV1.by_puuid(regionId,puuid)["gameName"]
         invocateur= lol_watcher.league.by_summoner(region,cg["participants"][i]["summonerId"])
         rank="Unranked"
@@ -62,9 +72,16 @@ async def creerImageCG(cg,regionId,region):
         else :
             localisation= ((sizeChamp[0]*(posR)+65*(posR+1)) ,(570))  
             posR+=1
-      
-        imageFond.paste(getChampImage(puuid,champion,pseudo,rank,div,lp,spells,masteryPTS,region),localisation)
+        
+        imageFond.paste(getChampImage(puuid,champion,pseudo,rank,div,lp,spells,masteryPTS,runes,region),localisation)
+        modeDeJeu= getTypePartieFromCode(modeDeJeu)
+        draw = ImageDraw.Draw(imageFond)
+        text_width = draw.textlength(modeDeJeu, font=fontMode)
 
+        image_width= imageFond.size[0]
+        text_x = (image_width - text_width) // 2
+
+        draw.text((text_x,10), modeDeJeu, font=fontMode, fill="#F0E6D2",align="center",stroke_width=2,stroke_fill="#010A13")
                         
     
     return imageFond
@@ -78,7 +95,7 @@ def get_summoner_name_by_key(summoners_dict, key):
   
 
     
-def getChampImage(puuid,Champ,pseudo,rank,div,lp,spell,masteryPTS,region):
+def getChampImage(puuid,Champ,pseudo,rank,div,lp,spell,masteryPTS,runes,region):
     versions = lol_watcher.data_dragon.versions_for_region(region)
     Account = lol_watcher.summoner.by_puuid(region, puuid)
     url = f"https://ddragon.leagueoflegends.com/cdn/img/champion/loading/{Champ}_0.jpg"
@@ -103,7 +120,9 @@ def getChampImage(puuid,Champ,pseudo,rank,div,lp,spell,masteryPTS,region):
         
            
     combined_image =combined_image.resize((96,48))
+    runes_image=runesImage(get_rune_by_PrimaryId(runes["primaryId"],runes["primaryRune"]),get_rune_by_SecondaryId(runes["secondaryId"])).resize((65,55)).convert('RGBA')
     finalImage.paste(combined_image,(5,400))
+    finalImage.paste(runes_image,(230,397),runes_image)
     imageFond= ImageDraw.Draw(finalImage)
 
     if rank=="Unranked":
@@ -155,18 +174,10 @@ def getChampImage(puuid,Champ,pseudo,rank,div,lp,spell,masteryPTS,region):
 
     finalImage.paste(background, background_position, background)
     
-    
-    
-    for x_offset, y_offset in [(-border_width, 0), (border_width, 0), (0, -border_width), (0, border_width)]:
-        imageFond.text((text_position[0] + x_offset, text_position[1] + y_offset), pseudo, font=font, fill=border_color)
-        imageFond.text((divLp_position[0] + x_offset, divLp_position[1] + y_offset), rankdivlp, font=font, fill=border_color)
-        imageFond.text((mastery_position[0] + x_offset, mastery_position[1] + y_offset), masteryPTS, font=font, fill=border_color)
-        imageFond.text((level_position[0] + x_offset, level_position[1] + y_offset), f"{accountLvl}", font=fontLvl, fill=border_color)
-    
-    imageFond.text(text_position,f"{pseudo}",font=font,fill=text_color)
-    imageFond.text(divLp_position,rankdivlp,font=font,fill=text_color)
-    imageFond.text(mastery_position,masteryPTS,font=font,fill=text_color)
-    imageFond.text(level_position,f"{accountLvl}",font=fontLvl,fill=text_color)
+    imageFond.text(text_position,f"{pseudo}",font=font,fill=text_color,align="center",stroke_width=border_width,stroke_fill=border_color)
+    imageFond.text(divLp_position,rankdivlp,font=font,fill=text_color,align="center",stroke_width=border_width,stroke_fill=border_color)
+    imageFond.text(mastery_position,masteryPTS,font=font,fill=text_color,align="center",stroke_width=border_width,stroke_fill=border_color)
+    imageFond.text(level_position,f"{accountLvl}",font=fontLvl,fill=text_color,align="center",stroke_width=border_width,stroke_fill=border_color)
     return finalImage.resize(sizeChamp)     
 
 
@@ -200,12 +211,64 @@ def getRankIcon(Account,rank,region):
     
     return iconeFinal
 
-#with open("1.json","r") as f :
-#    cg= json.load(f)
+
+
+
+def get_rune_by_PrimaryId(rune_id,secondary_Id):
+    for rune in dataRunes:
+        if rune["id"]==rune_id:
+            rune_liste =rune["slots"][0]["runes"]
+            for i in range (len(rune_liste)):
+                if rune_liste[i]["id"]==secondary_Id:
+                    return "https://ddragon.leagueoflegends.com/cdn/img/"+rune_liste[i]["icon"]
+def get_rune_by_SecondaryId(rune_id):
+    for rune in dataRunes:
+        if rune["id"]==rune_id:
+            return "https://ddragon.leagueoflegends.com/cdn/img/"+rune["icon"]
+
+
+def runesImage(image1_url, image2_url):
+    response1 = requests.get(image1_url)
+    image1 = Image.open(BytesIO(response1.content)).convert("RGBA")
+
+    response2 = requests.get(image2_url)
+    image2 = Image.open(BytesIO(response2.content)).convert("RGBA")
+
+
+    new_size = (130, 130)
+    image2 = image2.resize(new_size)
+
+
+    circle1_size = (image1.size[0] + 50, image1.size[1] + 50)
+    circle2_size = (image2.size[0] + 50, image2.size[1] + 50)
+
+    circle1 = Image.new("RGBA", circle1_size, (0, 0, 0, 0))
+    draw1 = ImageDraw.Draw(circle1)
+    draw1.ellipse((0, 0, circle1_size[0], circle1_size[1]), outline="#C89B3C",fill="#1E282D", width=10)
+
+    circle2 = Image.new("RGBA", circle2_size, (0, 0, 0, 0))
+    draw2 = ImageDraw.Draw(circle2)
+    draw2.ellipse((0, 0, circle2_size[0], circle2_size[1]), outline="#C89B3C",fill="#1E282D", width=10)
+
+
+    circle1.paste(image1, (25, 25), image1)
+    circle2.paste(image2, (25, 25), image2)
+
+
+    output_image = Image.new("RGBA", (450,350), (255, 255, 255, 0))
+
+    output_image.paste(circle1, (0, 0), circle1)
+    output_image.paste(circle2, (265, 130), circle2)
+
+    return output_image.convert("RGBA")
+"""
+with open("1.json","r") as f :
+    cg= json.load(f)
 
 
 
 
-#image =creerImageCG(cg,"europe","euw1")
+image =creerImageCG(cg,"europe","euw1")
 
-#image.save("test.png")
+image.save("test.png")
+"""

@@ -1271,14 +1271,13 @@ async def testChann(ctx):
 
 
 @bot.tree.command(name="ajouter_channel_suivit")
-@commands.has_permissions(administrator = True)
 async def addChannel(interaction: discord.Interaction, channel:discord.channel.TextChannel):
-    await interaction.response.defer()
+    
     if not interaction.user.guild_permissions.administrator:
         await interaction.response.send_message(
             "Vous devez être administrateur pour utiliser cette commande !", ephemeral=True
         )
-        return
+    await interaction.response.defer()
     dataChannel = {
         "id": channel.id,
         "nom": channel.name
@@ -1290,14 +1289,13 @@ def generate_choices():
     return [app_commands.Choice(name=f"{i[1]}", value=f"{i[0]}") for i in liste_channel ]
 
 @bot.tree.command(name="suppr_channel_suivit")
-@commands.has_permissions(administrator = True)
 async def delChannel(interaction: discord.Interaction, channel:str):
-    await interaction.response.defer()
+    
     if not interaction.user.guild_permissions.administrator:
         await interaction.response.send_message(
             "Vous devez être administrateur pour utiliser cette commande !", ephemeral=True
         )
-        return
+    await interaction.response.defer()
     delete_listChannelSuivit(channel)
     await interaction.followup.send("Channel supprimé avec succès !", ephemeral=True)
     

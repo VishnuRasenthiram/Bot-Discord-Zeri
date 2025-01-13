@@ -171,8 +171,8 @@ async def getMe(interaction:discord.Interaction,pseudo,tagline,region):
     if not isinstance(region,Choice):
             region= Choice(name="defaut",value="euw1")
     try:
-        me =lol_watcher.accountV1.by_riotid(region=regionForRiotId(region.value),summoner_name=pseudo,tagline=tagline),region.value
-        return me
+        me,region =lol_watcher.accountV1.by_riotid(region=regionForRiotId(region.value),summoner_name=pseudo,tagline=tagline),region.value
+        return me,region
     
     except ApiError as err:
         if err.response.status_code == 429 :
@@ -279,12 +279,11 @@ async def del_profile(interaction:discord.Interaction):
     if etat==0:
         await interaction.response.send_message("Vous n'avez pas lié de compte !",ephemeral=True)
     else :
-        
         await interaction.response.send_message("Votre compte a bien été supprimé !",ephemeral=True)
 
 @bot.tree.command(name="suivre_profil")
 @app_commands.choices(region=choixRegion)
-async def add_profile_liste(interaction:discord.Interaction,pseudo:str,region:app_commands.Choice[str]="euw1"):
+async def add_profile_liste(interaction:discord.Interaction,pseudo:str,channel:str,region:app_commands.Choice[str]="euw1"):
    
         try:
             pseudo,tagline=await verifFormatRiotId(interaction,pseudo)
@@ -295,24 +294,40 @@ async def add_profile_liste(interaction:discord.Interaction,pseudo:str,region:ap
                 print("Quota de requête dépassé")
             elif err.response.status_code == 404:
                  await interaction.response.send_message("Le compte avec ce pseudo n'existe pas !",ephemeral=True)
-        liste=get_player_liste()
-        trouvé=True
+        liste = get_player_liste()
+        trouvé = True
         
-        if len(liste)!=0:
+        if liste:
             for puuidL in liste:
-                if puuidL==puuid :
-                    trouvé=False
+                if puuidL[1] == puuid and channel in ast.literal_eval(puuidL[4]):
+                    trouvé = False
+                    break
+        
+        if trouvé:
+            for i in liste:
+                if i[1] == puuid:
+                    listeChan = list(ast.literal_eval(i[4]))
+                    listeChan.append(channel)
+                    update_player_listeChannel(puuid, listeChan)
+                    trouvé = False
+                    break
+        
+            if trouvé:
+                listeChan = [channel]
+                player_data = {
+                    "puuid": puuid,
+                    "region": region,
+                    "listeChannel": str(listeChan)
+                }
+                insert_player_liste(player_data)
+        
+            await interaction.response.send_message("Profil ajouté !", ephemeral=True)
+        else:
+            await interaction.response.send_message("Ce profil est déjà suivi !", ephemeral=True)
+@add_profile_liste.autocomplete("channel")
+async def type_autocomplete(interaction: discord.Interaction, current: str):
+    return [app_commands.Choice(name=choice.name, value=choice.value) for choice in generate_choices() if current.lower() in choice.name.lower()]
  
-        if trouvé :
-            player_data={
-                "puuid":puuid,
-                "region":region,
-            }
-            insert_player_liste(player_data)
-            await interaction.response.send_message("Profil ajouté !",ephemeral=True)
-       
-        else :
-            await interaction.response.send_message("Ce profil est déjà suivit !",ephemeral=True)
 async def getPuuidRegion(interaction:discord.Interaction,pseudo:str,region:str):
         if pseudo:
             pseudo,tagline=await verifFormatRiotId(interaction,pseudo)
@@ -339,12 +354,14 @@ async def getPuuidRegion(interaction:discord.Interaction,pseudo:str,region:str):
 
 
 
-
-
+def generate_choices_liste_player(puuid):
+    liste_channel= get_player_listeChannel(puuid)
+    return [app_commands.Choice(name=f"{i[1]}", value=f"{i[0]}") for i in liste_channel ]
+#il faut une fonction pour supprimer un channel ou tous les channels et donc la personne de la liste
 
 @bot.tree.command(name="suppr_profil_suivit")
 @app_commands.choices(region=choixRegion)
-async def del_profile_liste(interaction:discord.Interaction,pseudo:str,region:app_commands.Choice[str]="euw1"):
+async def del_profile_liste(interaction:discord.Interaction,pseudo:str,channel:str,region:app_commands.Choice[str]="euw1"):
     pseudo,tagline=await verifFormatRiotId(interaction,pseudo)
     me,region=await getMe(interaction,pseudo,tagline,region)
     puuid=me["puuid"]
@@ -352,19 +369,53 @@ async def del_profile_liste(interaction:discord.Interaction,pseudo:str,region:ap
                 "puuid":puuid,
                 "region":region,
     }
-    etat=delete_player_liste(player_data)
+
+    if channel=="all":
+        etat=delete_player_liste(player_data)
+    else:
+        channelListe= list(get_player_listeChannel(puuid))
+        if str(channel) in channelListe:
+            channelListe.remove(channel)
+            if len(channelListe)==0:
+                delete_player_liste(player_data)
+            etat=1
+            update_player_listeChannel(player_data["puuid"],channelListe)
+        else:
+            etat=0
+            
+                
     if etat==0:
         await interaction.response.send_message("Ce profil n'est pas dans la base de donnée!",ephemeral=True)
     else :
-        
         await interaction.response.send_message("Ce profil a bien été supprimé !",ephemeral=True)
+@del_profile_liste.autocomplete("channel")
+async def type_autocomplete(interaction: discord.Interaction, current: str):
+    pseudo = interaction.namespace.pseudo
+    pseudo, tagline = await verifFormatRiotId(None, pseudo)
+    me, region = await getMe(None, pseudo, tagline, None)
+    puuid = me["puuid"]
+    chan = [app_commands.Choice(name="All", value="all")]
+
+    channel_list_id = get_player_listeChannel(puuid)
+    if channel_list_id is None:
+        return chan
+    channel_list = []
+    for id in channel_list_id:
+        channel = bot.get_channel(int(id))
+        if channel:
+            channel_list.append(app_commands.Choice(name=channel.name, value=str(channel.id)))
+
+    chan = chan + [
+        choice for choice in channel_list if current.lower() in choice.name.lower()
+    ]
+    return chan
+     
+
 
 async def verif_game_en_cours():
     liste = get_player_liste()
-    guild = bot.get_guild(KARAN_ID)
-    guildGuuruu=bot.get_guild(GUURUU_ID)
-    salon = guild.get_channel(CHANNEL_SUIVIT)
-    salonGuuruu=guildGuuruu.get_channel(CHANNEL_SUIVIT_GUURUU)
+
+
     gameDejaSend = []
     if liste is None:
         return
@@ -377,22 +428,25 @@ async def verif_game_en_cours():
         try:
             cg = lol_watcher.spectator.by_puuid(region, puuid)
             if (cg["gameId"] not in gameDejaSend) and (cg["gameQueueConfigId"] != 1700) :
-                gameDejaSend.append(cg["gameId"])
                 player_data = {
                     "puuid": puuid,
                     "derniereGame": cg["gameId"],
                 }
 
-                update_derniereGame(player_data)
                 regionId = LOF.regionForRiotId(region)
                 image = await creer_image_avec_reessai(cg, regionId, region)
                 img_bytes = BytesIO()
                 image.save(img_bytes, format='PNG')
                 img_bytes.seek(0)
                 file=discord.File(img_bytes, filename="Partie_En_Cours.png")
-                await salon.send(file=file)
-                img_bytes.seek(0)
-                await salonGuuruu.send(file=file)
+
+                channelListe= list(get_player_listeChannel(puuid))
+                for channelId in channelListe:
+                    channel=bot.get_channel(int(channelId))
+                    await channel.send(file=file)
+                    img_bytes.seek(0)
+                gameDejaSend.append(cg["gameId"])
+                update_derniereGame(player_data)
         except ApiError as err:
             status_code = err.response.status_code
             if status_code == 429:
@@ -1059,16 +1113,6 @@ async def pick(ctx):
     
     await ctx.message.channel.send(embed=embed)
     
-        
-
-
-
-
-    
-
-    
-
-
 
 @bot.event
 async def on_command_error(ctx, error):
@@ -1216,6 +1260,43 @@ async def checkpoll(id):
             await channel.send(poll.get_answer(1).vote_count)
     except Exception as e :
         print(e)
+
+     
+
+@bot.command()
+async def testChann(ctx):
+
+    channel= bot.get_channel(CHANNEL_SUIVIT)  
+    print(dir(channel))
+
+
+@bot.tree.command(name="ajouter_channel_suivit")
+@commands.has_permissions(administrator = True)
+async def addChannel(interaction: discord.Interaction, channel:discord.channel.TextChannel):
+    await interaction.response.defer()
+    dataChannel = {
+        "id": channel.id,
+        "nom": channel.name
+    }
+    insert_listChannelSuivit(dataChannel)
+    await interaction.followup.send("Channel ajouté avec succès !", ephemeral=True)
+def generate_choices():
+    liste_channel= get_listChannelSuivit()
+    return [app_commands.Choice(name=f"{i[1]}", value=f"{i[0]}") for i in liste_channel ]
+
+@bot.tree.command(name="suppr_channel_suivit")
+@commands.has_permissions(administrator = True)
+async def delChannel(interaction: discord.Interaction, channel:str):
+    await interaction.response.defer()
+    delete_listChannelSuivit(channel)
+    await interaction.followup.send("Channel supprimé avec succès !", ephemeral=True)
+    
+@delChannel.autocomplete("channel")
+async def type_autocomplete(interaction: discord.Interaction, current: str):
+    return [app_commands.Choice(name=choice.name, value=choice.value) for choice in generate_choices() if current.lower() in choice.name.lower()]
+    
+
+
 
 if __name__ == "__main__":
     asyncio.run(bot.start(os.getenv('TOKEN')))

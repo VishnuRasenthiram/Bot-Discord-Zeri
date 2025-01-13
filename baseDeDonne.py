@@ -1,6 +1,7 @@
 import psycopg2
 import os
 from dotenv import load_dotenv
+import ast
 load_dotenv()
 DATABASE_URL=os.getenv('DATABASE_URL')
 
@@ -113,9 +114,9 @@ def insert_player_liste(data):
     conn = psycopg2.connect(DATABASE_URL, sslmode='require')
     cur = conn.cursor()
     cur.execute("""
-        INSERT INTO liste_player(puuid,region,derniereGame)
-        VALUES (%s,%s,%s)
-    """, (data['puuid'],data['region'],"0"))
+        INSERT INTO liste_player(puuid,region,derniereGame,listeChannel)
+        VALUES (%s,%s,%s,%s)
+    """, (data['puuid'],data['region'],"0",data['listeChannel']))
     conn.commit()
     cur.close()
     conn.close()
@@ -174,6 +175,87 @@ def drop_player_table():
     cur.close()
     conn.close()
 
+def alterTableListePlayer():
+    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+    cur = conn.cursor()
+    cur.execute("ALTER TABLE liste_player ADD COLUMN listeChannel VARCHAR(255) DEFAULT '[]'")
+    conn.commit()
+    cur.close()
+    conn.close()
+
+def get_player_listeChannel(puuid):
+    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+    cur = conn.cursor()
+    cur.execute("SELECT listeChannel FROM liste_player WHERE puuid = %s", (puuid,))
+    result = cur.fetchone()
+    cur.close()
+    conn.close()
+
+    return ast.literal_eval(result[0])
+
+    
+def update_player_listeChannel(puuid, listeChannel):
+    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+    cur = conn.cursor()
+    cur.execute("""
+        UPDATE liste_player 
+        SET listeChannel = %s
+        WHERE puuid = %s ;
+    """, (str(listeChannel), puuid,))
+    conn.commit()
+    cur.close()
+    conn.close()
+
+def init_listChannelSuivit_table():
+
+    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+
+    cur = conn.cursor()
+
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS liste_Channel_Suivit (
+            id varchar(255) PRIMARY KEY,
+            nom VARCHAR(255)
+        )
+    """)
+
+    conn.commit()
+    cur.close()
+    conn.close()
+
+def insert_listChannelSuivit(data):
+    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+    cur = conn.cursor()
+    cur.execute("""
+        INSERT INTO liste_Channel_Suivit (id, nom)
+        VALUES (%s, %s)
+        ON CONFLICT (id) DO NOTHING
+    """, (data['id'], data['nom']))
+    conn.commit()
+    cur.close()
+    conn.close()
+def delete_listChannelSuivit(id):    
+    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+    cur = conn.cursor()
+    cur.execute("DELETE FROM liste_Channel_Suivit WHERE id = %s" , (id,))
+    conn.commit()
+    if cur.rowcount == 0:
+            etat =0
+    else:
+            etat =1
+    cur.close()
+    conn.close()
+
+    return etat
+
+def get_listChannelSuivit():
+    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM liste_Channel_Suivit ")
+    liste_channel = cur.fetchall()
+    cur.close()
+    conn.close()
+    return liste_channel
 
 def init_user_table():
 
@@ -236,4 +318,10 @@ def update_user_profile(user_id, new_money, new_level, new_xp, new_daily, new_nb
     cur.close()
     conn.close()
     
-init_user_table()
+def reset_listeChannel():
+    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+    cur = conn.cursor()
+    cur.execute("UPDATE liste_player SET listeChannel = '[]'")
+    conn.commit()
+    cur.close()
+    conn.close()

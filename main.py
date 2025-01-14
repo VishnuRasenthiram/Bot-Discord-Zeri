@@ -98,19 +98,30 @@ async def on_ready():
     scheduler.start()
     print("le bot est pret")
     try:
+        periodic_check.start()
         synced= await bot.tree.sync()
-        print(f"Synced {synced} commands")
     except Exception as e:
         print(e)
     
-    periodic_check.start()
+    
 
    
     
 
 @tasks.loop(seconds=60)
 async def periodic_check():
-    await verif_game_en_cours() 
+    attempt = True
+    while attempt :
+        try:
+            await verif_game_en_cours() 
+            
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 503:
+                await asyncio.sleep(1) 
+            else:
+                raise e
+    raise Exception("Échec après plusieurs tentatives : le service reste indisponible.")
+    
 
     
 async def changementIconeServeur():

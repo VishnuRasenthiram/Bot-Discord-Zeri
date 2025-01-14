@@ -106,9 +106,17 @@ async def on_ready():
 
    
     
-@tasks.loop(seconds=60)
+is_running = False
+@tasks.loop(seconds=10)
 async def periodic_check():
-    await verif_game_en_cours()
+    global is_running
+    if is_running:
+        return
+    is_running = True
+    try:
+        await verif_game_en_cours()
+    finally:
+        is_running = False
     
 async def changementIconeServeur():
     with open("env/ranked-emblem/Karan_nuit.png", 'rb') as n,open("env/ranked-emblem/Karan_jour.png", 'rb') as j:
@@ -414,8 +422,7 @@ async def type_autocomplete(interaction: discord.Interaction, current: str):
 
 async def verif_game_en_cours():
     liste = get_player_liste()
-
-
+    print("Vérification des parties en cours")
     gameDejaSend = []
     if liste is None:
         return
@@ -423,8 +430,8 @@ async def verif_game_en_cours():
     for gameId in liste:
         gameDejaSend.append((int)(gameId[3]))
     
-    for i in liste:
-        puuid, region = i[1], i[2]
+    for player in liste:
+        puuid, region = player[1], player[2]
         try:
             cg = lol_watcher.spectator.by_puuid(region, puuid)
             if (cg["gameId"] not in gameDejaSend) and (cg["gameQueueConfigId"] != 1700) :
@@ -451,6 +458,7 @@ async def verif_game_en_cours():
             status_code = err.response.status_code
             if status_code == 429:
                 print("Quota de requête dépassé")
+                pass
             else:
                 pass
 

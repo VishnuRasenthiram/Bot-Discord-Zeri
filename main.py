@@ -102,24 +102,16 @@ async def on_ready():
         print(f"Synced {synced} commands")
     except Exception as e:
         print(e)
-    if not periodic_check.is_running():
-        periodic_check.start()
+    
+    periodic_check.start()
 
    
     
-is_running = False
+
 @tasks.loop(seconds=60)
 async def periodic_check():
-    global is_running
-    if is_running:
-        return
-    is_running = True
-    try:
-        await verif_game_en_cours() 
-    except Exception as e:
-        print(f"Erreur pendant la vérification : {e}")
-    finally:
-        is_running = False
+    await verif_game_en_cours() 
+
     
 async def changementIconeServeur():
     with open("env/ranked-emblem/Karan_nuit.png", 'rb') as n,open("env/ranked-emblem/Karan_jour.png", 'rb') as j:

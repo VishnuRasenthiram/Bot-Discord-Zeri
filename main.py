@@ -91,23 +91,6 @@ CHANNEL_SUIVIT_GUURUU=1320482473217490975
 #MAIN
 print(current_time)
 
-
-
-@bot.event
-async def on_ready():
-    scheduler.start()
-    print("le bot est pret")
-    try:
-        synced= await bot.tree.sync()
-    except Exception as e:
-        print(e)
-    
-    
-
-   
-    
-
-
 verif_lock = asyncio.Lock()
 
 @tasks.loop(seconds=60)
@@ -125,8 +108,23 @@ async def periodic_check():
 async def before_periodic_check():
     await bot.wait_until_ready()
 
-# Démarrez la boucle périodique
-periodic_check.start()
+@bot.event
+async def on_ready():
+    scheduler.start()
+    print("le bot est pret")
+    try:
+        periodic_check.start()
+        synced= await bot.tree.sync()
+    except Exception as e:
+        print(e)
+    
+    
+
+   
+    
+
+
+
 
 async def changementIconeServeur():
     with open("env/ranked-emblem/Karan_nuit.png", 'rb') as n,open("env/ranked-emblem/Karan_jour.png", 'rb') as j:

@@ -446,7 +446,8 @@ async def verif_game_en_cours():
                     "puuid": puuid,
                     "derniereGame": cg["gameId"],
                 }
-
+                gameDejaSend.append(cg["gameId"])
+                update_derniereGame(player_data)
                 regionId = LOF.regionForRiotId(region)
                 image = await creer_image_avec_reessai(cg, regionId, region)
                 img_bytes = BytesIO()
@@ -459,8 +460,7 @@ async def verif_game_en_cours():
                     channel=bot.get_channel(int(channelId))
                     await channel.send(file=file)
                     img_bytes.seek(0)
-                gameDejaSend.append(cg["gameId"])
-                update_derniereGame(player_data)
+                
         except ApiError as err:
             status_code = err.response.status_code
             if status_code == 429:

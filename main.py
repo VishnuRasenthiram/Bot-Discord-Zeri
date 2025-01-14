@@ -98,7 +98,6 @@ async def on_ready():
     scheduler.start()
     print("le bot est pret")
     try:
-        periodic_check.start()
         synced= await bot.tree.sync()
     except Exception as e:
         print(e)
@@ -108,22 +107,27 @@ async def on_ready():
    
     
 
+
+verif_lock = asyncio.Lock()
+
 @tasks.loop(seconds=60)
 async def periodic_check():
-    attempt = True
-    while attempt :
+    async with verif_lock:
         try:
-            await verif_game_en_cours() 
-            
+            await verif_game_en_cours()
         except requests.exceptions.HTTPError as e:
             if e.response.status_code == 503:
-                await asyncio.sleep(1) 
+                await asyncio.sleep(1)
             else:
                 raise e
-    raise Exception("Échec après plusieurs tentatives : le service reste indisponible.")
-    
 
-    
+@periodic_check.before_loop
+async def before_periodic_check():
+    await bot.wait_until_ready()
+
+# Démarrez la boucle périodique
+periodic_check.start()
+
 async def changementIconeServeur():
     with open("env/ranked-emblem/Karan_nuit.png", 'rb') as n,open("env/ranked-emblem/Karan_jour.png", 'rb') as j:
         iconNuit = n.read()

@@ -102,19 +102,22 @@ async def on_ready():
         print(f"Synced {synced} commands")
     except Exception as e:
         print(e)
-    periodic_check.start()
+    if not periodic_check.is_running():
+        periodic_check.start()
 
    
     
 is_running = False
-@tasks.loop(seconds=10)
+@tasks.loop(seconds=60)
 async def periodic_check():
     global is_running
     if is_running:
         return
     is_running = True
     try:
-        await verif_game_en_cours()
+        await verif_game_en_cours() 
+    except Exception as e:
+        print(f"Erreur pendant la vérification : {e}")
     finally:
         is_running = False
     
@@ -422,7 +425,6 @@ async def type_autocomplete(interaction: discord.Interaction, current: str):
 
 async def verif_game_en_cours():
     liste = get_player_liste()
-    print("Vérification des parties en cours")
     gameDejaSend = []
     if liste is None:
         return

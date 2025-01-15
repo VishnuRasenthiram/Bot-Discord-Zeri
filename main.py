@@ -228,7 +228,6 @@ async def getPuuidRegion(interaction:discord.Interaction,pseudo:str,region:str):
 
         return puuid,region            
 
-
 choixRegion=[app_commands.Choice(name="EUW", value="euw1"),
     app_commands.Choice(name="EUN", value="eun1"),
     app_commands.Choice(name="TR", value="tr1"),           
@@ -344,36 +343,10 @@ async def add_profile_liste(interaction:discord.Interaction,pseudo:str,channel:s
 async def type_autocomplete(interaction: discord.Interaction, current: str):
     return [app_commands.Choice(name=choice.name, value=choice.value) for choice in generate_choices() if current.lower() in choice.name.lower()]
  
-async def getPuuidRegion(interaction:discord.Interaction,pseudo:str,region:str):
-        if pseudo:
-            pseudo,tagline=await verifFormatRiotId(interaction,pseudo)
-        if not(pseudo):
-            
-            profile=get_player_data(interaction.user.id)
-        
-            if profile!=None:
-                
-                if profile[4]==0:
-                    await interaction.response.send_message("Vous n'avez pas confirmé le profil !",ephemeral=True)
-                else :
-                    puuid = profile[1]
-                    region = profile[3]
-                    
-            else:
-                await interaction.response.send_message("Veuillez entrer votre Riot ID comme ceci : Pseudo#0000\nVous avez la possibilité de lié votre compte via la commande : **/sauvegarder_mon_profil**",ephemeral=True)
-        else:
-            me,region=await getMe(interaction,pseudo,tagline,region)
-            puuid=me["puuid"]
-
-
-        return puuid,region            
-
-
 
 def generate_choices_liste_player(puuid):
     liste_channel= get_player_listeChannel(puuid)
     return [app_commands.Choice(name=f"{i[1]}", value=f"{i[0]}") for i in liste_channel ]
-#il faut une fonction pour supprimer un channel ou tous les channels et donc la personne de la liste
 
 @bot.tree.command(name="suppr_profil_suivit")
 @app_commands.choices(region=choixRegion)
@@ -404,6 +377,7 @@ async def del_profile_liste(interaction:discord.Interaction,pseudo:str,channel:s
         await interaction.response.send_message("Ce profil n'est pas dans la base de donnée!",ephemeral=True)
     else :
         await interaction.response.send_message("Ce profil a bien été supprimé !",ephemeral=True)
+
 @del_profile_liste.autocomplete("channel")
 async def type_autocomplete(interaction: discord.Interaction, current: str):
     pseudo = interaction.namespace.pseudo
@@ -429,6 +403,39 @@ async def type_autocomplete(interaction: discord.Interaction, current: str):
             channel_list.append(app_commands.Choice(name=channel.name, value=str(channel.id)))
 
     return [choice for choice in channel_list if current.lower() in choice.name.lower()]
+
+@bot.tree.command(name="ajouter_channel_suivit")
+async def addChannel(interaction: discord.Interaction, channel:discord.channel.TextChannel):
+    
+    if not interaction.user.id==517231233235812353:
+        await interaction.response.send_message(
+            "Demandez à <@517231233235812353> pour faire cela!", ephemeral=True
+        )
+    await interaction.response.defer()
+    dataChannel = {
+        "id": channel.id,
+        "nom": channel.name
+    }
+    insert_listChannelSuivit(dataChannel)
+    await interaction.followup.send("Channel ajouté avec succès !", ephemeral=True)
+def generate_choices():
+    liste_channel= get_listChannelSuivit()
+    return [app_commands.Choice(name=f"{i[1]}", value=f"{i[0]}") for i in liste_channel ]
+
+@bot.tree.command(name="suppr_channel_suivit")
+async def delChannel(interaction: discord.Interaction, channel:str):
+    
+    if not interaction.user.id==517231233235812353:
+        await interaction.response.send_message(
+            "Demandez à <@517231233235812353> pour faire cela!", ephemeral=True
+        )
+    await interaction.response.defer()
+    delete_listChannelSuivit(channel)
+    await interaction.followup.send("Channel supprimé avec succès !", ephemeral=True)
+    
+@delChannel.autocomplete("channel")
+async def type_autocomplete(interaction: discord.Interaction, current: str):
+    return [app_commands.Choice(name=choice.name, value=choice.value) for choice in generate_choices() if current.lower() in choice.name.lower()]
      
 
 
@@ -1292,38 +1299,6 @@ async def testChann(ctx):
     print(dir(channel))
 
 
-@bot.tree.command(name="ajouter_channel_suivit")
-async def addChannel(interaction: discord.Interaction, channel:discord.channel.TextChannel):
-    
-    if not interaction.user.guild_permissions.administrator:
-        await interaction.response.send_message(
-            "Vous devez être administrateur pour utiliser cette commande !", ephemeral=True
-        )
-    await interaction.response.defer()
-    dataChannel = {
-        "id": channel.id,
-        "nom": channel.name
-    }
-    insert_listChannelSuivit(dataChannel)
-    await interaction.followup.send("Channel ajouté avec succès !", ephemeral=True)
-def generate_choices():
-    liste_channel= get_listChannelSuivit()
-    return [app_commands.Choice(name=f"{i[1]}", value=f"{i[0]}") for i in liste_channel ]
-
-@bot.tree.command(name="suppr_channel_suivit")
-async def delChannel(interaction: discord.Interaction, channel:str):
-    
-    if not interaction.user.guild_permissions.administrator:
-        await interaction.response.send_message(
-            "Vous devez être administrateur pour utiliser cette commande !", ephemeral=True
-        )
-    await interaction.response.defer()
-    delete_listChannelSuivit(channel)
-    await interaction.followup.send("Channel supprimé avec succès !", ephemeral=True)
-    
-@delChannel.autocomplete("channel")
-async def type_autocomplete(interaction: discord.Interaction, current: str):
-    return [app_commands.Choice(name=choice.name, value=choice.value) for choice in generate_choices() if current.lower() in choice.name.lower()]
     
 
 

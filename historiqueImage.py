@@ -16,9 +16,9 @@ font = ImageFont.truetype("font/BeaufortforLOL-Bold.ttf",size=25)
 bandeauWidth, bandeauHeight = 900, 200
 masque = Image.new('L', (bandeauWidth, bandeauHeight), 0)
 draw = ImageDraw.Draw(masque)
-radius = 50  
 
-draw.rounded_rectangle([(0, 0), (bandeauWidth, bandeauHeight)], radius=radius, fill=255)
+
+draw.rectangle([(0, 0), (bandeauWidth, bandeauHeight)], fill=255, outline="black", width=6)
 
 def creeImageHistorique(puuid,region):
     histo= lol_watcher.match.matchlist_by_puuid(region,puuid)
@@ -50,7 +50,7 @@ def creeBandeauItem(informationPartie):
     slot = Image.open("Image/empty_slot.png")
     for i in range (7):
         if informationPartie[f'item{i}'] !=0:
-            slot = add_item_to_slot(slot,f'https://ddragon.leagueoflegends.com/cdn/14.16.1/img/item/{informationPartie[f'item{i}']}.png')
+            slot = add_item_to_slot(slot,f'https://ddragon.leagueoflegends.com/cdn/{version["v"]}/img/item/{informationPartie[f'item{i}']}.png')
             combined_image.paste(slot, (i * 64, 0))
             
     return combined_image

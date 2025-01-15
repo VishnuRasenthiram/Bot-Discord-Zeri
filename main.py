@@ -98,12 +98,15 @@ async def periodic_check():
     async with verif_lock:
         try:
             await verif_game_en_cours()
-        except ApiError as e:
-            print(e)
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 503:
+                print("Service indisponible, attente...")
+                await asyncio.sleep(60)
+            else:
+                print(f"Erreur HTTP: {e}")
+        except Exception as e:
+            print(f"Erreur: {e}")
 
-@periodic_check.before_loop
-async def before_periodic_check():
-    await bot.wait_until_ready()
 
 @bot.event
 async def on_ready():
@@ -404,24 +407,28 @@ async def del_profile_liste(interaction:discord.Interaction,pseudo:str,channel:s
 @del_profile_liste.autocomplete("channel")
 async def type_autocomplete(interaction: discord.Interaction, current: str):
     pseudo = interaction.namespace.pseudo
+    if not pseudo:
+        return []
+
     pseudo, tagline = await verifFormatRiotId(None, pseudo)
+    if not pseudo:
+        return []
+
     me, region = await getMe(None, pseudo, tagline, None)
     puuid = me["puuid"]
     chan = [app_commands.Choice(name="All", value="all")]
 
     channel_list_id = get_player_listeChannel(puuid)
-    if channel_list_id is None:
+    if not channel_list_id:
         return chan
+
     channel_list = []
     for id in channel_list_id:
         channel = bot.get_channel(int(id))
         if channel:
             channel_list.append(app_commands.Choice(name=channel.name, value=str(channel.id)))
 
-    chan = chan + [
-        choice for choice in channel_list if current.lower() in choice.name.lower()
-    ]
-    return chan
+    return [choice for choice in channel_list if current.lower() in choice.name.lower()]
      
 
 
@@ -458,13 +465,16 @@ async def verif_game_en_cours():
                     await channel.send(file=file)
                     img_bytes.seek(0)
                 
-        except ApiError as err:
-            status_code = err.response.status_code
-            if status_code == 429:
-                print("Quota de requête dépassé")
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 429:
+                print("Quota de requête dépassé, attente...")
+                await asyncio.sleep(20)  # Attendre une minute avant de réessayer
+            elif e.response.status_code == 404:
                 pass
             else:
-                pass
+                print(f"Erreur HTTP: {e}")
+        except Exception as e:
+            print(f"Erreur: {e}")
 
 
 @bot.tree.command(name="profil_lol")

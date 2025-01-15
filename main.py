@@ -98,11 +98,8 @@ async def periodic_check():
     async with verif_lock:
         try:
             await verif_game_en_cours()
-        except requests.exceptions.HTTPError as e:
-            if e.response.status_code == 503:
-                await asyncio.sleep(1)
-            else:
-                raise e
+        except ApiError as e:
+            print(e)
 
 @periodic_check.before_loop
 async def before_periodic_check():

@@ -168,9 +168,7 @@ class LOF:
         await interaction.response.defer()
         
         try:
-                print("Début de la requête")
                 image =creeImageHistorique(puuid,region)
-                print("Image créée")
                 img_bytes=BytesIO()
                 image.save(img_bytes,format='PNG')
                 img_bytes.seek(0)

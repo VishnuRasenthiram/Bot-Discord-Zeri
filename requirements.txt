@@ -105,7 +105,6 @@ python-dateutil==2.9.0.post0
 python-dotenv==1.0.1
 python-nasa-api==0.0.2
 pytz==2024.1
-pywin32==306
 pyzmq==26.2.0
 requests==2.32.3
 requests-oauthlib==2.0.0

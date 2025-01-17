@@ -26,6 +26,7 @@ choixInteraction = [
 
 choixAction=[
     app_commands.Choice(name="Gêné", value="shy anime"),
+    app_commands.Choice(name="Rit", value="laugh anime"),
     app_commands.Choice(name="S’ennuie", value="bored anime"),
     app_commands.Choice(name="Pleure", value="cry anime"),
     app_commands.Choice(name="Bave", value="drool anime"),
@@ -70,6 +71,7 @@ def generate_interaction_text(value, M1, M2):
     }
     interaction_texts_none = {
         "cry anime": f"{M1} pleure à chaudes larmes 😭.",
+        "laugh anime": f"{M1} explose de rire🤣.",
         "shy anime": f"{M1} est gêné et rougit 😳.",
         "sleep anime": f"{M1} s’endort paisiblement 😴.",
         "bored anime": f"{M1} s’ennuie profondément🥱.",

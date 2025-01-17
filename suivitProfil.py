@@ -42,7 +42,6 @@ def generate_choices():
     return [app_commands.Choice(name=f"{i[1]}", value=f"{i[0]}") for i in liste_channel ]
 
 async def add_profile_liste(interaction:discord.Interaction,pseudo:str,channel:str,region:app_commands.Choice[str]="euw1"):
-   
         try:
             pseudo,tagline=await verifFormatRiotId(interaction,pseudo)
             me,region=await getMe(interaction,pseudo,tagline,region)
@@ -113,34 +112,6 @@ async def del_profile_liste(interaction:discord.Interaction,pseudo:str,channel:s
         await interaction.response.send_message("Ce profil a bien été supprimé !",ephemeral=True)
 
 
-
-async def autocomplete(interaction: discord.Interaction, current: str):
-    from main import getBot
-
-    bot = getBot()
-    pseudo = interaction.namespace.pseudo
-    if not pseudo:
-        return []
-
-    pseudo, tagline = await verifFormatRiotId(None, pseudo)
-    if not pseudo:
-        return []
-
-    me, region = await getMe(None, pseudo, tagline, None)
-    puuid = me["puuid"]
-    chan = [app_commands.Choice(name="All", value="all")]
-
-    channel_list_id = get_player_listeChannel(puuid)
-    if not channel_list_id:
-        return chan
-
-    channel_list = []
-    for id in channel_list_id:
-        channel = bot.get_channel(int(id))
-        if channel:
-            channel_list.append(app_commands.Choice(name=channel.name, value=str(channel.id)))
-
-    return [choice for choice in channel_list if current.lower() in choice.name.lower()]
 
 async def addChannel(interaction: discord.Interaction, channel:discord.channel.TextChannel):
     

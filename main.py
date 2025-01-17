@@ -103,7 +103,7 @@ verif_lock = asyncio.Lock()
 async def periodic_check():
     async with verif_lock:
         try:
-            await LOF.verif_game_en_cours()
+            await verif_game_en_cours()
         except requests.exceptions.HTTPError as e:
             if e.response.status_code == 503:
                 print("Service indisponible, attente...")
@@ -112,7 +112,66 @@ async def periodic_check():
                 print(f"Erreur HTTP: {e}")
         except Exception as e:
             print(f"Erreur: {e}")
+            
+async def verif_game_en_cours():
+        liste = get_player_liste()
+        gameDejaSend = []
+        if liste is None:
+            return
 
+        for gameId in liste:
+            gameDejaSend.append(int(gameId[3]))
+
+        for player in liste:
+            puuid, region = player[1], player[2]
+
+            for _ in range(3):
+                try:
+                    async with aiohttp.ClientSession() as session:
+                        async with session.get(f"https://{region}.api.riotgames.com/lol/spectator/v5/active-games/by-summoner/{puuid}",
+                                            headers={"X-Riot-Token": f"{os.getenv('RIOT_API')}"}) as response:
+                            if response.status == 429:
+                                await asyncio.sleep(20)
+                                continue  
+                            elif response.status == 404:
+                                break 
+                            elif response.status >= 500:
+
+                                await asyncio.sleep(5)
+                                continue
+                            elif response.status == 503:
+
+                                await asyncio.sleep(30)
+                                continue  
+
+                            cg = await response.json()
+                            if cg["gameId"] not in gameDejaSend and cg["gameQueueConfigId"] != 1700:
+                                gameDejaSend.append(cg["gameId"])
+                                player_data = {"puuid": puuid, "derniereGame": cg["gameId"]}
+                                update_derniereGame(player_data)
+
+                                regionId = LOF.regionForRiotId(region)
+                                image = await creer_image_avec_reessai(cg, regionId, region)
+
+                                img_bytes = BytesIO()
+                                image.save(img_bytes, format="PNG")
+                                img_bytes.seek(0)
+                                file = discord.File(img_bytes, filename="Partie_En_Cours.png")
+
+                                channelListe = list(get_player_listeChannel(puuid))
+                                for channelId in channelListe:
+                                    channel = bot.get_channel(int(channelId))
+                                    if channel:
+                                        img_copy = BytesIO(img_bytes.getvalue()) 
+                                        await channel.send(file=discord.File(img_copy, filename="Partie_En_Cours.png"))
+
+                    break 
+
+                except aiohttp.ClientError as e:
+                    await asyncio.sleep(5) 
+                except Exception as e:
+                    print(f"Erreur inattendue : {e}")
+                    break    
 
 @bot.event
 async def on_ready():
@@ -185,7 +244,29 @@ async def supprimerProfilSuivit(interaction:discord.Interaction,pseudo:str,chann
 
 @supprimerProfilSuivit.autocomplete("channel")
 async def type_autocomplete(interaction: discord.Interaction, current: str):
-    await autocomplete(interaction, current)
+    pseudo = interaction.namespace.pseudo
+    if not pseudo:
+        return []
+
+    pseudo, tagline = await verifFormatRiotId(None, pseudo)
+    if not pseudo:
+        return []
+
+    me, region = await getMe(None, pseudo, tagline, None)
+    puuid = me["puuid"]
+    chan = [app_commands.Choice(name="All", value="all")]
+
+    channel_list_id = get_player_listeChannel(puuid)
+    if not channel_list_id:
+        return chan
+
+    channel_list = []
+    for id in channel_list_id:
+        channel = bot.get_channel(int(id))
+        if channel:
+            channel_list.append(app_commands.Choice(name=channel.name, value=str(channel.id)))
+
+    return [choice for choice in channel_list if current.lower() in choice.name.lower()]
 
 @bot.tree.command(name="ajouter_channel_suivit")
 async def ajouterChannelSuivit(interaction: discord.Interaction, channel:discord.channel.TextChannel):

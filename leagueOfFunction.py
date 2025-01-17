@@ -12,12 +12,28 @@ import os
 from currentGameImage import *
 from baseDeDonne import *
 from historiqueImage import *
+import aiohttp
 
-load_dotenv()
 
 lol_watcher = LolWatcher(os.getenv('RIOT_API'))
 version = lol_watcher.data_dragon.versions_for_region("euw1")
 
+choixRegion=[app_commands.Choice(name="EUW", value="euw1"),
+    app_commands.Choice(name="EUN", value="eun1"),
+    app_commands.Choice(name="TR", value="tr1"),           
+    app_commands.Choice(name="RU", value="ru"),
+    app_commands.Choice(name="NA", value="na1"),
+    app_commands.Choice(name="LA1", value="la1"),
+    app_commands.Choice(name="LA2", value="la2"),
+    app_commands.Choice(name="BR", value="br1"),
+    app_commands.Choice(name="JP", value="jp1"),
+    app_commands.Choice(name="KR", value="kr"),
+    app_commands.Choice(name="OC", value="oc1"),
+    app_commands.Choice(name="PH", value="ph2"),
+    app_commands.Choice(name="SG", value="sg2"),
+    app_commands.Choice(name="TH", value="th2"),
+    app_commands.Choice(name="TW", value="tw2"),
+    app_commands.Choice(name="VN", value="vn2"),] 
 def rank_to_emoji(rank,div,lp):
         var = " "
         match rank.lower():
@@ -56,7 +72,50 @@ def regionForRiotId(region:str):
             return "americas"
         else:
             return "asia"
+async def getMe(interaction:discord.Interaction,pseudo,tagline,region):
+    if not isinstance(region,Choice):
+            region= Choice(name="defaut",value="euw1")
+    try:
+        me,region =lol_watcher.accountV1.by_riotid(region=regionForRiotId(region.value),summoner_name=pseudo,tagline=tagline),region.value
+        return me,region
+    
+    except ApiError as err:
+        if err.response.status_code == 429 :
+                print("Quota de requête dépassé")
+        elif err.response.status_code == 404:
+            await interaction.response.send_message("Le compte avec ce pseudo n'existe pas !",ephemeral=True)
 
+async def verifFormatRiotId(interaction:discord.Interaction,pseudo:str):
+    tagline=None
+    if pseudo!=None and pseudo.find("#")!=-1:
+        pseudo,tagline=pseudo.lower().split("#")[0],pseudo.lower().split("#")[1]
+    
+    else:
+        await interaction.response.send_message("Veuillez entrer votre pseudo avec le # !",ephemeral=True)
+    return pseudo,tagline
+async def getPuuidRegion(interaction:discord.Interaction,pseudo:str,region:str):
+        if pseudo:
+            pseudo,tagline=await verifFormatRiotId(interaction,pseudo)
+        if not(pseudo):
+            
+            profile=get_player_data(interaction.user.id)
+        
+            if profile!=None:
+                
+                if profile[4]==0:
+                    await interaction.response.send_message("Vous n'avez pas confirmé le profil !",ephemeral=True)
+                else :
+                    puuid = profile[1]
+                    region = profile[3]
+                    
+            else:
+                await interaction.response.send_message("Veuillez entrer votre Riot ID comme ceci : Pseudo#0000\nVous avez la possibilité de lié votre compte via la commande : **/sauvegarder_mon_profil**",ephemeral=True)
+        else:
+            me,region=await getMe(interaction,pseudo,tagline,region)
+            puuid=me["puuid"]
+
+
+        return puuid,region     
 class LOF:
     def regionForRiotId(region:str):
      
@@ -205,6 +264,66 @@ class LOF:
                 else:
                     print(err)
                     raise
+    async def verif_game_en_cours():
+        from main import getBot
+        bot = getBot()
+        liste = get_player_liste()
+        gameDejaSend = []
+        if liste is None:
+            return
+
+        for gameId in liste:
+            gameDejaSend.append(int(gameId[3]))
+
+        for player in liste:
+            puuid, region = player[1], player[2]
+
+            for _ in range(3):
+                try:
+                    async with aiohttp.ClientSession() as session:
+                        async with session.get(f"https://{region}.api.riotgames.com/lol/spectator/v5/active-games/by-summoner/{puuid}",
+                                            headers={"X-Riot-Token": f"{os.getenv('RIOT_API')}"}) as response:
+                            if response.status == 429:
+                                await asyncio.sleep(20)
+                                continue  
+                            elif response.status == 404:
+                                break 
+                            elif response.status >= 500:
+
+                                await asyncio.sleep(5)
+                                continue
+                            elif response.status == 503:
+
+                                await asyncio.sleep(30)
+                                continue  
+
+                            cg = await response.json()
+                            if cg["gameId"] not in gameDejaSend and cg["gameQueueConfigId"] != 1700:
+                                gameDejaSend.append(cg["gameId"])
+                                player_data = {"puuid": puuid, "derniereGame": cg["gameId"]}
+                                update_derniereGame(player_data)
+
+                                regionId = LOF.regionForRiotId(region)
+                                image = await creer_image_avec_reessai(cg, regionId, region)
+
+                                img_bytes = BytesIO()
+                                image.save(img_bytes, format="PNG")
+                                img_bytes.seek(0)
+                                file = discord.File(img_bytes, filename="Partie_En_Cours.png")
+
+                                channelListe = list(get_player_listeChannel(puuid))
+                                for channelId in channelListe:
+                                    channel = bot.get_channel(int(channelId))
+                                    if channel:
+                                        img_copy = BytesIO(img_bytes.getvalue()) 
+                                        await channel.send(file=discord.File(img_copy, filename="Partie_En_Cours.png"))
+                    break 
+
+                except aiohttp.ClientError as e:
+                    await asyncio.sleep(5) 
+                except Exception as e:
+                    print(f"Erreur inattendue : {e}")
+                    break 
 
 
 async def creer_image_avec_reessai(cg, regionId, region):

@@ -163,16 +163,16 @@ async def ping(interaction:discord.Interaction):
 @bot.tree.command(name="sauvegarder_mon_profil")
 @app_commands.choices(region=choixRegion)
 async def sauvegarderProfil(interaction:discord.Interaction,pseudo:str,region:app_commands.Choice[str]="euw1"):
-        set_profile(interaction,pseudo,region)
+       await  set_profile(interaction,pseudo,region)
                  
 @bot.tree.command(name="supprimer_mon_profil")
 async def supprimerProfil(interaction:discord.Interaction):
-    del_profile(interaction)
+    await del_profile(interaction)
 
 @bot.tree.command(name="suivre_profil")
 @app_commands.choices(region=choixRegion)
 async def suivreProfil(interaction:discord.Interaction,pseudo:str,channel:str,region:app_commands.Choice[str]="euw1"):
-        add_profile_liste(interaction,pseudo,channel,region)
+        await add_profile_liste(interaction,pseudo,channel,region)
 
 @suivreProfil.autocomplete("channel")
 async def type_autocomplete(interaction: discord.Interaction, current: str):
@@ -181,20 +181,20 @@ async def type_autocomplete(interaction: discord.Interaction, current: str):
 @bot.tree.command(name="suppr_profil_suivit")
 @app_commands.choices(region=choixRegion)
 async def supprimerProfilSuivit(interaction:discord.Interaction,pseudo:str,channel:str,region:app_commands.Choice[str]="euw1"):
-        del_profile_liste(interaction,pseudo,channel,region)
+       await  del_profile_liste(interaction,pseudo,channel,region)
 
 @supprimerProfilSuivit.autocomplete("channel")
 async def type_autocomplete(interaction: discord.Interaction, current: str):
-    autocomplete(interaction, current)
+    await autocomplete(interaction, current)
 
 @bot.tree.command(name="ajouter_channel_suivit")
 async def ajouterChannelSuivit(interaction: discord.Interaction, channel:discord.channel.TextChannel):
-    addChannel(interaction,channel)
+    await addChannel(interaction,channel)
 
 
 @bot.tree.command(name="suppr_channel_suivit")
 async def supprimerChannelSuivit(interaction: discord.Interaction, channel:str):
-    delChannel(interaction,channel)
+   await delChannel(interaction,channel)
     
 @supprimerChannelSuivit.autocomplete("channel")
 async def type_autocomplete(interaction: discord.Interaction, current: str):

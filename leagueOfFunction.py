@@ -265,6 +265,7 @@ class LOF:
                     print(err)
                     raise
     async def verif_game_en_cours():
+        print("verif_game_en_cours")
         from main import getBot
         bot = getBot()
         liste = get_player_liste()
@@ -317,6 +318,7 @@ class LOF:
                                     if channel:
                                         img_copy = BytesIO(img_bytes.getvalue()) 
                                         await channel.send(file=discord.File(img_copy, filename="Partie_En_Cours.png"))
+                                print("Partie en cours envoyé")
                     break 
 
                 except aiohttp.ClientError as e:

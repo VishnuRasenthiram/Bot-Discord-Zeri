@@ -116,68 +116,7 @@ async def getPuuidRegion(interaction:discord.Interaction,pseudo:str,region:str):
 
 
         return puuid,region  
-async def verif_game_en_cours():
-        from main import getBot
-        bot = getBot()
-        liste = get_player_liste()
-        gameDejaSend = []
-        if liste is None:
-            return
 
-        for gameId in liste:
-            gameDejaSend.append(int(gameId[3]))
-
-        for player in liste:
-            puuid, region = player[1], player[2]
-
-            for _ in range(3):
-                try:
-                    async with aiohttp.ClientSession() as session:
-                        async with session.get(f"https://{region}.api.riotgames.com/lol/spectator/v5/active-games/by-summoner/{puuid}",
-                                            headers={"X-Riot-Token": f"{os.getenv('RIOT_API')}"}) as response:
-                            if response.status == 429:
-                                await asyncio.sleep(20)
-                                continue  
-                            elif response.status == 404:
-                                break 
-                            elif response.status >= 500:
-
-                                await asyncio.sleep(5)
-                                continue
-                            elif response.status == 503:
-
-                                await asyncio.sleep(30)
-                                continue  
-
-                            cg = await response.json()
-                            if cg["gameId"] not in gameDejaSend and cg["gameQueueConfigId"] != 1700:
-                                gameDejaSend.append(cg["gameId"])
-                                player_data = {"puuid": puuid, "derniereGame": cg["gameId"]}
-                                update_derniereGame(player_data)
-
-                                regionId = LOF.regionForRiotId(region)
-                                image = await creer_image_avec_reessai(cg, regionId, region)
-
-                                img_bytes = BytesIO()
-                                image.save(img_bytes, format="PNG")
-                                img_bytes.seek(0)
-                                file = discord.File(img_bytes, filename="Partie_En_Cours.png")
-
-                                channelListe = list(get_player_listeChannel(puuid))
-                                for channelId in channelListe:
-                                    channel = bot.get_channel(int(channelId))
-                                    if channel:
-                                        img_copy = BytesIO(img_bytes.getvalue()) 
-                                        await channel.send(file=discord.File(img_copy, filename="Partie_En_Cours.png"))
-                                print("Partie en cours envoyé")
-
-                    break 
-
-                except aiohttp.ClientError as e:
-                    await asyncio.sleep(5) 
-                except Exception as e:
-                    print(f"Erreur inattendue : {e}")
-                    break    
 class LOF:
     def regionForRiotId(region:str):
      

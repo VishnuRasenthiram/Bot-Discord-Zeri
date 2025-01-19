@@ -33,6 +33,7 @@ from sauvegardeProfil   import *
 from suivitProfil import *
 from interaction import *
 from imposteur import *
+from typing import Union
 load_dotenv()
 ##########################################################################
 
@@ -269,7 +270,7 @@ async def type_autocomplete(interaction: discord.Interaction, current: str):
     return [choice for choice in channel_list if current.lower() in choice.name.lower()]
 
 @bot.tree.command(name="ajouter_channel_suivit")
-async def ajouterChannelSuivit(interaction: discord.Interaction, channel:discord.channel.TextChannel):
+async def ajouterChannelSuivit(interaction: discord.Interaction, channel:Union[discord.threads.Thread,discord.channel.TextChannel]):
     await addChannel(interaction,channel)
 
 

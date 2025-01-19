@@ -32,7 +32,7 @@ import hashlib
 from zeriMoney import *
 import aiohttp
 from leagueOfFunction import *
-
+from typing import Union
 
 def generate_choices_liste_player(puuid):
     liste_channel= get_player_listeChannel(puuid)
@@ -113,7 +113,7 @@ async def del_profile_liste(interaction:discord.Interaction,pseudo:str,channel:s
 
 
 
-async def addChannel(interaction: discord.Interaction, channel:discord.channel.TextChannel):
+async def addChannel(interaction: discord.Interaction, channel:Union[discord.threads.Thread,discord.channel.TextChannel]):
     
     if not interaction.user.id==517231233235812353:
         await interaction.response.send_message(

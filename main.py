@@ -33,6 +33,7 @@ from sauvegardeProfil   import *
 from suivitProfil import *
 from interaction import *
 from imposteur import *
+from ladderLol import *
 from typing import Union
 load_dotenv()
 ##########################################################################
@@ -105,6 +106,7 @@ async def periodic_check():
     async with verif_lock:
         try:
             await verif_game_en_cours()
+            await update_ladder()
         except requests.exceptions.HTTPError as e:
             if e.response.status_code == 503:
                 print("Service indisponible, attente...")
@@ -172,7 +174,33 @@ async def verif_game_en_cours():
                     await asyncio.sleep(5) 
                 except Exception as e:
                     print(f"Erreur inattendue : {e}")
-                    break    
+                    break
+##########################################################################
+async def update_ladder():
+    ladder = get_listChannelLadder()
+
+    for channel in ladder:
+        channel_id = int(channel[0])
+        channel = bot.get_channel(channel_id)
+        if channel:
+            listeJoueur= get_ladder_profile(channel_id)
+            if listeJoueur:
+                try:
+                    message = await channel.fetch_message(get_messageId_listChannelLadder(channel_id))
+                    await message.edit(embed=await create_ladder(listeJoueur))
+                except discord.errors.NotFound:
+                    message = await channel.send(embed=await create_ladder(listeJoueur))
+                    update_messageId_listChannelLadder(channel_id, message.id)
+                
+    
+                    
+
+                    
+
+
+
+
+
 
 @bot.event
 async def on_ready():
@@ -281,8 +309,60 @@ async def supprimerChannelSuivit(interaction: discord.Interaction, channel:str):
 @supprimerChannelSuivit.autocomplete("channel")
 async def type_autocomplete(interaction: discord.Interaction, current: str):
     return [app_commands.Choice(name=choice.name, value=choice.value) for choice in generate_choices() if current.lower() in choice.name.lower()]
-     
 
+@bot.tree.command(name="ajouter_channel_ladder")
+async def ajouterChannelLadder(interaction: discord.Interaction, channel:Union[discord.threads.Thread,discord.channel.TextChannel]):
+    await addChannelLadder(interaction,channel)
+
+
+@bot.tree.command(name="suppr_channel_ladder")
+async def supprimerChannelLadder(interaction: discord.Interaction, channel:str):
+   await delChannelLadder(interaction,channel)
+    
+@supprimerChannelLadder.autocomplete("channel")
+async def type_autocomplete(interaction: discord.Interaction, current: str):
+    return [app_commands.Choice(name=choice.name, value=choice.value) for choice in generate_choicesLadder() if current.lower() in choice.name.lower()]
+
+@bot.tree.command(name="add_to_ladder")
+@app_commands.choices(region=choixRegion)
+async def ajouterLadder(interaction:discord.Interaction,pseudo:str,channel:str,region:app_commands.Choice[str]="euw1"):
+        await add_profile_listeLadder(interaction,pseudo,channel,region)
+
+@ajouterLadder.autocomplete("channel")
+async def type_autocomplete(interaction: discord.Interaction, current: str):
+    return [app_commands.Choice(name=choice.name, value=choice.value) for choice in generate_choicesLadder() if current.lower() in choice.name.lower()]
+
+@bot.tree.command(name="delete_from_ladder")
+@app_commands.choices(region=choixRegion)
+async def supprimerProfilLadder(interaction:discord.Interaction,pseudo:str,channel:str,region:app_commands.Choice[str]="euw1"):
+       await  del_profile_listeLadder(interaction,pseudo,channel,region)
+
+@supprimerProfilLadder.autocomplete("channel")
+async def type_autocomplete(interaction: discord.Interaction, current: str):
+    pseudo = interaction.namespace.pseudo
+    if not pseudo:
+        return []
+
+    pseudo, tagline = await verifFormatRiotId(None, pseudo)
+    if not pseudo:
+        return []
+
+    me, region = await getMe(None, pseudo, tagline, None)
+    puuid = me["puuid"]
+    chan = [app_commands.Choice(name="All", value="all")]
+
+    channel_list_id = get_liste_channel_ladder_joueur(puuid)
+
+    if not channel_list_id:
+        return chan
+
+    channel_list = []
+    for id in channel_list_id:
+
+        channel = bot.get_channel(int(id[0]))
+        if channel:
+            channel_list.append(app_commands.Choice(name=channel.name, value=str(channel.id)))      
+    return [choice for choice in channel_list if current.lower() in choice.name.lower()]
 @bot.tree.command(name="profil_lol")
 @app_commands.choices(region=choixRegion)
 async def lolp(interaction: discord.Interaction, pseudo: str = None, region: app_commands.Choice[str] = "euw1"):  

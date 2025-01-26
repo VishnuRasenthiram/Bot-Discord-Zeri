@@ -325,3 +325,181 @@ def reset_listeChannel():
     conn.commit()
     cur.close()
     conn.close()
+
+
+#ladder 
+def init_listChannelLadder_table():
+
+    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+
+    cur = conn.cursor()
+
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS liste_Channel_Ladder (
+            id VARCHAR(255) PRIMARY KEY,
+            nom VARCHAR(255),
+            messageId VARCHAR(255)
+        )
+    """)
+
+    conn.commit()
+    cur.close()
+    conn.close()
+
+def insert_listChannelLadder(data):
+    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+    cur = conn.cursor()
+    cur.execute("""
+        INSERT INTO liste_Channel_Ladder (id, nom, messageId)
+        VALUES (%s, %s, 0)
+        ON CONFLICT (id) DO NOTHING
+    """, (data['id'], data['nom']))
+    conn.commit()
+    cur.close()
+    conn.close()
+    
+def delete_listChannelLadder(id):    
+    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+    cur = conn.cursor()
+    cur.execute("DELETE FROM liste_Channel_Ladder WHERE id = %s" , (id,))
+    conn.commit()
+    if cur.rowcount == 0:
+            etat =0
+    else:
+            etat =1
+    cur.close()
+    conn.close()
+
+    return etat
+
+def get_listChannelLadder():
+    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM liste_Channel_Ladder ")
+    liste_channel = cur.fetchall()
+    cur.close()
+    conn.close()
+    return liste_channel
+
+def update_messageId_listChannelLadder(id, messageId):
+    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+    cur = conn.cursor()
+    cur.execute("""
+        UPDATE liste_Channel_Ladder
+        SET messageId = %s
+        WHERE id = %s
+    """, (str(messageId), str(id)))
+    conn.commit()
+    cur.close()
+    conn.close()
+
+def get_messageId_listChannelLadder(id):
+    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+    cur = conn.cursor()
+    cur.execute("SELECT messageId FROM liste_Channel_Ladder WHERE id = %s", (str(id),))
+    result = cur.fetchone()
+    cur.close()
+    conn.close()
+
+    return result[0]
+
+
+
+
+def init_ladder_table():
+     
+    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+
+    cur = conn.cursor()
+
+    cur.execute("""
+               CREATE TABLE IF NOT EXISTS ladder (
+            puuid VARCHAR(128),
+            channel varchar(255),
+            region VARCHAR(64),
+            PRIMARY KEY (puuid, channel),
+            FOREIGN KEY (channel) REFERENCES liste_Channel_Ladder(id)
+        );
+        
+    """)
+
+    conn.commit()
+    cur.close()
+    conn.close()
+
+
+def insert_ladder(data):
+    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+    cur = conn.cursor()
+    cur.execute("""
+        INSERT INTO ladder (puuid, channel, region)
+        VALUES (%s, %s, %s)
+        ON CONFLICT (puuid, channel) DO NOTHING
+    """, (data['puuid'], data['channel'], data['region']))
+    conn.commit()
+    cur.close()
+    conn.close()
+
+def get_ladder_liste():
+    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM ladder ")
+    player_liste = cur.fetchall()
+    cur.close()
+    conn.close()
+    return player_liste
+
+def get_ladder_profile(channel):
+    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM ladder WHERE channel = %s", (str(channel),))
+    user = cur.fetchall()
+    cur.close()
+    conn.close()
+    return user
+
+def delete_ladder(data):
+    
+    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+    cur = conn.cursor()
+    cur.execute("DELETE FROM ladder WHERE puuid = %s AND channel = %s AND region = %s" , (data["puuid"],data["channel"],data["region"]))
+    conn.commit()
+    if cur.rowcount == 0:
+            etat =0
+    else:
+            etat =1
+    cur.close()
+    conn.close()
+
+    return etat
+
+
+def drop_table_liste_channel_ladder():
+    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+    cur = conn.cursor()
+    
+    cur.execute("DROP TABLE IF EXISTS liste_Channel_Ladder CASCADE")
+    
+    conn.commit()
+    cur.close()
+    conn.close()
+
+
+def drop_table_ladder():
+    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+    cur = conn.cursor()
+    
+    cur.execute("DROP TABLE IF EXISTS ladder CASCADE")
+    
+    conn.commit()
+    cur.close()
+    conn.close()
+
+def get_liste_channel_ladder_joueur(puuid):
+    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+    cur = conn.cursor()
+    cur.execute("SELECT channel FROM ladder WHERE puuid = %s", (puuid,))
+    liste_channel = cur.fetchall()
+    cur.close()
+    conn.close()
+    return liste_channel

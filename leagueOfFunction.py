@@ -134,7 +134,6 @@ class LOF:
             myAccount = lol_watcher.summoner.by_puuid(region, puuid)
             mastery = lol_watcher.champion_mastery.by_puuid(region, puuid)
             me1 = lol_watcher.league.by_summoner(region, myAccount["id"])
-            print(me1,region)
             icone = f'http://ddragon.leagueoflegends.com/cdn/{versions["v"]}/img/profileicon/{myAccount["profileIconId"]}.png'
 
             if not me1:

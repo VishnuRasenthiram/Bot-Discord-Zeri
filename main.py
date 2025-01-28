@@ -101,11 +101,25 @@ def getBot():
 
 verif_lock = asyncio.Lock()
 
-@tasks.loop(seconds=60)
+@tasks.loop(minutes=5)
 async def periodic_check():
     async with verif_lock:
         try:
             await verif_game_en_cours()
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 503:
+                print("Service indisponible, attente...")
+                await asyncio.sleep(60)
+            else:
+                print(f"Erreur HTTP: {e}")
+        except Exception as e:
+            print(f"Erreur: {e}")
+
+verif_lock_ladder = asyncio.Lock()
+@tasks.loop(minutes=60)
+async def periodic_check_ladder():
+    async with verif_lock_ladder:
+        try:
             await update_ladder()
         except requests.exceptions.HTTPError as e:
             if e.response.status_code == 503:
@@ -115,6 +129,7 @@ async def periodic_check():
                 print(f"Erreur HTTP: {e}")
         except Exception as e:
             print(f"Erreur: {e}")
+            
             
 async def verif_game_en_cours():
         liste = get_player_liste()
@@ -208,6 +223,7 @@ async def on_ready():
     scheduler.start()
     try:
         periodic_check.start()
+        periodic_check_ladder.start()
         synced= await bot.tree.sync()
     except Exception as e:
         print(e)

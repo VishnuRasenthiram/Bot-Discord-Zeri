@@ -157,8 +157,7 @@ async def create_ladder(liste_joueur):
         except ApiError as err :
             if err.response.status_code == 429 :
                 print("Quota de requête dépassé")
-            else:
-                print(err)
+
         regionRiotId = regionForRiotId(region)
         nom=lol_watcher.accountV1.by_puuid(regionRiotId,puuid)["gameName"]
         if not me1:

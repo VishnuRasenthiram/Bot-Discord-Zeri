@@ -35,9 +35,11 @@ from interaction import *
 from imposteur import *
 from ladderLol import *
 from typing import Union
+
+from keepAline import keep_alive
 load_dotenv()
 ##########################################################################
-
+keep_alive()
 #API
 
 

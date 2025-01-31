@@ -145,50 +145,32 @@ async def verif_game_en_cours():
 
             for _ in range(3):
                 try:
-                    async with aiohttp.ClientSession() as session:
-                        async with session.get(f"https://{region}.api.riotgames.com/lol/spectator/v5/active-games/by-summoner/{puuid}",
-                                            headers={"X-Riot-Token": f"{os.getenv('RIOT_API')}"}) as response:
-                            if response.status == 429:
-                                await asyncio.sleep(20)
-                                continue  
-                            elif response.status == 404:
-                                break 
-                            elif response.status >= 500:
+                    cg = await lol_watcher.spectator.by_puuid(region, puuid)
+                    if cg["gameId"] not in gameDejaSend and cg["gameQueueConfigId"] != 1700:
+                        gameDejaSend.append(cg["gameId"])
+                        player_data = {"puuid": puuid, "derniereGame": cg["gameId"]}
+                        update_derniereGame(player_data)
 
-                                await asyncio.sleep(5)
-                                continue
-                            elif response.status == 503:
+                        regionId = LOF.regionForRiotId(region)
+                        image = await creer_image_avec_reessai(cg, regionId, region)
 
-                                await asyncio.sleep(30)
-                                continue  
+                        img_bytes = BytesIO()
+                        image.save(img_bytes, format="PNG")
+                        img_bytes.seek(0)
+                        file = discord.File(img_bytes, filename="Partie_En_Cours.png")
 
-                            cg = await response.json()
-                            if cg["gameId"] not in gameDejaSend and cg["gameQueueConfigId"] != 1700:
-                                gameDejaSend.append(cg["gameId"])
-                                player_data = {"puuid": puuid, "derniereGame": cg["gameId"]}
-                                update_derniereGame(player_data)
-
-                                regionId = LOF.regionForRiotId(region)
-                                image = await creer_image_avec_reessai(cg, regionId, region)
-
-                                img_bytes = BytesIO()
-                                image.save(img_bytes, format="PNG")
-                                img_bytes.seek(0)
-                                file = discord.File(img_bytes, filename="Partie_En_Cours.png")
-
-                                channelListe = list(get_player_listeChannel(puuid))
-                                for channelId in channelListe:
-                                    channel = bot.get_channel(int(channelId))
-                                    if channel:
-                                        img_copy = BytesIO(img_bytes.getvalue()) 
-                                        await channel.send(file=discord.File(img_copy, filename="Partie_En_Cours.png"))
-
-                    break 
-
-                except aiohttp.ClientError as e:
-                    await asyncio.sleep(5) 
-                except Exception as e:
-                    print(f"Erreur inattendue : {e}")
+                        channelListe = list(get_player_listeChannel(puuid))
+                        for channelId in channelListe:
+                            channel = bot.get_channel(int(channelId))
+                            if channel:
+                                img_copy = BytesIO(img_bytes.getvalue()) 
+                                await channel.send(file=discord.File(img_copy, filename="Partie_En_Cours.png"))
+                    break
+                except ApiError as e:
+                    if e.response.status_code == 404:
+                        break
+                except Exception as er:
+                    print(f"Erreur inattendue : {er}")
                     break
 ##########################################################################
 async def update_ladder():

@@ -147,7 +147,7 @@ async def verif_game_en_cours():
 
             for _ in range(3):
                 try:
-                    cg = await lol_watcher.spectator.by_puuid(region, puuid)
+                    cg = lol_watcher.spectator.by_puuid(region, puuid)
                     if cg["gameId"] not in gameDejaSend and cg["gameQueueConfigId"] != 1700:
                         gameDejaSend.append(cg["gameId"])
                         player_data = {"puuid": puuid, "derniereGame": cg["gameId"]}

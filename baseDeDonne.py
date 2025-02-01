@@ -3,7 +3,6 @@ import os
 from dotenv import load_dotenv
 import ast
 load_dotenv()
-
 DB_HOST = os.getenv("DB_HOST")
 DB_NAME = "zeribot"
 DB_USER = "postgres"
@@ -11,17 +10,17 @@ DB_PORT = "5432"
 DB_PASSWORD = os.getenv("DB_PASSWORD")
 
 
-CONN = psycopg2.connect(
+
+
+def initDataBase():
+
+    conn = psycopg2.connect(
         host=DB_HOST,
         database=DB_NAME,
         user=DB_USER,
         password=DB_PASSWORD,
-        port=DB_PORT               
+        port=DB_PORT               # port par défaut de PostgreSQL
     )
-
-def initDataBase():
-
-    conn = CONN
 
     # Créer un curseur pour exécuter des commandes SQL
     cur = conn.cursor()
@@ -46,7 +45,13 @@ def initDataBase():
 
 
 def insert_player_data(data):
-    conn = CONN
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        port=DB_PORT               # port par défaut de PostgreSQL
+    )
     cur = conn.cursor()
     cur.execute("""
         INSERT INTO player_data (id, puuid, icon, region, statut)
@@ -59,7 +64,13 @@ def insert_player_data(data):
 
 
 def get_player_data(player_id):
-    conn = CONN
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        port=DB_PORT               # port par défaut de PostgreSQL
+    )
     cur = conn.cursor()
     cur.execute("SELECT * FROM player_data WHERE id = %s", (player_id,))
     player = cur.fetchone()
@@ -68,7 +79,13 @@ def get_player_data(player_id):
     return player
 
 def update_player_statut(player_id, new_statut):
-    conn = CONN
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        port=DB_PORT               # port par défaut de PostgreSQL
+    )
     cur = conn.cursor()
     cur.execute("""
         UPDATE player_data
@@ -81,7 +98,13 @@ def update_player_statut(player_id, new_statut):
 
 def delete_player_data(player_id):
     
-    conn = CONN
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        port=DB_PORT               # port par défaut de PostgreSQL
+    )
     cur = conn.cursor()
     cur.execute("DELETE FROM player_data WHERE id = %s", (player_id,))
     conn.commit()
@@ -100,7 +123,13 @@ def delete_player_data(player_id):
 
 def initTableListePlayer():
 
-    conn = CONN
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        port=DB_PORT               # port par défaut de PostgreSQL
+    )
 
     # Créer un curseur pour exécuter des commandes SQL
     cur = conn.cursor()
@@ -124,7 +153,13 @@ def initTableListePlayer():
     conn.close()
 
 def insert_player_liste(data):
-    conn = CONN
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        port=DB_PORT               # port par défaut de PostgreSQL
+    )
     cur = conn.cursor()
     cur.execute("""
         INSERT INTO liste_player(puuid,region,derniereGame,listeChannel)
@@ -136,7 +171,13 @@ def insert_player_liste(data):
 
 def delete_player_liste(data):
     
-    conn = CONN
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        port=DB_PORT               # port par défaut de PostgreSQL
+    )
     cur = conn.cursor()
     cur.execute("DELETE FROM liste_player WHERE puuid = %sAND region=%s" , (data["puuid"],data["region"]))
     conn.commit()
@@ -150,7 +191,13 @@ def delete_player_liste(data):
     return etat    
 
 def update_derniereGame(data):
-    conn = CONN
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        port=DB_PORT               # port par défaut de PostgreSQL
+    )
     cur = conn.cursor()
     cur.execute("""
         UPDATE liste_player 
@@ -164,7 +211,13 @@ def update_derniereGame(data):
 
 
 def get_player_liste():
-    conn = CONN
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        port=DB_PORT               # port par défaut de PostgreSQL
+    )
     cur = conn.cursor()
     cur.execute("SELECT * FROM liste_player ")
     player_liste = cur.fetchall()
@@ -173,7 +226,13 @@ def get_player_liste():
     return player_liste
 
 def clear_player_liste():
-    conn = CONN
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        port=DB_PORT               # port par défaut de PostgreSQL
+    )
     cur = conn.cursor()
     cur.execute("DELETE FROM liste_player")
     conn.commit()
@@ -181,7 +240,13 @@ def clear_player_liste():
     conn.close()
     
 def drop_player_table():
-    conn = CONN
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        port=DB_PORT               # port par défaut de PostgreSQL
+    )
     cur = conn.cursor()
     cur.execute("DROP TABLE IF EXISTS liste_player")
     conn.commit()
@@ -189,7 +254,13 @@ def drop_player_table():
     conn.close()
 
 def alterTableListePlayer():
-    conn = CONN
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        port=DB_PORT               # port par défaut de PostgreSQL
+    )
     cur = conn.cursor()
     cur.execute("ALTER TABLE liste_player ADD COLUMN listeChannel VARCHAR(255) DEFAULT '[]'")
     conn.commit()
@@ -197,7 +268,13 @@ def alterTableListePlayer():
     conn.close()
 
 def get_player_listeChannel(puuid):
-    conn = CONN
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        port=DB_PORT               # port par défaut de PostgreSQL
+    )
     cur = conn.cursor()
     cur.execute("SELECT listeChannel FROM liste_player WHERE puuid = %s", (puuid,))
     result = cur.fetchone()
@@ -208,7 +285,13 @@ def get_player_listeChannel(puuid):
 
     
 def update_player_listeChannel(puuid, listeChannel):
-    conn = CONN
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        port=DB_PORT               # port par défaut de PostgreSQL
+    )
     cur = conn.cursor()
     cur.execute("""
         UPDATE liste_player 
@@ -221,7 +304,13 @@ def update_player_listeChannel(puuid, listeChannel):
 
 def init_listChannelSuivit_table():
 
-    conn = CONN
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        port=DB_PORT               # port par défaut de PostgreSQL
+    )
 
     cur = conn.cursor()
 
@@ -237,7 +326,13 @@ def init_listChannelSuivit_table():
     conn.close()
 
 def insert_listChannelSuivit(data):
-    conn = CONN
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        port=DB_PORT               # port par défaut de PostgreSQL
+    )
     cur = conn.cursor()
     cur.execute("""
         INSERT INTO liste_Channel_Suivit (id, nom)
@@ -248,7 +343,13 @@ def insert_listChannelSuivit(data):
     cur.close()
     conn.close()
 def delete_listChannelSuivit(id):    
-    conn = CONN
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        port=DB_PORT               # port par défaut de PostgreSQL
+    )
     cur = conn.cursor()
     cur.execute("DELETE FROM liste_Channel_Suivit WHERE id = %s" , (id,))
     conn.commit()
@@ -262,7 +363,13 @@ def delete_listChannelSuivit(id):
     return etat
 
 def get_listChannelSuivit():
-    conn = CONN
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        port=DB_PORT               # port par défaut de PostgreSQL
+    )
     cur = conn.cursor()
     cur.execute("SELECT * FROM liste_Channel_Suivit ")
     liste_channel = cur.fetchall()
@@ -272,7 +379,13 @@ def get_listChannelSuivit():
 
 def init_user_table():
 
-    conn = CONN
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        port=DB_PORT               # port par défaut de PostgreSQL
+    )
 
     cur = conn.cursor()
 
@@ -292,7 +405,13 @@ def init_user_table():
     conn.close()
 
 def insert_user_profile(data):
-    conn = CONN
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        port=DB_PORT               # port par défaut de PostgreSQL
+    )
     cur = conn.cursor()
     cur.execute("""
         INSERT INTO user_profile (id, money, level, xp, daily, nb_daily)
@@ -303,7 +422,13 @@ def insert_user_profile(data):
     cur.close()
     conn.close()    
 def get_user_liste():
-    conn = CONN
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        port=DB_PORT               # port par défaut de PostgreSQL
+    )
     cur = conn.cursor()
     cur.execute("SELECT * FROM user_profile ")
     player_liste = cur.fetchall()
@@ -311,7 +436,13 @@ def get_user_liste():
     conn.close()
     return player_liste
 def get_user_profile(user_id):
-    conn = CONN
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        port=DB_PORT               # port par défaut de PostgreSQL
+    )
     cur = conn.cursor()
     cur.execute("SELECT * FROM user_profile WHERE id = %s", (user_id,))
     user = cur.fetchone()
@@ -320,7 +451,13 @@ def get_user_profile(user_id):
     return user
 
 def update_user_profile(user_id, new_money, new_level, new_xp, new_daily, new_nb_daily):
-    conn = CONN
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        port=DB_PORT               # port par défaut de PostgreSQL
+    )
     cur = conn.cursor()
     cur.execute("""
         UPDATE user_profile
@@ -332,7 +469,13 @@ def update_user_profile(user_id, new_money, new_level, new_xp, new_daily, new_nb
     conn.close()
     
 def reset_listeChannel():
-    conn = CONN
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        port=DB_PORT               # port par défaut de PostgreSQL
+    )
     cur = conn.cursor()
     cur.execute("UPDATE liste_player SET listeChannel = '[]'")
     conn.commit()
@@ -343,7 +486,13 @@ def reset_listeChannel():
 #ladder 
 def init_listChannelLadder_table():
 
-    conn = CONN
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        port=DB_PORT               # port par défaut de PostgreSQL
+    )
 
     cur = conn.cursor()
 
@@ -360,7 +509,13 @@ def init_listChannelLadder_table():
     conn.close()
 
 def insert_listChannelLadder(data):
-    conn = CONN
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        port=DB_PORT               # port par défaut de PostgreSQL
+    )
     cur = conn.cursor()
     cur.execute("""
         INSERT INTO liste_Channel_Ladder (id, nom, messageId)
@@ -372,7 +527,13 @@ def insert_listChannelLadder(data):
     conn.close()
     
 def delete_listChannelLadder(id):    
-    conn = CONN
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        port=DB_PORT               # port par défaut de PostgreSQL
+    )
     cur = conn.cursor()
     cur.execute("DELETE FROM liste_Channel_Ladder WHERE id = %s" , (id,))
     conn.commit()
@@ -386,7 +547,13 @@ def delete_listChannelLadder(id):
     return etat
 
 def get_listChannelLadder():
-    conn = CONN
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        port=DB_PORT               # port par défaut de PostgreSQL
+    )
     cur = conn.cursor()
     cur.execute("SELECT * FROM liste_Channel_Ladder ")
     liste_channel = cur.fetchall()
@@ -395,7 +562,13 @@ def get_listChannelLadder():
     return liste_channel
 
 def update_messageId_listChannelLadder(id, messageId):
-    conn = CONN
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        port=DB_PORT               # port par défaut de PostgreSQL
+    )
     cur = conn.cursor()
     cur.execute("""
         UPDATE liste_Channel_Ladder
@@ -407,7 +580,13 @@ def update_messageId_listChannelLadder(id, messageId):
     conn.close()
 
 def get_messageId_listChannelLadder(id):
-    conn = CONN
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        port=DB_PORT               # port par défaut de PostgreSQL
+    )
     cur = conn.cursor()
     cur.execute("SELECT messageId FROM liste_Channel_Ladder WHERE id = %s", (str(id),))
     result = cur.fetchone()
@@ -421,7 +600,13 @@ def get_messageId_listChannelLadder(id):
 
 def init_ladder_table():
      
-    conn = CONN
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        port=DB_PORT               # port par défaut de PostgreSQL
+    )
 
     cur = conn.cursor()
 
@@ -442,7 +627,13 @@ def init_ladder_table():
 
 
 def insert_ladder(data):
-    conn = CONN
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        port=DB_PORT               # port par défaut de PostgreSQL
+    )
     cur = conn.cursor()
     cur.execute("""
         INSERT INTO ladder (puuid, channel, region)
@@ -454,7 +645,13 @@ def insert_ladder(data):
     conn.close()
 
 def get_ladder_liste():
-    conn = CONN
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        port=DB_PORT               # port par défaut de PostgreSQL
+    )
     cur = conn.cursor()
     cur.execute("SELECT * FROM ladder ")
     player_liste = cur.fetchall()
@@ -463,7 +660,13 @@ def get_ladder_liste():
     return player_liste
 
 def get_ladder_profile(channel):
-    conn = CONN
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        port=DB_PORT               # port par défaut de PostgreSQL
+    )
     cur = conn.cursor()
     cur.execute("SELECT * FROM ladder WHERE channel = %s", (str(channel),))
     user = cur.fetchall()
@@ -473,7 +676,13 @@ def get_ladder_profile(channel):
 
 def delete_ladder(data):
     
-    conn = CONN
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        port=DB_PORT               # port par défaut de PostgreSQL
+    )
     cur = conn.cursor()
     cur.execute("DELETE FROM ladder WHERE puuid = %s AND channel = %s AND region = %s" , (data["puuid"],data["channel"],data["region"]))
     conn.commit()
@@ -488,7 +697,13 @@ def delete_ladder(data):
 
 
 def drop_table_liste_channel_ladder():
-    conn = CONN
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        port=DB_PORT               # port par défaut de PostgreSQL
+    )
     cur = conn.cursor()
     
     cur.execute("DROP TABLE IF EXISTS liste_Channel_Ladder CASCADE")
@@ -499,7 +714,13 @@ def drop_table_liste_channel_ladder():
 
 
 def drop_table_ladder():
-    conn = CONN
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        port=DB_PORT               # port par défaut de PostgreSQL
+    )
     cur = conn.cursor()
     
     cur.execute("DROP TABLE IF EXISTS ladder CASCADE")
@@ -509,7 +730,13 @@ def drop_table_ladder():
     conn.close()
 
 def get_liste_channel_ladder_joueur(puuid):
-    conn = CONN
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        port=DB_PORT               # port par défaut de PostgreSQL
+    )
     cur = conn.cursor()
     cur.execute("SELECT channel FROM ladder WHERE puuid = %s", (puuid,))
     liste_channel = cur.fetchall()
@@ -517,4 +744,3 @@ def get_liste_channel_ladder_joueur(puuid):
     conn.close()
     return liste_channel
 
-print(get_listChannelLadder())

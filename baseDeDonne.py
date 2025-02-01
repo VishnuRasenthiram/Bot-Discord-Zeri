@@ -8,7 +8,12 @@ DATABASE_URL=os.getenv('DATABASE_URL')
 
 def initDataBase():
 
-    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+    conn = psycopg2.connect(
+        host="localhost",          # ou l'adresse IP du serveur si nécessaire
+        database="zeribot",        # nom de la base de données
+        user="postgres",           # utilisateur PostgreSQL
+        port="5432"                # port par défaut de PostgreSQL
+    )
 
     # Créer un curseur pour exécuter des commandes SQL
     cur = conn.cursor()

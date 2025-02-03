@@ -389,25 +389,25 @@ async def on_message(message):
     if (not message.author == bot.user) and (not message.author.bot) :
             
         file = discord.File(f"env/ranked-emblem/PALU.mp4", filename=f"PALU.mp4")
-        
+        fileG2 = discord.File(f"env/ranked-emblem/toohless.mp4", filename=f"toohless.mp4")
+        file3 = discord.File(f"env/ranked-emblem/junglediff.png", filename=f"junglediff.png")
+
+        if "g2 win" in message.content.lower():
+            await message.channel.send(file=fileG2)
 
         if "palu"in message.content.lower().split():
             await message.channel.send(file=file)
-
-        file3 = discord.File(f"env/ranked-emblem/junglediff.png", filename=f"junglediff.png")
 
         if "jungle diff"in message.content.lower():
             a=await message.channel.send(file=file3)
             await a.add_reaction("✅")
             await a.add_reaction("❌")
             
-            
         if "cheh"in message.content.lower().split():
             await message.channel.send(random.choice(cheh))
             
         await bot.process_commands(message)
         
-            
         if "merci zeri" in message.content.lower():
             
             await message.reply("Derien Bebou <:Eheh:1280080977418260483>")

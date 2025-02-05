@@ -71,15 +71,15 @@ def send_message_with_memory(userid, message):
             message_history = json.load(f)
     except FileNotFoundError:
         message_history = []
-
-    message_history.append(f"{userid}: {message}")
     
-
-    context = "\n".join(message_history)
+    context = f"{message}\n historique :".join(message_history)
 
 
     response = CHAT.send_message(context, **parameters).text
 
+    
+ 
+    message_history.append(f"{userid}: {message}")
     message_history.append(f"Zeri: {response}")
     
 
@@ -87,4 +87,8 @@ def send_message_with_memory(userid, message):
         json.dump(message_history, f)
     
     return response
+
+def clear_history():
+    with open("ia/history.json", "w") as f:
+        json.dump([], f)
 

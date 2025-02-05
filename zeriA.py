@@ -6,8 +6,6 @@ from vertexai.language_models import ChatModel, InputOutputTextPair
 from vertexai import generative_models
 import json
 
-"""
-v1
 def generate_content(prompt: str) -> str:
 
     client = genai.Client(
@@ -15,9 +13,17 @@ def generate_content(prompt: str) -> str:
         project="intricate-grove-450013-p6",
         location="us-central1",
     )
+    try:
+        with open("ia/history.json", "r") as f:
+            message_history = json.load(f)
+    except FileNotFoundError:
+        message_history = [""]
+    if prompt not in message_history :
+        message_history.append(prompt)
 
+    history = "\n".join(message_history)
     model = "gemini-2.0-flash-exp"
-    contents = ["Incarne Zeri, le personnage de League of Legends. Avec un ton amical et décontracté. Elle a une personnalité pleine de vie, aime relever des défis et est toujours prête à soutenir ses alliés. fait des phrases pas trop longue pour répondre a ce message :"+prompt]
+    contents = ["Incarne Zeri, le personnage de League of Legends. Avec un ton amical et décontracté. Elle a une personnalité pleine de vie, aime relever des défis et est toujours prête à soutenir ses alliés. fait des phrases pas trop longue pour répondre a ce message :"+prompt + "si besoin voici une historique des anciens messages :"+history]
 
     generate_content_config = types.GenerateContentConfig(
         temperature=1,
@@ -41,7 +47,12 @@ def generate_content(prompt: str) -> str:
         if not chunk.candidates or not chunk.candidates[0].content.parts:
             continue
         retour += chunk.text
+    if f"Zeri: {retour}" not in message_history: 
+        message_history.append(f"Zeri: {retour}")
+    with open("ia/history.json", "w") as f:
+        json.dump(message_history, f)
     return retour
+
 """
 
 def init_chat_model():
@@ -49,7 +60,7 @@ def init_chat_model():
     chat_model = ChatModel.from_pretrained("chat-bison@private")
     
     chat = chat_model.start_chat(
-        context="""Incarne Zeri, le personnage de League of Legends. Avec un ton amical et décontracté. Elle a une personnalité pleine de vie, aime relever des défis et est toujours prête à soutenir ses alliés. N'hesite pas a utiliser des emojis divers et variés et pas seulement a la fin des phrases, et des phrases typiques que Zeri pourrait dire et ne met pas de **Zeri:**""",
+        context=Incarne Zeri, le personnage de League of Legends. Avec un ton amical et décontracté. Elle a une personnalité pleine de vie, aime relever des défis et est toujours prête à soutenir ses alliés. N'hesite pas a utiliser des emojis divers et variés et pas seulement a la fin des phrases, et des phrases typiques que Zeri pourrait dire et ne met pas de **Zeri:**,
     )
     
     return chat
@@ -88,6 +99,9 @@ def send_message_with_memory(userid, message):
     
     return response
 
+"""
+
 def clear_history():
     with open("ia/history.json", "w") as f:
-        json.dump(["Debut historique"], f)
+        json.dump([""], f)
+

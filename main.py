@@ -216,7 +216,7 @@ async def on_ready():
 async def changementIconeServeur():
 
     clear_history()
-    
+
     if not hasattr(changementIconeServeur, "iconNuit"):
         with open("env/ranked-emblem/Karan_nuit.png", 'rb') as n:
             changementIconeServeur.iconNuit = n.read()

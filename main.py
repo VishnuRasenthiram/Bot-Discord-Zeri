@@ -35,13 +35,11 @@ from interaction import *
 from imposteur import *
 from ladderLol import *
 from typing import Union
-
+from zeriA import generate_content
 load_dotenv()
 ##########################################################################
 
 #API
-
-
 
 
 
@@ -382,6 +380,8 @@ async def partieEnCours(interaction: discord.Interaction, pseudo: str = None, re
     puuid,region=await getPuuidRegion(interaction,pseudo,region)
     await LOF.partieEnCours(interaction,puuid, region)
 
+
+
 @bot.event
 async def on_message(message):
     cheh=["https://tenor.com/view/nelson-monfort-cheh-i-hear-cheh-in-my-oreillette-gif-15977955","https://tenor.com/view/maskey-gif-17974418","https://tenor.com/view/wavesives-waves-ives-waves-ives-waves-cheh-gif-1692370554913806768","https://tenor.com/view/capitaine-groscheh-gros-cheh-cheh-m%C3%A9rit%C3%A9-mange-ton-seum-gif-12396020753961179573","https://tenor.com/view/cheh-bienfaits-duh-gif-12323680"]
@@ -391,6 +391,10 @@ async def on_message(message):
         file = discord.File(f"env/ranked-emblem/PALU.mp4", filename=f"PALU.mp4")
         fileG2 = discord.File(f"env/ranked-emblem/toohless.mp4", filename=f"toohless.mp4")
         file3 = discord.File(f"env/ranked-emblem/junglediff.png", filename=f"junglediff.png")
+
+        if bot.user in message.mentions:
+            message_content = message.content.replace(f"<@{bot.user.id}>", "").strip().lower()
+            await message.channel.send(generate_content(message_content))
 
         if "g2 win" in message.content.lower():
             await message.channel.send(file=fileG2)

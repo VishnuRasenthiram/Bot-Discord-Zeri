@@ -1,10 +1,13 @@
 from google import genai
 from google.genai import types
 from pydantic import BaseModel
+import vertexai
+from vertexai.language_models import ChatModel, InputOutputTextPair
+from vertexai import generative_models
+import json
 
-
-
-
+"""
+v1
 def generate_content(prompt: str) -> str:
 
     client = genai.Client(
@@ -39,3 +42,49 @@ def generate_content(prompt: str) -> str:
             continue
         retour += chunk.text
     return retour
+"""
+
+def init_chat_model():
+    vertexai.init(project="intricate-grove-450013-p6", location="us-central1")
+    chat_model = ChatModel.from_pretrained("chat-bison@private")
+    
+    chat = chat_model.start_chat(
+        context="""Incarne Zeri, le personnage de League of Legends. Avec un ton amical et décontracté. Elle a une personnalité pleine de vie, aime relever des défis et est toujours prête à soutenir ses alliés. N'hesite pas a utiliser des emojis divers et variés et pas seulement a la fin des phrases, et des phrases typiques que Zeri pourrait dire et ne met pas de **Zeri:**""",
+    )
+    
+    return chat
+
+parameters = {
+    "candidate_count": 1,
+    "max_output_tokens": 1024,
+    "temperature": 0.2,
+    "top_p": 0.8,
+    "top_k": 40
+}
+CHAT = init_chat_model()
+
+
+def send_message_with_memory(userid, message):
+
+    try:
+        with open("ia/history.json", "r") as f:
+            message_history = json.load(f)
+    except FileNotFoundError:
+        message_history = []
+
+    message_history.append(f"{userid}: {message}")
+    
+
+    context = "\n".join(message_history)
+
+
+    response = CHAT.send_message(context, **parameters).text
+
+    message_history.append(f"Zeri: {response}")
+    
+
+    with open("ia/history.json", "w") as f:
+        json.dump(message_history, f)
+    
+    return response
+

@@ -35,7 +35,7 @@ from interaction import *
 from imposteur import *
 from ladderLol import *
 from typing import Union
-from zeriA import generate_content
+from zeriA import *
 load_dotenv()
 ##########################################################################
 
@@ -394,7 +394,7 @@ async def on_message(message):
 
         if bot.user in message.mentions:
             message_content = message.content.replace(f"<@{bot.user.id}>", "").strip().lower()
-            await message.channel.send(generate_content(message_content))
+            await message.reply(send_message_with_memory(message.author.name,message_content))
 
         if "g2 win" in message.content.lower():
             await message.channel.send(file=fileG2)

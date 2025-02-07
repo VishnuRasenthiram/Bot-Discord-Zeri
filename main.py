@@ -956,7 +956,11 @@ async def on_command_error(ctx, error):
         await ctx.channel.send('Ahahaha  t\'as pas les perms <:kekw:1079185133573255210>')
         await ctx.channel.send("https://tenor.com/view/counter-i-dont-gived-you-permission-gif-23613918")
 
-
+@bot.command()
+@commands.cooldown(1, 900, commands.BucketType.user)
+async def resetHistory(ctx):
+    clear_history()
+    await ctx.channel.send("Historique réinitialisé")
 
 
 @bot.command()

@@ -9,3 +9,5 @@ runes.json
 __pycache__/
 
 ia/*
+
+cmd.txt

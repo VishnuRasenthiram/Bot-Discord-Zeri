@@ -6,7 +6,7 @@ from vertexai.language_models import ChatModel, InputOutputTextPair
 from vertexai import generative_models
 import json
 
-def generate_content(prompt: str) -> str:
+def generate_content(prompt: str, user) -> str:
 
     client = genai.Client(
         vertexai=True,
@@ -18,12 +18,16 @@ def generate_content(prompt: str) -> str:
             message_history = json.load(f)
     except FileNotFoundError:
         message_history = [""]
-    if prompt not in message_history :
-        message_history.append(prompt)
+
+    for message in message_history:
+        if prompt not in message:
+            message_history.append(f"{user}:{prompt}")
+        else:
+            break
 
     history = "\n".join(message_history)
     model = "gemini-2.0-flash-exp"
-    contents = ["Incarne Zeri, le personnage de League of Legends. Avec un ton amical et décontracté. Elle a une personnalité pleine de vie, aime relever des défis et est toujours prête à soutenir ses alliés. fait des phrases pas trop longue pour répondre a ce message :"+prompt + "si besoin voici une historique des anciens messages :"+history]
+    contents = ["Incarne Zeri sans mettre 'Zeri:' au debut des messages, le personnage de League of Legends. Avec un ton amical.fait des phrases pas trop longue sans trop mettre d'emoji, voir pas dutout dans certains messages pour répondre a ce message :"+user+":"+prompt + "l'historique :"+history]
 
     generate_content_config = types.GenerateContentConfig(
         temperature=1,

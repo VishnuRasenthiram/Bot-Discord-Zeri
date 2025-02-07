@@ -397,7 +397,7 @@ async def on_message(message):
 
         if bot.user in message.mentions:
             message_content = message.content.replace(f"<@{bot.user.id}>", "").strip().lower()
-            await message.reply(generate_content(message_content))
+            await message.reply(generate_content(message_content, message.author.name))
 
         if "g2 win" in message.content.lower():
             await message.channel.send(file=fileG2)

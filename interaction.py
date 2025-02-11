@@ -21,11 +21,14 @@ choixInteraction = [
     app_commands.Choice(name="Boude", value="pout anime"),
     app_commands.Choice(name="Donne à manger", value="feed anime"),
     app_commands.Choice(name="S’assoit", value="sit anime"),
-    app_commands.Choice(name="Dort", value="sleep with anime")
+    app_commands.Choice(name="Dort", value="sleep with anime"),
+    app_commands.Choice(name="Bonk", value="bonk anime"),
+    app_commands.Choice(name="S'excuse", value="apologizes anime"),
 ]
 
 choixAction=[
     app_commands.Choice(name="Gêné", value="shy anime"),
+    app_commands.Choice(name="Au bout de sa vie", value="anime dead"),
     app_commands.Choice(name="Rit", value="laugh anime"),
     app_commands.Choice(name="S’ennuie", value="bored anime"),
     app_commands.Choice(name="Pleure", value="cry anime"),
@@ -67,10 +70,13 @@ def generate_interaction_text(value, M1, M2):
         "drool anime": f"{M1} bave en regardant {M2} 🤤.",
         "feed anime": f"{M1} donne à manger à {M2} 🍲.",
         "sit anime": f"{M1} s’assoit tranquillement à côté de {M2} 🪑.",
-        "sleep with anime": f"{M1} s’endort paisiblement à côté de {M2} 😴."
+        "sleep with anime": f"{M1} s’endort paisiblement à côté de {M2} 😴.",
+        "bonk anime": f"{M2} se fait BONK par {M1}!",
+        "apologizes anime": f"{M1} s'excuse auprès de {M2}!"
     }
     interaction_texts_none = {
         "cry anime": f"{M1} pleure à chaudes larmes 😭.",
+        "anime dead":f"{M1} est au bout de sa vie 🥺",
         "laugh anime": f"{M1} explose de rire 🤣.",
         "shy anime": f"{M1} est gêné et rougit 😳.",
         "sleep anime": f"{M1} s’endort paisiblement 😴.",
@@ -78,7 +84,7 @@ def generate_interaction_text(value, M1, M2):
         "drool anime": f"{M1} bave un peu en rêvassant 🤤.",
         "hungry anime": f"{M1} a faim et se tient le ventre 🍴.",
         "disappear anime": f"{M1} disparaît mystérieusement✨.",
-        "depress anime": f"{M1} semble déprimer 😔.",
+        "depress anime": f"{M1} fait une dépression 😔.",
         "happy anime": f"{M1} est heureux😄.",
         "wake up anime": f"{M1} se réveille en sursaut😯.",
         "sit anime": f"{M1} s’assoit tranquillement, profitant du moment 🪑."

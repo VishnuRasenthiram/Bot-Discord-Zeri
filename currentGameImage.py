@@ -7,15 +7,15 @@ from dotenv import load_dotenv
 import urllib 
 import json
 import asyncio
-from historiqueImage import add_item_to_slot
-from historiqueImage import getTypePartieFromCode
+from historiqueImage import *
+
 load_dotenv()
 lol_watcher = LolWatcher(os.getenv('RIOT_API'))
 version = lol_watcher.data_dragon.versions_for_region("euw1")
 font = ImageFont.truetype("font/BeaufortforLOL-Bold.ttf",size=25)
 fontLvl = ImageFont.truetype("font/BeaufortforLOL-Bold.ttf",size=20)
 fontMode= ImageFont.truetype("font/BeaufortforLOL-Bold.ttf",size=35)
-dataRunes=requests.get(f"https://ddragon.leagueoflegends.com/cdn/{version["v"]}/data/en_US/runesReforged.json")
+dataRunes=requests.get(f"https://ddragon.leagueoflegends.com/cdn/{version['v']}/data/en_US/runesReforged.json")
 dataRunes=dataRunes.json()
 
 with open("dossierJson/summoner_info.json","r") as f:
@@ -272,3 +272,91 @@ image =creerImageCG(cg,"europe","euw1")
 
 image.save("test.png")
 """
+class joueur :
+    def __init__(self,player,queue_id):
+        self.pseudo=player["riotIdGameName"]
+        self.champ=player["championName"]
+        self.queue_id=queue_id
+        self.team=player["teamId"]
+        self.position=player["individualPosition"]
+        self.items=creeBandeauItem(player)
+        self.player=player
+        
+   
+
+position_order = {
+    "TOP": 0,
+    "JUNGLE": 1,
+    "MIDDLE": 2,
+    "BOTTOM": 3,
+    "UTILITY": 4,
+    "":-1
+}
+
+fontAfter = ImageFont.truetype("font/BeaufortforLOL-Bold.ttf",size=40)
+
+async def after_game(region: str, game_id: int):
+    try :
+        matchs = lol_watcher.match.by_id(region, f"{region.upper()}_{game_id}")
+        listeJoueur = [joueur(player,matchs["info"]["queueId"]) for player in matchs["info"]["participants"]]
+
+        # Attribuer les rôles manquants
+        listeJoueur.sort(key=lambda x: x.team)
+        nb_j = (int)(len(listeJoueur)/2)
+        blue = listeJoueur[:nb_j]
+        red = listeJoueur[nb_j:]
+        if matchs["info"]["gameMode"] == "CLASSIC":
+            blue.sort(key=lambda x: (position_order[x.position]))
+            red.sort(key=lambda x: (position_order[x.position]))
+
+        imageFond = Image.open(f"Image/Zeri_CG.png")
+        size = 1920, 1080
+        imageFond = imageFond.resize(size)
+        for index,joueurs in enumerate(blue):
+            localisation = (10, 50 + 200 * index)
+            imageFond.paste(cree_bandeau_joueur(joueurs).resize((950,160)), localisation)
+        for index,joueurs in enumerate(red):
+            localisation = (970, 50 + 200 * index)
+            imageFond.paste(cree_bandeau_joueur(joueurs).resize((950,160)), localisation)
+
+        text=ImageDraw.Draw(imageFond)
+
+        win = blue[0].player["win"]
+
+        if win:
+            text.text((480,0),"Victoire",font=fontAfter,fill="#0397AB",stroke_width=1,stroke_fill="black")
+            text.text((1400,0),"Défaite",font=fontAfter,fill="#D12B3A",stroke_width=1,stroke_fill="black")
+        else:
+            text.text((1400,0),"Victoire",font=fontAfter,fill="#0397AB",stroke_width=1,stroke_fill="black")
+            text.text((480,0),"Défaite",font=fontAfter,fill="#D12B3A",stroke_width=1,stroke_fill="black")
+        return imageFond
+    except ApiError as e:
+        raise e
+
+def cree_bandeau_joueur(joueur: joueur):
+    image = Image.new('RGBA',(800,150), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(image)
+    draw.rectangle([(0, 0), (800,150)], fill="#3C3C41", outline="black", width=6)
+
+
+    chp=f'https://ddragon.leagueoflegends.com/cdn/{version["v"]}/img/champion/{joueur.champ}.png'
+    image.paste(Image.open(BytesIO(requests.get(chp).content)).resize((120,120)),(10,20))
+
+    iconPos=positionToIcon(joueur.player)
+    image.paste(iconPos,(610,60),iconPos)
+
+    image.paste(joueur.items,(155,45))
+    
+    text = ImageDraw.Draw(image)
+
+    text.text((155,10),f"{joueur.champ}  -  {joueur.pseudo}",font=font)
+    
+    image.paste(getLevelTimerKda(joueur.player).resize((300,30)),(155,112))
+
+    image.paste(getStats(joueur.player).resize((140,80)),(650,40))
+
+    return image
+
+
+
+#after_game("euw1", 7317366866).save("test.png")

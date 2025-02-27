@@ -80,9 +80,8 @@ CHAN_FLAME=332580555872927746
 ANNONCE_CHAN=634266557383442432
 KARAN_ID=614728233497133076
 SALON_NASA=1317082270875652180
-GUURUU_ID=1282820405626671164
-CHANNEL_SUIVIT=1283540354523463701
-CHANNEL_SUIVIT_GUURUU=1320482473217490975
+
+
 
 ##################################################################################################################################
 ##################################################################################################################################
@@ -106,6 +105,7 @@ async def periodic_check():
     async with verif_lock:
         try:
             await verif_game_en_cours()
+            
         except requests.exceptions.HTTPError as e:
             if e.response.status_code == 503:
                 print("Service indisponible, attente...")
@@ -114,6 +114,20 @@ async def periodic_check():
                 print(f"Erreur HTTP: {e}")
         except Exception as e:
             print(f"Erreur: {e}")
+
+@tasks.loop(minutes=1)
+async def periodic_check_fini():
+    try:
+        await verif_game_fini()
+        
+    except requests.exceptions.HTTPError as e:
+        if e.response.status_code == 503:
+            print("Service indisponible, attente...")
+            await asyncio.sleep(60)
+        else:
+            print(f"Erreur HTTP: {e}")
+    except Exception as e:
+        print(f"Erreur: {e}")
 
 verif_lock_ladder = asyncio.Lock()
 @tasks.loop(minutes=60)
@@ -148,8 +162,7 @@ async def verif_game_en_cours():
                     cg = lol_watcher.spectator.by_puuid(region, puuid)
                     if cg["gameId"] not in gameDejaSend and cg["gameQueueConfigId"] != 1700:
                         gameDejaSend.append(cg["gameId"])
-                        player_data = {"puuid": puuid, "derniereGame": cg["gameId"]}
-                        update_derniereGame(player_data)
+                        
 
                         regionId = LOF.regionForRiotId(region)
                         image = await creer_image_avec_reessai(cg, regionId, region)
@@ -157,14 +170,19 @@ async def verif_game_en_cours():
                         img_bytes = BytesIO()
                         image.save(img_bytes, format="PNG")
                         img_bytes.seek(0)
-                        file = discord.File(img_bytes, filename="Partie_En_Cours.png")
+                        
+                        liste_messages = []
 
                         channelListe = list(get_player_listeChannel(puuid))
                         for channelId in channelListe:
                             channel = bot.get_channel(int(channelId))
                             if channel:
                                 img_copy = BytesIO(img_bytes.getvalue()) 
-                                await channel.send(file=discord.File(img_copy, filename="Partie_En_Cours.png"))
+                                message = await channel.send(file=discord.File(img_copy, filename="Partie_En_Cours.png"))
+                                liste_messages.append(message.id)
+
+                        player_data = {"puuid": puuid, "derniereGame": cg["gameId"],"messages_id": str(liste_messages),"game_fini":0}
+                        update_derniereGame(player_data)
                     break
                 except ApiError as e:
                     if e.response.status_code == 404:
@@ -172,6 +190,59 @@ async def verif_game_en_cours():
                 except Exception as er:
                     print(f"Erreur inattendue : {er}")
                     break
+
+async def verif_game_fini():
+    liste = get_player_liste()
+    gameDejaSend = []
+    if liste is None:
+        return
+
+    for gameId in liste:
+        if gameId[6] != 0 and gameId[6] != None:
+            gameDejaSend.append((int)(gameId[6]))
+
+    for player in liste:
+        region = player[2]
+        puuid = player[1]
+        
+        try:
+            
+            if  (int)(player[3]) not in gameDejaSend and (int)(player[3]) != None:
+                gameDejaSend.append(player[3])
+                
+                image = await after_game(region,player[3])
+
+                img_bytes = BytesIO()
+                image.save(img_bytes, format="PNG")
+                img_bytes.seek(0)
+                
+                message_liste = list(ast.literal_eval(player[5]))
+                channel_liste = list(ast.literal_eval(player[4]))
+
+                combined = zip(channel_liste, message_liste)
+
+                for channel, message_id in combined:
+                    channel = bot.get_channel(int(channel))
+                    
+                    if channel:
+                        message = await channel.fetch_message(message_id)
+                        if message:
+                            img_copy = BytesIO(img_bytes.getvalue()) 
+                            await message.channel.send(file=discord.File(img_copy, filename="Partie_Fini.png"))
+                            await message.delete()
+                        
+                
+                player_data = {"puuid": puuid, "derniereGame": player[3],"messages_id": player[5],"game_fini":player[3]}
+                update_derniereGame(player_data)
+
+            
+        except ApiError as e:
+            if e.response.status_code == 404:
+                pass
+                
+        except Exception as er:
+            pass
+            
 ##########################################################################
 async def update_ladder():
     ladder = get_listChannelLadder()
@@ -205,7 +276,8 @@ async def on_ready():
     scheduler.start()
     try:
         periodic_check.start()
-        periodic_check_ladder.start()
+        periodic_check_fini.start()
+        #periodic_check_ladder.start()
         synced= await bot.tree.sync()
     except Exception as e:
         print(e)
@@ -382,6 +454,25 @@ async def histo(interaction: discord.Interaction, pseudo: str = None, region: ap
 async def partieEnCours(interaction: discord.Interaction, pseudo: str = None, region: app_commands.Choice[str] = None):
     puuid,region=await getPuuidRegion(interaction,pseudo,region)
     await LOF.partieEnCours(interaction,puuid, region)
+
+@bot.tree.command(name="liste_suivit")
+async def liste_suivit(interaction: discord.Interaction):
+    await interaction.response.defer()
+    liste = get_player_liste()
+
+    try:
+        if liste:
+            for index,player in enumerate(liste):
+                pseudo=lol_watcher.accountV1.by_puuid(regionForRiotId(player[2]),player[1])["gameName"]
+                tagline = lol_watcher.accountV1.by_puuid(regionForRiotId(player[2]),player[1])["tagLine"]
+                await interaction.channel.send(f"{pseudo}#{tagline}")
+            await interaction.channel.send("Fini")
+    except ApiError as err:
+        print(err)
+    except Exception as e:
+        print(e)
+    
+    
 
 
 

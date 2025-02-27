@@ -50,7 +50,7 @@ def creeBandeauItem(informationPartie):
     slot = Image.open("Image/empty_slot.png")
     for i in range (7):
         if informationPartie[f'item{i}'] !=0:
-            slot = add_item_to_slot(slot,f'https://ddragon.leagueoflegends.com/cdn/{version["v"]}/img/item/{informationPartie[f'item{i}']}.png')
+            slot = add_item_to_slot(slot,f'https://ddragon.leagueoflegends.com/cdn/{version["v"]}/img/item/{informationPartie[f"item{i}"]}.png')
             combined_image.paste(slot, (i * 64, 0))
             
     return combined_image
@@ -58,9 +58,9 @@ def creeBandeauItem(informationPartie):
 def getTypePartieFromCode(informationTypePartie):
     with open("dossierJson/input.json","r") as numPartie:
             data = json.load(numPartie)  
-    for i in range (len(data)):
-        if str(informationTypePartie).startswith("18"):
+    if str(informationTypePartie).startswith("18"):
             informationTypePartie=18
+    for i in range (len(data)):
         if data[i]['queueId']==informationTypePartie:     
             return data[i]["description"] 
     
@@ -97,7 +97,7 @@ def add_item_to_slot(slot_image, item_image_path):
 
 
 def getChampIcon(informationPartie):
-    champ_image_path=f'https://ddragon.leagueoflegends.com/cdn/{version["v"]}/img/champion/{informationPartie['championName']}.png'
+    champ_image_path=f'https://ddragon.leagueoflegends.com/cdn/{version["v"]}/img/champion/{informationPartie["championName"]}.png'
     response = requests.get(champ_image_path)
     img_data = response.content
     champ_image= Image.open(BytesIO(img_data)).convert('RGBA')
@@ -106,10 +106,10 @@ def getChampIcon(informationPartie):
 
 def creeTemplateStats():
 
-    imageGold=Image.open('Image/gold.png').resize((50,50)).convert('RGBA')
-    imageCs=Image.open('Image/minion.png').resize((50,50)).convert('RGBA')
-    imageDamage=Image.open('Image/damage.png').resize((50,45)).convert('RGBA')
-    imageVision=Image.open('Image/vision.png').resize((50,40)).convert('RGBA')
+    imageGold=Image.open('Image/gold.png').convert('RGBA')
+    imageCs=Image.open('Image/minion.png').convert('RGBA')
+    imageDamage=Image.open('Image/damage.png').resize((25,25)).convert('RGBA')
+    imageVision=Image.open('Image/vision.png').resize((25,25)).convert('RGBA')
 
     statsBand=Image.new('RGBA', (220, 120), color="#3C3C41")
 
@@ -117,9 +117,9 @@ def creeTemplateStats():
     draw.rectangle([0, 0, 219, 119], outline="#C89B3C", width=2)
 
     statsBand.paste(imageCs,(10,10),imageCs)
-    statsBand.paste(imageGold,(10,60),imageGold)
-    statsBand.paste(imageDamage,(110,12),imageDamage)
-    statsBand.paste(imageVision,(110,65),imageVision)
+    statsBand.paste(imageGold,(25,70),imageGold)
+    statsBand.paste(imageDamage,(120,20),imageDamage)
+    statsBand.paste(imageVision,(120,70),imageVision)
 
     statsBand.save("Image/statsBand.png")
 
@@ -136,22 +136,22 @@ def getStats(informationPartie):
     font = ImageFont.truetype("font/BeaufortforLOL-Bold.ttf",size=20)
     
     draw.text((50,20),cs,font=font)
-    draw.text((50,70),gold,font=font)
+    draw.text((50,67),gold,font=font)
     draw.text((150,20),damage,font=font)
-    draw.text((150,70),visionScore,font=font)
+    draw.text((150,67),visionScore,font=font)
 
     return statsBand
 
 def creetemplateLTK():
-    imageLevel=Image.open('Image/level.png').resize((40,40)).convert('RGBA')
-    imageTemps=Image.open('Image/temps.png').resize((40,40)).convert('RGBA')
+    imageLevel=Image.open('Image/level.png').convert('RGBA')
+    imageTemps=Image.open('Image/temps.png').resize((34,34)).convert('RGBA')
     statsBand=Image.new('RGBA', (400, 50), color="#3C3C41")
 
     draw= ImageDraw.Draw(statsBand)
     
     draw.rectangle([0, 0, 399, 49], outline="#C89B3C", width=2)
-    statsBand.paste(imageLevel,(10,5),imageLevel)
-    statsBand.paste(imageTemps,(250,5),imageTemps)
+    statsBand.paste(imageLevel,(10,8),imageLevel)
+    statsBand.paste(imageTemps,(250,8),imageTemps)
 
     statsBand.save("Image/LTKBand.png")
 
@@ -188,8 +188,8 @@ def creeBandeauStat(informationPartie,informationTypePartie):
     bandeau.paste(getStats(informationPartie),(670,50))
     bandeau.paste(getLevelTimerKda(informationPartie),(150,130))
 
-    iconPos=positionToIcon(informationPartie).resize((74,64))
-    bandeau.paste(iconPos,(600,70),iconPos)
+    iconPos=positionToIcon(informationPartie)
+    bandeau.paste(iconPos,(615,70),iconPos)
 
     text=ImageDraw.Draw(bandeau)
 
@@ -227,3 +227,4 @@ def positionToIcon(informationPartie):
             imageLane=Image.open("Image/NOPOS.png")
     return imageLane.convert("RGBA")
     
+

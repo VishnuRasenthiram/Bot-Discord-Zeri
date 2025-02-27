@@ -200,10 +200,10 @@ def update_derniereGame(data):
     )
     cur = conn.cursor()
     cur.execute("""
-        UPDATE liste_player 
-        SET derniereGame=%s
-        WHERE puuid=%s ;
-    """, (data["derniereGame"],data['puuid']))
+    UPDATE liste_player 
+    SET derniereGame=%s, messages_id=%s, game_fini=%s
+    WHERE puuid=%s;  -- Assurez-vous que le type est cohérent
+    """, (data["derniereGame"], data["messages_id"], data['game_fini'], data["puuid"]))
     conn.commit()
     cur.close()
     conn.close()

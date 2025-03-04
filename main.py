@@ -277,7 +277,7 @@ async def on_ready():
     try:
         periodic_check.start()
         periodic_check_fini.start()
-        #periodic_check_ladder.start()
+        periodic_check_ladder.start()
         synced= await bot.tree.sync()
     except Exception as e:
         print(e)

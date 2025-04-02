@@ -18,3 +18,9 @@ error_log.txt
 
 Image/apod/*
 
+
+dossierJson/*
+
+.vscode/*
+__pycache__/*
+

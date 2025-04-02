@@ -18,3 +18,5 @@ error_log.txt
 
 Image/apod/*
 
+
+__pycache__/

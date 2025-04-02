@@ -2,7 +2,6 @@
 
 
 agarderdeCotePourPlusTard.py
-
 1.json
 2.json
 runes.json
@@ -19,4 +18,8 @@ error_log.txt
 Image/apod/*
 
 
-__pycache__/
+>>>>>>> origin
+.vscode/*
+__pycache__/*
+
+>>>>>>> origin

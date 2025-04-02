@@ -180,15 +180,10 @@ async def create_ladder(liste_joueur):
         classement.append((nom,rank,div,lp,icone))
 
     classement.sort(key=lambda x: (rank_order[x[1]], division_order[x[2]], - int(x[3])))
-    if len(classement)>25:
-        limite = 25
-    else:
-        limite = len(classement)
-    for i in range(limite):
-        joueur = classement[i]
-        
+
+    for i, joueur in enumerate(classement[:25]):
         embed.add_field(name=f"{i+1}. {joueur[0]}", value=rank_to_emoji(joueur[1],joueur[2],joueur[3]), inline=False)
-        if i ==0:
+        if i == 0:
             embed.set_thumbnail(url=joueur[4])
     return embed
 

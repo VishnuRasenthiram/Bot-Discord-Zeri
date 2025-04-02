@@ -36,6 +36,7 @@ from imposteur import *
 from ladderLol import *
 from typing import Union
 from zeriA import *
+import traceback
 load_dotenv()
 ##########################################################################
 
@@ -613,43 +614,46 @@ async def apod(ctx):
     await imageNasa(ctx.message.channel)
 
 async def imageNasa(channel):
-    apod=nasa
-    
-    
-    if apod.apod()["media_type"]=="image":
-    
-        embed=discord.Embed(title="Photo astronomique du jour !",
-                description=f'Voici la photo du jour en astronomie !', 
-                color=discord.Color.red()).set_thumbnail(
-                url="https://www.nasa.gov/sites/default/files/thumbnails/image/nasa-logo-web-rgb.png"
-                ).set_image(url=apod.apod()["hdurl"])
+    try :
 
-        if "copyright" in apod.apod():
+        embed=discord.Embed(title=nasa.apod()["title"],
+                    description=f"🔭 {nasa.apod()['date']}", 
+                    color=discord.Color.red()).set_thumbnail(
+                    url="https://www.nasa.gov/wp-content/uploads/2023/12/nasainsigniargb150px.png"
+                    )
+        if "copyright" in nasa.apod():
 
-                embed.add_field(
-                name="Auteur :", 
-                value=f'{apod.apod()["copyright"]}', 
-                inline=True
-                )
-        await channel.send(embed=embed)
-    elif apod.apod()["media_type"]=="video":
-        embed=discord.Embed(title="Vidéo astronomique du jour !",
-                description=f'Voici la vidéo du jour en astronomie !', 
-                color=discord.Color.red()).set_thumbnail(
-                url="https://www.nasa.gov/sites/default/files/thumbnails/image/nasa-logo-web-rgb.png"
-                )
+                    embed.add_field(
+                    name="Auteur :", 
+                    value=f'{nasa.apod()["copyright"]}', 
+                    inline=True
+                    )
+        if nasa.apod()["media_type"]=="image":
 
-        if "copyright" in apod.apod():
+            response = requests.get(nasa.apod()["hdurl"])
 
-                embed.add_field(
-                name="Auteur :", 
-                value=f'{apod.apod()["copyright"]}', 
-                inline=True
-                )
-        
-        await channel.send(embed=embed)
-        await channel.send(apod.apod()["url"])
-    
+            file_name= nasa.apod()["hdurl"].split("/")[-1]
+
+            if response.status_code == 200:
+                if not os.path.exists(f"Image/apod/{file_name}"):
+                    with open(f"Image/apod/{file_name}", "wb") as file: 
+                        file.write(response.content)
+            else:
+                print("Erreur lors du téléchargement de l'image.")
+                return
+            
+            file = discord.File(f"Image/apod/{file_name}", filename="apod.png")
+            embed.set_image(url="attachment://apod.png")
+            
+
+        await channel.send(embed=embed,file=file)
+
+        if nasa.apod()["media_type"]=="video":
+            await channel.send(nasa.apod()["hdurl"])
+
+    except  e:
+        print(e)
+        await channel.send("Erreur lors de la récupération de l'image.")
 ##########################################################################   
 
 
@@ -1114,7 +1118,11 @@ async def checkpoll(id):
         print(e)
 
 
-
+@bot.event
+async def on_error(event, *args, **kwargs):
+    with open("error_log.txt", "a") as f:
+        f.write(f"\nErreur détectée : {event}\n")
+        f.write(traceback.format_exc())
 
 
 if __name__ == "__main__":

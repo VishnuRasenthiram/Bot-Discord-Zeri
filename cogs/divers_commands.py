@@ -10,7 +10,6 @@ from dotenv import load_dotenv
 from zeri_features.imposteur.imposteur import fi, impo
 from riotwatcher import LolWatcher, ApiError
 import urllib
-from main import KARAN_ID
 from zeri_features.zeri_interactions.zeri_nasa import imageNasa
 load_dotenv()
 
@@ -18,7 +17,7 @@ lol_watcher = LolWatcher(os.getenv('RIOT_API'))
 version = lol_watcher.data_dragon.versions_for_region("euw1")
 
 
-
+KARAN_ID=614728233497133076
 class DiversCommands(commands.Cog):
     def __init__(self, bot: discord.Client):
         self.bot = bot
@@ -150,7 +149,7 @@ class DiversCommands(commands.Cog):
     @commands.cooldown(1, 30, commands.BucketType.user)
     async def apod(self,ctx):
         await imageNasa(ctx.message.channel)
-
+'''
     
     @commands.command()
     @commands.cooldown(1, 900, commands.BucketType.user)
@@ -198,7 +197,7 @@ class DiversCommands(commands.Cog):
                 await channel.send(poll.get_answer(1).vote_count)
         except Exception as e :
             print(e)
-
+'''
 
 async def setup(bot):
     await bot.add_cog(DiversCommands(bot))

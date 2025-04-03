@@ -6,7 +6,14 @@ from zeri_features.zeri_ia.zeriA import *
 from zeri_features.zeri_welcome.welcomeImage import *
 
 import  time
-from main import KARAN_ID, CHAN_BVN, ROLE_NEANTIN, ROLE_FAILLE, CHAN_VOC, ANNONCE_CHAN, COOLDOWN
+
+CHAN_BVN =614953541911576692
+ROLE_NEANTIN =1079422327391006851
+ROLE_FAILLE=1079432006796066816
+CHAN_VOC =1071472444562473021
+ANNONCE_CHAN=634266557383442432
+KARAN_ID=614728233497133076
+COOLDOWN=10
 
 
 class Events(commands.Cog):
@@ -110,7 +117,7 @@ class Events(commands.Cog):
         if member.guild.id==KARAN_ID:
 
             image =creerImageBVN(member,"Bienvenue")
-        
+
 
             img_bytes=BytesIO()
             image.save(img_bytes,format='PNG')
@@ -120,7 +127,7 @@ class Events(commands.Cog):
             channel=discord.utils.get(member.guild.channels, id=CHAN_BVN)
             role = discord.utils.get(member.guild.roles, id=ROLE_NEANTIN)
             role2= discord.utils.get(member.guild.roles, id=ROLE_FAILLE)
-        
+
             await channel.send(file=discord.File(img_bytes, filename='bienvenue.png'))
             await member.add_roles(role)
             await member.add_roles(role2)

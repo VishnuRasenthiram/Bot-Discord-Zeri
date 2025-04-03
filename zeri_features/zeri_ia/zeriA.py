@@ -102,6 +102,6 @@ def send_message_with_memory(userid, message):
 """
 
 def clear_history():
-    with open("ia/history.json", "w") as f:
+    with open("zeri_features/zeri_ia/ia/history.json", "w") as f:
         json.dump([""], f)
 

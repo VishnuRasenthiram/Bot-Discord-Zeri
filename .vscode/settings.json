@@ -10,5 +10,8 @@
             "database": "zeribot",
             "username": "postgres"
         }
+    ],
+    "python.analysis.extraPaths": [
+        "./zeri_features"
     ]
 }

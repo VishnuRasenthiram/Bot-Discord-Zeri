@@ -1,33 +1,11 @@
 import discord
 from discord.ext import *
-from discord.ui import Select
 import asyncio
-from datetime import date, datetime
-from datetime import timedelta
-from discord.flags import Intents 
-from discord import app_commands
-import urllib
-import requests
-from datetime import datetime
-import json
 import random
-import re
-import pytz
-from dotenv import load_dotenv
-import os
-from threading import Thread
-import subprocess
-import sched, time
-from discord.ext import tasks, commands
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from apscheduler.triggers.cron import CronTrigger
-from baseDeDonne import *
+from bd.baseDeDonne import *
 import math
+
 class ZeriMoney:
-    def __init__(self,bot: commands.Bot):
-        self.bot=bot
-
-
 
     async def update_daily(self):
 
@@ -64,7 +42,7 @@ class ZeriMoney:
         user=get_user_profile(id)
         if user==None:
            await  self.register(id)
-        await interaction.followup.send(f"Balance: {user[1]} <:RaCoins:1322339383164010618>")
+        await interaction.followup.send(f"Balance: {user[1]} <:Zcoins:1357324573120397543> ")
 
     async def register(self,id):
         user=get_user_profile(id)
@@ -144,7 +122,7 @@ class ZeriMoney:
             url=interaction.user.display_avatar.url
         ).add_field(
             name="Balance",
-            value=f"{user[1]} RC <:RaCoins:1322339383164010618>",
+            value=f"{user[1]} ZC <:Zcoins:1357324573120397543> ",
             inline=True
         ).add_field(
             name="Level",
@@ -205,24 +183,24 @@ class ZeriMoney:
             await interaction.followup.send("Vous ne pouvez pas miser une somme négative.")
             return
         if mise<100:
-            await interaction.followup.send("Vous devez miser au moins 100 RC.")
+            await interaction.followup.send("Vous devez miser au moins 100 ZC.")
             return
         if mise>10000:
-            await interaction.followup.send("Vous ne pouvez pas miser plus de 10000 RC.")
+            await interaction.followup.send("Vous ne pouvez pas miser plus de 10000 ZC.")
             return
-        message =await interaction.followup.send(f"Vous avez misé {mise} RC sur {choix}. La pièce est lancée...<:RaCoins:1322339383164010618>")
+        message =await interaction.followup.send(f"Vous avez misé {mise} ZC sur {choix}. La pièce est lancée...<:Zcoins:1357324573120397543> ")
         message = await interaction.channel.fetch_message(message.id)
         await asyncio.sleep(4)  
         if random.randint(0, 1) == 0:
             resultat = "Pile"
         else:
             resultat = "Face"
-        await message.edit(content=f"Vous avez misé {mise} RC sur {choix}. Résultat: {resultat}")  
+        await message.edit(content=f"Vous avez misé {mise} ZC sur {choix}. Résultat: {resultat}")  
 
         if resultat == choix:
             newMoney = user[1] + mise
-            await interaction.followup.send(f"{interaction.user.mention} vous avez gagné {mise} RC! <:RaCoins:1322339383164010618>")
+            await interaction.followup.send(f"{interaction.user.mention} vous avez gagné {mise} ZC! <:Zcoins:1357324573120397543> ")
         else:
             newMoney = user[1] - mise
-            await interaction.followup.send(f"{interaction.user.mention} vous avez perdu {mise} RC. <:RaCoins:1322339383164010618>")
+            await interaction.followup.send(f"{interaction.user.mention} vous avez perdu {mise} ZC. <:Zcoins:1357324573120397543> ")
         update_user_profile(user[0],newMoney,user[2],user[3],user[4],user[5])

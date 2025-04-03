@@ -1,9 +1,5 @@
 from google import genai
 from google.genai import types
-from pydantic import BaseModel
-import vertexai
-from vertexai.language_models import ChatModel, InputOutputTextPair
-from vertexai import generative_models
 import json
 
 def generate_content(prompt: str, user) -> str:
@@ -14,7 +10,7 @@ def generate_content(prompt: str, user) -> str:
         location="us-central1",
     )
     try:
-        with open("ia/history.json", "r") as f:
+        with open("zeri_features/zeri_ia/ia/history.json", "r") as f:
             message_history = json.load(f)
     except FileNotFoundError:
         message_history = [""]
@@ -27,7 +23,7 @@ def generate_content(prompt: str, user) -> str:
 
     history = "\n".join(message_history)
     model = "gemini-2.0-flash-exp"
-    contents = ["Incarne Zeri sans mettre 'Zeri:' au debut des messages, le personnage de League of Legends. Avec un ton amical.fait des phrases pas trop longue sans trop mettre d'emoji, voir pas dutout dans certains messages pour répondre a ce message :"+user+":"+prompt + "l'historique :"+history]
+    contents = ["Incarnes Zeri, le personnage de League of Legends. Réponds avec un ton amical et énergique, en phrases courtes et directes. Ne commence pas tes réponses par 'Zeri:' et utilise des emojis avec modération (1 max par message)"+user+":"+prompt + "l'historique :"+history]
 
     generate_content_config = types.GenerateContentConfig(
         temperature=1,
@@ -53,7 +49,7 @@ def generate_content(prompt: str, user) -> str:
         retour += chunk.text
     if f"Zeri: {retour}" not in message_history: 
         message_history.append(f"Zeri: {retour}")
-    with open("ia/history.json", "w") as f:
+    with open("zeri_features/zeri_ia/ia/history.json", "w") as f:
         json.dump(message_history, f)
     return retour
 

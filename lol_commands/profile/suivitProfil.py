@@ -1,14 +1,10 @@
 import discord
-from riotwatcher import LolWatcher, ApiError
+from riotwatcher import ApiError
 from discord.ext import *
-from discord.ui import Select
 from discord import app_commands
-from threading import Thread
-from leagueOfFunction import *
-from welcomeImage import *
-from currentGameImage import *
-from baseDeDonne import *
-from leagueOfFunction import *
+from lol_commands.leagueOfFunction import *
+from lol_commands.current_game.currentGameImage import *
+from lol_commands.leagueOfFunction import *
 from typing import Union
 
 def generate_choices_liste_player(puuid):

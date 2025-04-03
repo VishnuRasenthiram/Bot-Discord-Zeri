@@ -1,10 +1,9 @@
-from PIL import Image, ImageDraw, ImageOps, ImageFont
+from PIL import Image, ImageDraw, ImageFont
 import requests
 from io import BytesIO
-from riotwatcher import LolWatcher, ApiError
+from riotwatcher import LolWatcher
 import os
 from dotenv import load_dotenv
-import urllib 
 import json
 from math import *
 

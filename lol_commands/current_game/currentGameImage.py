@@ -6,8 +6,7 @@ import os
 from dotenv import load_dotenv
 import urllib 
 import json
-import asyncio
-from historiqueImage import *
+from lol_commands.historique.historiqueImage import *
 
 load_dotenv()
 lol_watcher = LolWatcher(os.getenv('RIOT_API'))

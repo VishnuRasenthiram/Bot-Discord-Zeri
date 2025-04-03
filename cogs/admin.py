@@ -3,10 +3,9 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 import random
-from main import KARAN_ID
 from zeri_features.zeri_ia.zeriA import clear_history
 
-
+KARAN_ID=614728233497133076
 
 class Admin(commands.Cog):
     def __init__(self, bot: discord.Client):
@@ -98,13 +97,13 @@ class Admin(commands.Cog):
             serv= self.bot.get_guild(int(ctx.message.content.split()[1:][0]))
             await serv.leave()
             await ctx.channel.send(f'J\'ai quitté le serveur : {serv}!')    
-
+"""
     @commands.command()
     @commands.cooldown(1, 900, commands.BucketType.user)
     async def resetHistory(ctx):
         clear_history()
         await ctx.channel.send("Historique réinitialisé")
-
+"""
 
         
 async def setup(bot):

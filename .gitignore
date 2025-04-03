@@ -1,4 +1,5 @@
 .env
+.venv/*
 
 
 agarderdeCotePourPlusTard.py
@@ -19,6 +20,8 @@ Image/apod/*
 
 
 
+
+.idea/*
 .vscode/*
 __pycache__/*
 

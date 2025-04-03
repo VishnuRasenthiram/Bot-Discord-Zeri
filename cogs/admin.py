@@ -4,7 +4,7 @@ from discord.ext import commands
 from discord import app_commands
 import random
 from main import KARAN_ID
-from zeri_ia.zeriA import clear_history
+from zeri_features.zeri_ia.zeriA import clear_history
 
 
 

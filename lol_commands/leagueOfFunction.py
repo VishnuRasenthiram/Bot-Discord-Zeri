@@ -1,18 +1,12 @@
+import asyncio
 import discord
 from riotwatcher import LolWatcher, ApiError
-from discord.ext import commands
-from discord.ui import Select
 from discord.app_commands import Choice
-import urllib 
-from discord.flags import Intents 
 from discord import app_commands
-import json
-from dotenv import load_dotenv
 import os
-from currentGameImage import *
-from baseDeDonne import *
-from historiqueImage import *
-import aiohttp
+from lol_commands.current_game.currentGameImage import *
+from bd.baseDeDonne import *
+from lol_commands.historique.historiqueImage import *
 
 
 lol_watcher = LolWatcher(os.getenv('RIOT_API'))

@@ -1,37 +1,9 @@
 import discord
 from riotwatcher import LolWatcher, ApiError
-from discord.ext import *
-from discord.ui import Select
-import asyncio
-from datetime import date, datetime
-from datetime import timedelta
-from discord.flags import Intents 
 from discord import app_commands
-import urllib
-import requests
-from datetime import datetime
-import json
-import random
-from nasaapi import Client
-import re
-import pytz
-from dotenv import load_dotenv
 import os
-from threading import Thread
-import subprocess
-import sched, time
-from discord.ext import tasks, commands
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from apscheduler.triggers.cron import CronTrigger
-from leagueOfFunction import *
-from welcomeImage import *
-from currentGameImage import *
-from baseDeDonne import *
-from tenorApi import *
-import hashlib  
-import aiohttp
-from leagueOfFunction import *
-from typing import Union
+from lol_commands.leagueOfFunction import *
+
 
 lol_watcher = LolWatcher(os.getenv('RIOT_API'))
 version = lol_watcher.data_dragon.versions_for_region("euw1")

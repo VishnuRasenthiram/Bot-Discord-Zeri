@@ -7,7 +7,7 @@ from discord.ext import commands
 from discord import app_commands
 import random
 from dotenv import load_dotenv
-from imposteur.imposteur import fi, impo
+from zeri_features.imposteur.imposteur import fi, impo
 from riotwatcher import LolWatcher, ApiError
 import urllib
 from main import KARAN_ID

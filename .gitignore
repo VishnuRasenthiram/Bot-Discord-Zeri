@@ -10,6 +10,19 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+<<<<<<< HEAD
+agarderdeCotePourPlusTard.py
+1.json
+2.json
+runes.json
+__pycache__/*
+<<<<<<< HEAD
+
+=======
+__pycache__
+>>>>>>> b950ff4029a7f89aafef218578d0495ea162dfd1
+zeri_features/zeri_ia/ia/*
+=======
 # Fichiers temporaires
 *.pyc
 *.pyo
@@ -31,6 +44,7 @@ error_log.txt
 runes.json
 test.json
 dossierJson/
+>>>>>>> b7f18d4461bcddd4e90c88a308d21e7a717e0fbe
 
 # Fichiers d'images
 Image/apod/
@@ -42,3 +56,23 @@ zeri_features/zeri_ia/ia/
 agarderdeCotePourPlusTard.py
 cmd.txt
 
+<<<<<<< HEAD
+test.json
+
+error_log.txt
+
+Image/apod/*
+
+
+
+
+.idea/*
+.vscode/*
+__pycache__/*
+
+
+update.log
+update.sh
+env/*
+=======
+>>>>>>> b7f18d4461bcddd4e90c88a308d21e7a717e0fbe

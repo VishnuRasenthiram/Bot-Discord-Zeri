@@ -15,11 +15,16 @@ from lol_commands.classement.ladderLol import *
 
 class LoLCommands(commands.Cog):
     def __init__(self, bot: discord.Client):
-        self.bot = bot
-        self.lol_watcher = LolWatcher(os.getenv('RIOT_API'))
-        self.version = self.lol_watcher.data_dragon.versions_for_region("euw1")
-
-        self.choixRegion = choixRegion
+        try:
+            self.bot = bot
+            print("🔄 Initialisation du LolWatcher...")
+            self.lol_watcher = LolWatcher(os.getenv('RIOT_API'))
+            print("✅ LolWatcher initialisé")
+            self.choixRegion = choixRegion
+            print("✅ Cog LoL initialisé avec succès")
+        except Exception as e:
+            print(f"❌ Erreur lors de l'initialisation du cog LoL: {str(e)}")
+            raise
 
 
     @app_commands.command(name="sauvegarder_mon_profil", description="Sauvegarde votre profil LoL")
@@ -173,4 +178,10 @@ class LoLCommands(commands.Cog):
 
 
 async def setup(bot):
-    await bot.add_cog(LoLCommands(bot))
+    try:
+        print("🔄 Chargement du cog LoL...")
+        await bot.add_cog(LoLCommands(bot))
+        print("✅ Cog LoL chargé avec succès")
+    except Exception as e:
+        print(f"❌ Erreur lors du chargement du cog LoL: {str(e)}")
+        raise

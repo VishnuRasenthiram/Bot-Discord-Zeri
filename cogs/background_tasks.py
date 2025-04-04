@@ -1,28 +1,35 @@
-from asyncio import tasks
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from apscheduler.triggers.cron import CronTrigger
-import datetime
-import pytz
 import os
+import asyncio
 from io import BytesIO
-
+import ast
 import requests
+
 from lol_commands.leagueOfFunction import LOF, creer_image_avec_reessai
-from main import KARAN_ID,SALON_NASA
 from riotwatcher import LolWatcher
 from riotwatcher.exceptions import ApiError
-from zeri_features.zeri_interactions.zeri_nasa import imageNasa
-from zeri_features.zeri_economy.zeriMoney import *
-from bd.baseDeDonne import get_player_liste, get_player_listeChannel, update_derniereGame
+from zeri_features.zeri_economy.zeriMoney import ZeriMoney
+from bd.baseDeDonne import (
+    get_ladder_profile,
+    get_player_liste, 
+    get_player_listeChannel, 
+    update_derniereGame
+)
+from lol_commands.classement.ladderLol import (
+    create_ladder, 
+    get_listChannelLadder,
+    get_messageId_listChannelLadder, 
+    update_messageId_listChannelLadder
+)
+from lol_commands.current_game.currentGameImage import after_game
 
-from lol_commands.classement.ladderLol import create_ladder, get_listChannelLadder, get_messageId_listChannelLadder, update_messageId_listChannelLadder
-from lol_commands.current_game.currentGameImage import *
-from lol_commands.leagueOfFunction import LOF
 
+KARAN_ID=614728233497133076
+SALON_NASA=1317082270875652180
 class BackgroundTasks(commands.Cog):
-    def __init__(self, bot : discord.Client):
+    def __init__(self, bot: discord.Client):
         self.bot = bot
         self.economy = ZeriMoney()
         self.scheduler = AsyncIOScheduler()
@@ -30,19 +37,18 @@ class BackgroundTasks(commands.Cog):
         self.verif_lock = asyncio.Lock()
         self.lol_watcher = LolWatcher(os.getenv('RIOT_API'))
 
-
     async def cog_load(self):
-        """Démarre les tâches quand le cog est chargé"""
-        try:
-            if not self.periodic_check.is_running():
-                self.periodic_check.start()
-            if not self.periodic_check_fini.is_running():
-                self.periodic_check_fini.start()
-            if not self.periodic_check_ladder.is_running():
-                self.periodic_check_ladder.start()
-        except Exception as e:
-            print(f"❌ Erreur démarrage tâches: {e}")
+        self.periodic_check.start()
+        self.periodic_check_fini.start()
+        self.periodic_check_ladder.start()
 
+    async def cog_unload(self):
+        self.periodic_check.cancel()
+        self.periodic_check_fini.cancel()
+        self.periodic_check_ladder.cancel()
+
+        
+ 
     @tasks.loop(minutes=5)
     async def periodic_check(self):
         async with self.verif_lock:
@@ -57,7 +63,6 @@ class BackgroundTasks(commands.Cog):
                     print(f"Erreur HTTP: {e}")
             except Exception as e:
                 print(f"Erreur: {e}")
-        
 
     @tasks.loop(minutes=1)
     async def periodic_check_fini(self):
@@ -73,7 +78,7 @@ class BackgroundTasks(commands.Cog):
         except Exception as e:
             print(f"Erreur: {e}")
 
-    
+      
     @tasks.loop(minutes=60)
     async def periodic_check_ladder(self):
         async with self.verif_lock_ladder:
@@ -89,7 +94,7 @@ class BackgroundTasks(commands.Cog):
             except Exception as e:
                 print(f"Erreur: {e}")
             
-            
+   
     async def verif_game_en_cours(self):
             liste = get_player_liste()
             gameDejaSend = []
@@ -104,7 +109,7 @@ class BackgroundTasks(commands.Cog):
 
                 for _ in range(3):
                     try:
-                        cg = lol_watcher.spectator.by_puuid(region, puuid)
+                        cg = self.lol_watcher.spectator.by_puuid(region, puuid)
                         if cg["gameId"] not in gameDejaSend and cg["gameQueueConfigId"] != 1700:
                             gameDejaSend.append(cg["gameId"])
                             
@@ -202,7 +207,7 @@ class BackgroundTasks(commands.Cog):
                     except discord.errors.NotFound:
                         message = await channel.send(embed=await create_ladder(listeJoueur))
                         update_messageId_listChannelLadder(channel_id, message.id)
-                
+           
     
                     
 

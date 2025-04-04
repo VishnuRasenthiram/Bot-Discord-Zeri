@@ -1,29 +1,44 @@
+# Environnement Python
 .env
-.venv/*
+.venv/
+env/
+venv/
+ENV/
 
+# Cache Python
+__pycache__/
+*.py[cod]
+*$py.class
 
-agarderdeCotePourPlusTard.py
+# Fichiers temporaires
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
 
+# Dossiers IDE
+.idea/
+.vscode/
+
+# Fichiers de logs et erreurs
+*.log
+error_log.txt
+
+# Fichiers JSON spécifiques
 1.json
 2.json
 runes.json
-__pycache__/*
-__pycache__
-zeri_features/zeri_ia/ia/*
-
-cmd.txt
-
 test.json
+dossierJson/
 
-error_log.txt
+# Fichiers d'images
+Image/apod/
 
-Image/apod/*
+# Fichiers de configuration IA
+zeri_features/zeri_ia/ia/
 
-
-dossierJson/*
-
-
-.idea/*
-.vscode/*
-__pycache__/*
+# Fichiers temporaires ou de développement
+agarderdeCotePourPlusTard.py
+cmd.txt
 

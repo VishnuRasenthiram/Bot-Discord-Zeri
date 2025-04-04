@@ -7,6 +7,9 @@ import math
 
 class ZeriMoney:
 
+    def __init__(self, bot: discord.Client):
+        self.bot = bot
+
     async def update_daily(self):
 
         userListe=get_user_liste()

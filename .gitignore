@@ -7,7 +7,11 @@ agarderdeCotePourPlusTard.py
 2.json
 runes.json
 __pycache__/*
+<<<<<<< HEAD
 
+=======
+__pycache__
+>>>>>>> b950ff4029a7f89aafef218578d0495ea162dfd1
 zeri_features/zeri_ia/ia/*
 
 cmd.txt

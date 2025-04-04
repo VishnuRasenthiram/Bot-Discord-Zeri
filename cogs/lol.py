@@ -17,11 +17,8 @@ class LoLCommands(commands.Cog):
     def __init__(self, bot: discord.Client):
         try:
             self.bot = bot
-            print("🔄 Initialisation du LolWatcher...")
             self.lol_watcher = LolWatcher(os.getenv('RIOT_API'))
-            print("✅ LolWatcher initialisé")
             self.choixRegion = choixRegion
-            print("✅ Cog LoL initialisé avec succès")
         except Exception as e:
             print(f"❌ Erreur lors de l'initialisation du cog LoL: {str(e)}")
             raise
@@ -179,9 +176,7 @@ class LoLCommands(commands.Cog):
 
 async def setup(bot):
     try:
-        print("🔄 Chargement du cog LoL...")
         await bot.add_cog(LoLCommands(bot))
-        print("✅ Cog LoL chargé avec succès")
     except Exception as e:
         print(f"❌ Erreur lors du chargement du cog LoL: {str(e)}")
         raise

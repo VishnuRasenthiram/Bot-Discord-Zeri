@@ -49,11 +49,12 @@ SALON_NASA=1317082270875652180
 async def on_ready():
     print(current_time)
     await bot.change_presence(activity=discord.Game(name="zzzzz"))
+    await load_cogs()
     try:
         await bot.tree.sync()
     except Exception as e:
         print(e)
-    await load_cogs()
+    
     print("le bot est pret")
     
 

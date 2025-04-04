@@ -8,7 +8,7 @@ from discord import app_commands
 import random
 from dotenv import load_dotenv
 from zeri_features.imposteur.imposteur import fi, impo
-from riotwatcher import LolWatcher, ApiError
+from riotwatcher import LolWatcher
 import urllib
 from zeri_features.zeri_interactions.zeri_nasa import imageNasa
 load_dotenv()
@@ -75,53 +75,6 @@ class DiversCommands(commands.Cog):
             await ctx.message.delete()
             await ctx.message.channel.send(mesg)
 
-
-
-    @commands.command()
-    async def pp(self,ctx):
-        
-    
-        if  len(ctx.message.mentions)>0:
-            user=ctx.message.mentions[0]
-            await ctx.message.channel.send(user.display_avatar)
-
-        else:
-            
-            await ctx.message.channel.send(ctx.author.display_avatar)
-
-    @commands.command()
-    async def ppdebase(self,ctx):
-        
-    
-        if  len(ctx.message.mentions)>0:
-            user=ctx.message.mentions[0]
-            await ctx.message.channel.send(user.avatar)
-
-        else:
-            
-            await ctx.message.channel.send(ctx.author.avatar)
-
-    @commands.command()
-    async def ppserv(self,ctx):
-        await ctx.channel.send(ctx.guild.icon)
-
-    @commands.command()
-    async def banner(self,ctx):
-
-        if  len(ctx.message.mentions)>0:
-            user=ctx.message.mentions[0]
-            usez =await self.bot.fetch_user(user.id)
-            if usez.banner==None:
-                await ctx.channel.send("N'a pas de banniere")
-            else:
-                await ctx.message.channel.send(usez.banner)
-
-        else:
-            usez =await self.bot.fetch_user(ctx.author.id)
-            if usez.banner==None:
-                await ctx.channel.send("N'a pas de banniere")
-            else:
-                await ctx.message.channel.send(usez.banner)
 
 
 

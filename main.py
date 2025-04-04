@@ -1,30 +1,12 @@
 import discord
-from riotwatcher import  ApiError
 from discord.ext import *
 import asyncio
 from datetime import datetime
-from datetime import timedelta
-import requests
 from datetime import datetime
-import json
 import pytz
 from dotenv import load_dotenv
 import os
-
-from discord.ext import tasks, commands
-
-from lol_commands.leagueOfFunction import *
-from zeri_features.zeri_welcome.welcomeImage import *
-from lol_commands.current_game.currentGameImage import *
-from bd.baseDeDonne import *
-from zeri_features.zeri_interactions.tenorApi import *
-
-from lol_commands.profile.sauvegardeProfil   import *
-from lol_commands.profile.suivitProfil import *
-from zeri_features.zeri_interactions.interaction import *
-from zeri_features.imposteur.imposteur import *
-from lol_commands.classement.ladderLol import *
-from zeri_features.zeri_ia.zeriA import *
+from discord.ext import commands
 import traceback
 load_dotenv()
 

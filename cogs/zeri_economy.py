@@ -10,7 +10,7 @@ choixPOF = [
 class Economy(commands.Cog):
     def __init__(self, bot: discord.Client):
         self.bot = bot
-        self.Zeri_Money = ZeriMoney()
+        self.Zeri_Money = ZeriMoney(bot)
 
 
     @app_commands.command(name="profil", description="Affiche le profil de l'utilisateur")

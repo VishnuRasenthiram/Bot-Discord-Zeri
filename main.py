@@ -79,7 +79,7 @@ async def load_cogs():
                     await bot.load_extension(f'cogs.{filename[:-3]}')
                     print(f'loaded {filename}')
                 except Exception as e:
-                    print(f'Failed to load {filename}')
+                    print(f'Failed to load {filename} : {e}')
 
 
 async def main():

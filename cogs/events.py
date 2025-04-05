@@ -20,7 +20,7 @@ class Events(commands.Cog):
     
     def __init__(self, bot: discord.Client):
         self.bot = bot
-        self.Zeri_money = ZeriMoney()
+        self.Zeri_money = ZeriMoney(bot)
         self.last_message_time = {}
         
         

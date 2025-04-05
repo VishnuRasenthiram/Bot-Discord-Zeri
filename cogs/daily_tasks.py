@@ -13,7 +13,7 @@ from zeri_features.zeri_economy.zeriMoney import *
 class DailyTasks(commands.Cog):
     def __init__(self, bot: discord.Client):
         self.bot = bot
-        self.economy = ZeriMoney()
+        self.economy = ZeriMoney(bot)
         self.scheduler = AsyncIOScheduler()
         self.icon_loaded = False
 

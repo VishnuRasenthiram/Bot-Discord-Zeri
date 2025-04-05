@@ -31,7 +31,7 @@ SALON_NASA=1317082270875652180
 class BackgroundTasks(commands.Cog):
     def __init__(self, bot: discord.Client):
         self.bot = bot
-        self.economy = ZeriMoney()
+        self.economy = ZeriMoney(bot)
         self.scheduler = AsyncIOScheduler()
         self.verif_lock_ladder = asyncio.Lock()
         self.verif_lock = asyncio.Lock()

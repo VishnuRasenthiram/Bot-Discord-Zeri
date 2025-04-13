@@ -48,12 +48,13 @@ SALON_NASA=1317082270875652180
 @bot.event
 async def on_ready():
     print(current_time)
-    await bot.change_presence(activity=discord.Game(name="zzzzz"))
+    await bot.change_presence(activity=discord.Game(name="ZzZzz"))
     await load_cogs()
     try:
-        await bot.tree.sync()
+        synced = await bot.tree.sync()
+        print(f"✅ Synchronisé {len(synced)} commandes")
     except Exception as e:
-        print(e)
+        print(f"❌ Erreur de synchronisation : {e}")
     
     print("le bot est pret")
     
@@ -73,14 +74,16 @@ async def on_error(event, *args, **kwargs):
         f.write(traceback.format_exc())
 
 async def load_cogs():
-        for filename in os.listdir('./cogs'):
-            if filename.endswith('.py'):
-                try:
-                    await bot.load_extension(f'cogs.{filename[:-3]}')
-                    print(f'loaded {filename}')
-                except Exception as e:
-                    print(f'Failed to load {filename} : {e}')
-
+    for filename in os.listdir('./cogs'):
+        if filename.endswith('.py'):
+            cog_name = f'cogs.{filename[:-3]}'
+            if cog_name in bot.extensions:
+                continue     
+            try:
+                await bot.load_extension(cog_name)
+                print(f'✅ Loaded {filename}')
+            except Exception as e:
+                print(f'❌ Failed to load {filename} : {e}')
 
 async def main():
     async with bot:

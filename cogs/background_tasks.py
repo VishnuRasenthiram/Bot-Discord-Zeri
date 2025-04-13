@@ -6,7 +6,6 @@ import asyncio
 from io import BytesIO
 import ast
 import requests
-
 from lol_commands.leagueOfFunction import LOF, creer_image_avec_reessai
 from riotwatcher import LolWatcher
 from riotwatcher.exceptions import ApiError
@@ -23,7 +22,8 @@ from lol_commands.classement.ladderLol import (
     get_messageId_listChannelLadder, 
     update_messageId_listChannelLadder
 )
-from lol_commands.current_game.currentGameImage import after_game
+
+from lol_commands.after_game.after_game import after_game
 
 
 KARAN_ID=614728233497133076
@@ -105,41 +105,39 @@ class BackgroundTasks(commands.Cog):
                 gameDejaSend.append(int(gameId[3]))
 
             for player in liste:
-                puuid, region = player[1], player[2]
+                puuid, region = player[1], player[2]   
+                try:
+                    cg = self.lol_watcher.spectator.by_puuid(region, puuid)
+                    if cg["gameId"] not in gameDejaSend and cg["gameQueueConfigId"] != 1700:
+                        gameDejaSend.append(cg["gameId"])
+                        
 
-                for _ in range(3):
-                    try:
-                        cg = self.lol_watcher.spectator.by_puuid(region, puuid)
-                        if cg["gameId"] not in gameDejaSend and cg["gameQueueConfigId"] != 1700:
-                            gameDejaSend.append(cg["gameId"])
-                            
+                        regionId = LOF.regionForRiotId(region)
+                        image = await creer_image_avec_reessai(cg, regionId, region)
 
-                            regionId = LOF.regionForRiotId(region)
-                            image = await creer_image_avec_reessai(cg, regionId, region)
+                        img_bytes = BytesIO()
+                        image.save(img_bytes, format="PNG")
+                        img_bytes.seek(0)
+                        
+                        liste_messages = []
 
-                            img_bytes = BytesIO()
-                            image.save(img_bytes, format="PNG")
-                            img_bytes.seek(0)
-                            
-                            liste_messages = []
+                        channelListe = list(get_player_listeChannel(puuid))
+                        for channelId in channelListe:
+                            channel = self.bot.get_channel(int(channelId))
+                            if channel:
+                                img_copy = BytesIO(img_bytes.getvalue()) 
+                                message = await channel.send(file=discord.File(img_copy, filename="Partie_En_Cours.png"))
+                                liste_messages.append(message.id)
 
-                            channelListe = list(get_player_listeChannel(puuid))
-                            for channelId in channelListe:
-                                channel = self.bot.get_channel(int(channelId))
-                                if channel:
-                                    img_copy = BytesIO(img_bytes.getvalue()) 
-                                    message = await channel.send(file=discord.File(img_copy, filename="Partie_En_Cours.png"))
-                                    liste_messages.append(message.id)
-
-                            player_data = {"puuid": puuid, "derniereGame": cg["gameId"],"messages_id": str(liste_messages),"game_fini":0}
-                            update_derniereGame(player_data)
+                        player_data = {"puuid": puuid, "derniereGame": cg["gameId"],"messages_id": str(liste_messages),"game_fini":0}
+                        update_derniereGame(player_data)
+                    break
+                except ApiError as e:
+                    if e.response.status_code == 404:
                         break
-                    except ApiError as e:
-                        if e.response.status_code == 404:
-                            break
-                    except Exception as er:
-                        print(f"Erreur inattendue : {er}")
-                        break
+                except Exception as er:
+                    print(f"Erreur inattendue test : {er}")
+                    break
 
     async def verif_game_fini(self):
         liste = get_player_liste()

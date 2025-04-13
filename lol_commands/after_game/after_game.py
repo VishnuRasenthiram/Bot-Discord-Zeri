@@ -1,101 +1,173 @@
-from PIL import Image, ImageDraw, ImageOps, ImageFont
+import json
+import os
+from PIL import Image, ImageDraw,ImageOps, ImageFont
+from dotenv import load_dotenv
 import requests
 from io import BytesIO
+
+import urllib
 from riotwatcher import LolWatcher, ApiError
-import os
-from dotenv import load_dotenv
-import urllib 
-import json
-from lol_commands.historique.historiqueImage import *
+
+from lol_commands.historique.historiqueImage import add_item_to_slot, creeBandeauItem, getLevelTimerKda, getStats, positionToIcon
+
+from lol_commands.current_game.currentGameImage import get_summoner_name_by_key
 
 load_dotenv()
 lol_watcher = LolWatcher(os.getenv('RIOT_API'))
-version = lol_watcher.data_dragon.versions_for_region("euw1")
 font = ImageFont.truetype("font/BeaufortforLOL-Bold.ttf",size=25)
 fontLvl = ImageFont.truetype("font/BeaufortforLOL-Bold.ttf",size=20)
 fontMode= ImageFont.truetype("font/BeaufortforLOL-Bold.ttf",size=35)
-dataRunes=requests.get(f"https://ddragon.leagueoflegends.com/cdn/{version['v']}/data/en_US/runesReforged.json")
-dataRunes=dataRunes.json()
 
-with open("dossierJson/summoner_info.json","r") as f:
-    summonnerData= json.load(f)
+try:
 
-async def creerImageCG(cg,regionId,region):
+    versions = lol_watcher.data_dragon.versions_for_region("euw1")
+    current_version = versions["v"] if versions else "13.24.1"  
     
-    size = 1920, 1080
-    sizeChamp= 308,400
-    link =f'https://ddragon.leagueoflegends.com/cdn/{version["v"]}/data/fr_FR/champion.json'
+    dataRunes = requests.get(f"https://ddragon.leagueoflegends.com/cdn/{current_version}/data/en_US/runesReforged.json")
+    dataRunes = dataRunes.json()
+    
+    champion_url = f"https://ddragon.leagueoflegends.com/cdn/{current_version}/data/fr_FR/champion.json"
+    response = requests.get(champion_url)
+    champ = response.json()["data"]
 
-    f = urllib.request.urlopen(link)
-    myfile = f.read()
-    data=json.loads(myfile)
-    champ = data["data"]  
-    with Image.open(f"Image/Zeri_CG.png") as imageFond:
+    with open("dossierJson/summoner_info.json","r") as f:
+        summonerData = json.load(f)
+    
+except Exception as e:
+    print(f"Erreur lors de l'initialisation: {e}")
+    raise
+
+
+
+
+class Joueur :
+    def __init__(self, player, queue_id, region):
+
+        self.pseudo=player["riotIdGameName"]
+        self.puuid=player["puuid"]
+        self.champ=player["championName"]
+        self.queue_id=queue_id
+        self.team=player["teamId"]
+        self.position=player["individualPosition"]
+        self.items=creeBandeauItem(player)
+
+        self.rank,self.div,self.lp,self.masteryPTS=get_data(player,region)
+
+        
+        self.runes={"primaryId":player["perks"]["styles"][0]["style"], 
+            "primaryRune":player["perks"]["styles"][0]["selections"][0]["perk"],
+            "secondaryId":player["perks"]["styles"][1]["style"]}
+
+
+        self.spell1 = player["summoner1Id"]
+        self.spell2 = player["summoner2Id"]
+
+        self.region=region
+        self.player=player
+
+        self.kda=f"{player["kills"]}/{player["deaths"]}/{player["assists"]}"
+        self.level=player["champLevel"]
+
+        
+
+position_order = {
+    "TOP": 0,
+    "JUNGLE": 1,
+    "MIDDLE": 2,
+    "BOTTOM": 3,
+    "UTILITY": 4,
+    "":-1
+}
+
+fontAfter = ImageFont.truetype("font/BeaufortforLOL-Bold.ttf",size=40)
+def get_data(player,region):
+    invocateur= lol_watcher.league.by_summoner(region,player["summonerId"])
+    rank="Unranked"
+    div=" "
+    lp=" "
+    masteryPTS=" "
+    
+    mastery = lol_watcher.champion_mastery.by_puuid(region, player["puuid"])      
+    for cle,valeur in champ.items():
+        if int(valeur['key'])==int(player['championId']):
+            for idMastery in range(len(mastery)):
+                if int(mastery[idMastery]['championId'])==int(player['championId']):
+                    masteryPTS="{:,.0f}".format(int(mastery[idMastery]['championPoints']))
+                    break
+            break        
+    for j in range(len(invocateur)):
+        if invocateur[j]['queueType']=="RANKED_SOLO_5x5":
+            rank=invocateur[j]["tier"]
+            div=invocateur[j]["rank"]
+            lp=invocateur[j]["leaguePoints"]
+
+    return rank,div,lp,masteryPTS
+
+def after_game(region: str, game_id: int):
+    try :
+        matchs = lol_watcher.match.by_id(region, f"{region.upper()}_{game_id}")
+        listeJoueur = [Joueur(player,matchs["info"]["queueId"],matchs["info"]["platformId"]) for player in matchs["info"]["participants"]]
+
+
+        listeJoueur.sort(key=lambda x: x.team)
+        nb_j = (int)(len(listeJoueur)/2)
+        blue = listeJoueur[:nb_j]
+        red = listeJoueur[nb_j:]
+        if matchs["info"]["gameMode"] == "CLASSIC":
+            blue.sort(key=lambda x: (position_order[x.position]))
+            red.sort(key=lambda x: (position_order[x.position]))
+
+        imageFond = Image.open(f"Image/Zeri_CG.png")
+        size = 1920, 1080
         imageFond = imageFond.resize(size)
-    posB=0
-    posR=0
-    for i in range ( len(cg["participants"])) :
-        puuid=cg["participants"][i]["puuid"]
-        mastery = lol_watcher.champion_mastery.by_puuid(region, puuid)
-        spellid1=get_summoner_name_by_key(summonnerData,cg["participants"][i]["spell1Id"])
-        spellid2=get_summoner_name_by_key(summonnerData,cg["participants"][i]["spell2Id"])
-        spells= [spellid1,spellid2]
-        runes={"primaryId":cg["participants"][i]["perks"]["perkStyle"], 
-               "primaryRune":cg["participants"][i]["perks"]["perkIds"][0],
-               "secondaryId":cg["participants"][i]["perks"]["perkSubStyle"]}
-        modeDeJeu=cg["gameQueueConfigId"]
+        win = blue[0].player["win"]
+        if win:
+            image_cadre_b = Image.open("Image/victory_cadre.png")
+            image_cadre_r = Image.open("Image/defeat_cadre.png")
+        else:
+            image_cadre_b = Image.open("Image/defeat_cadre.png")
+            image_cadre_r = Image.open("Image/victory_cadre.png")
 
-        pseudo=lol_watcher.accountV1.by_puuid(regionId,puuid)["gameName"]
-        invocateur= lol_watcher.league.by_summoner(region,cg["participants"][i]["summonerId"])
-        rank="Unranked"
-        div=" "
-        lp=" "
-        masteryPTS=" "           
-        for cle,valeur in champ.items():
-            if int(valeur['key'])==int(cg["participants"][i]['championId']):
-                champion=cle
-                for idMastery in range(len(mastery)):
-                    if int(mastery[idMastery]['championId'])==int(cg["participants"][i]['championId']):
-                        masteryPTS="{:,.0f}".format(int(mastery[idMastery]['championPoints']))
-                        break
-                break        
-        for j in range(len(invocateur)):
-            if invocateur[j]['queueType']=="RANKED_SOLO_5x5":
-                rank=invocateur[j]["tier"]
-                div=invocateur[j]["rank"]
-                lp=invocateur[j]["leaguePoints"]
-                
-        if cg["participants"][i]["teamId"]==100:
-            localisation= ((sizeChamp[0]*(posB)+65*(posB+1)) ,(60)) 
-            posB+=1          
-        else :
-            localisation= ((sizeChamp[0]*(posR)+65*(posR+1)) ,(570))  
-            posR+=1
+        for index,joueurs in enumerate(blue):
+            localisation = (10+ 400 * index, 40 )
+            imageFond.paste(getChampImage(joueurs).resize((300,450)), localisation)
+            imageFond.paste(joueurs.items.resize((300,40)),(localisation[0],localisation[1]+450))
+            imageFond.paste(image_cadre_b,(localisation[0],localisation[1]-40),image_cadre_b)
+            kda_level(joueurs,imageFond,localisation)
+
+        for index,joueurs in enumerate(red):
+            localisation = (10 + 400 * index, 590 )
+            imageFond.paste(getChampImage(joueurs).resize((300,450)), localisation)
+            imageFond.paste(joueurs.items.resize((300,40)),(localisation[0],localisation[1]+450))
+            imageFond.paste(image_cadre_r,(localisation[0],localisation[1]-40),image_cadre_r)
+            kda_level(joueurs,imageFond,localisation)
+
+        text=ImageDraw.Draw(imageFond)
+
         
-        imageFond.paste(getChampImage(puuid,champion,pseudo,rank,div,lp,spells,masteryPTS,runes,region),localisation)
-        modeDeJeu= getTypePartieFromCode(modeDeJeu)
-        draw = ImageDraw.Draw(imageFond)
-        text_width = draw.textlength(modeDeJeu, font=fontMode)
-
-        image_width= imageFond.size[0]
-        text_x = (image_width - text_width) // 2
-
-        draw.text((text_x,10), modeDeJeu, font=fontMode, fill="#F0E6D2",align="center",stroke_width=2,stroke_fill="#010A13")
-                        
-    
-    return imageFond
-    
-def get_summoner_name_by_key(summoners_dict, key):
-    for summoner_id, summoner_data in summoners_dict["data"].items():
         
-        if (int)(summoner_data['key'])==key:
-            return summoner_id
-            
-  
+        return imageFond
+    except ApiError as e:
+        raise e
+def kda_level(joueur: Joueur, imageFond: Image.Image, localisation: tuple[int, int]):
+    imageFond = ImageDraw.Draw(imageFond)
+    imageFond.text((localisation[0]+100,localisation[1]-35),f"{joueur.kda}",font=font,fill="#F0E6D2",align="center",stroke_width=2,stroke_fill="#010A13")
+    imageFond.text((localisation[0]+10,localisation[1]-35),f"{joueur.level}",font=font,fill="#F0E6D2",align="center",stroke_width=2,stroke_fill="#010A13")
+
+def getChampImage(joueur: Joueur):
+    region = joueur.region
+    puuid = joueur.puuid
+    Champ = joueur.champ
+    runes = joueur.runes
+    rank = joueur.rank
+    div = joueur.div
+    lp = joueur.lp
+    masteryPTS = joueur.masteryPTS
+    spells = [ get_summoner_name_by_key(summonerData,joueur.spell1), get_summoner_name_by_key(summonerData,joueur.spell2)]
+
 
     
-def getChampImage(puuid,Champ,pseudo,rank,div,lp,spell,masteryPTS,runes,region):
-    versions = lol_watcher.data_dragon.versions_for_region(region)
+
     Account = lol_watcher.summoner.by_puuid(region, puuid)
     url = f"https://ddragon.leagueoflegends.com/cdn/img/champion/loading/{Champ}_0.jpg"
     accountLvl= Account["summonerLevel"]
@@ -113,7 +185,7 @@ def getChampImage(puuid,Champ,pseudo,rank,div,lp,spell,masteryPTS,runes,region):
     imageSumm=Image.open(f"Image/empty_summ_slot.png")
     combined_image = Image.new('RGB', (128, 64), color='black')
     for summ in range(2): 
-        icone = f'https://ddragon.leagueoflegends.com/cdn/{versions["v"]}/img/spell/{spell[summ]}.png'
+        icone = f'https://ddragon.leagueoflegends.com/cdn/{versions["v"]}/img/spell/{spells[summ]}.png'
         slot= add_item_to_slot(imageSumm,icone)
         combined_image.paste(slot, (summ * 64, 0))
         
@@ -129,7 +201,7 @@ def getChampImage(puuid,Champ,pseudo,rank,div,lp,spell,masteryPTS,runes,region):
     else:
         rankdivlp= f'{rank} {div} {lp} lp'
 
-    text_bbox = imageFond.textbbox((0, 0), pseudo, font=font)
+    text_bbox = imageFond.textbbox((0, 0), joueur.pseudo, font=font)
     text_width = text_bbox[2] - text_bbox[0]
 
 
@@ -173,7 +245,7 @@ def getChampImage(puuid,Champ,pseudo,rank,div,lp,spell,masteryPTS,runes,region):
 
     finalImage.paste(background, background_position, background)
     
-    imageFond.text(text_position,f"{pseudo}",font=font,fill=text_color,align="center",stroke_width=border_width,stroke_fill=border_color)
+    imageFond.text(text_position,f"{joueur.pseudo}",font=font,fill=text_color,align="center",stroke_width=border_width,stroke_fill=border_color)
     imageFond.text(divLp_position,rankdivlp,font=font,fill=text_color,align="center",stroke_width=border_width,stroke_fill=border_color)
     imageFond.text(mastery_position,masteryPTS,font=font,fill=text_color,align="center",stroke_width=border_width,stroke_fill=border_color)
     imageFond.text(level_position,f"{accountLvl}",font=fontLvl,fill=text_color,align="center",stroke_width=border_width,stroke_fill=border_color)
@@ -186,7 +258,7 @@ def getRankIcon(Account,rank,region):
     sizeIcone=65,65
     imgRank=Image.open(f'Image/RANKICON/Wings/{rank}.png')
 
-    versions = lol_watcher.data_dragon.versions_for_region(region)
+
     
     icone = f'http://ddragon.leagueoflegends.com/cdn/{versions["v"]}/img/profileicon/{Account["profileIconId"]}.png'
     
@@ -206,12 +278,9 @@ def getRankIcon(Account,rank,region):
     output.putalpha(mask)
 
     iconeFinal.paste(output,[68,110],mask=output)
-    iconeFinal.convert('RGBA')
+    iconeFinal = iconeFinal.convert('RGBA')
     
     return iconeFinal
-
-
-
 
 def get_rune_by_PrimaryId(rune_id,secondary_Id):
     for rune in dataRunes:
@@ -260,17 +329,6 @@ def runesImage(image1_url, image2_url):
     output_image.paste(circle2, (265, 130), circle2)
 
     return output_image.convert("RGBA")
-"""
-with open("1.json","r") as f :
-    cg= json.load(f)
 
 
-
-
-image =creerImageCG(cg,"europe","euw1")
-
-image.save("test.png")
-"""
-
-
-
+#after_game("euw1", 7364256303).save("test.png")

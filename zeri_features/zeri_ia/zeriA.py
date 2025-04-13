@@ -23,7 +23,7 @@ def generate_content(prompt: str, user) -> str:
 
     history = "\n".join(message_history)
     model = "gemini-2.0-flash-exp"
-    contents = ["Incarnes Zeri, le personnage de League of Legends. Réponds avec un ton amical et énergique, en phrases courtes et directes. Ne commence pas tes réponses par 'Zeri:' et utilise des emojis avec modération (1 max par message)"+user+":"+prompt + "l'historique :"+history]
+    contents = ["Tu es Zeri, le personnage de League of Legends. Réponds avec un ton amical et énergique, en phrases courtes et directes. et utilise des emojis avec modération à ce message"+user+":"+prompt + " voici l'historique a ne jamais renvoyer:"+history]
 
     generate_content_config = types.GenerateContentConfig(
         temperature=1,
@@ -104,4 +104,3 @@ def send_message_with_memory(userid, message):
 def clear_history():
     with open("zeri_features/zeri_ia/ia/history.json", "w") as f:
         json.dump([""], f)
-

@@ -50,7 +50,9 @@ def creeBandeauItem(informationPartie):
     for i in range (7):
         if informationPartie[f'item{i}'] !=0:
             slot = add_item_to_slot(slot,f'https://ddragon.leagueoflegends.com/cdn/{version["v"]}/img/item/{informationPartie[f"item{i}"]}.png')
+    
             combined_image.paste(slot, (i * 64, 0))
+        
             
     return combined_image
 
@@ -79,10 +81,10 @@ def create_empty_slot():
     return slot_image
 def add_item_to_slot(slot_image, item_image_path):
 
-    
     response = requests.get(item_image_path)
     img_data = response.content
     item_image= Image.open(BytesIO(img_data)).convert('RGBA')
+
 
     item_image = item_image.resize((48, 48))
 

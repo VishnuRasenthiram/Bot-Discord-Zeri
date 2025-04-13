@@ -60,6 +60,7 @@ class Events(commands.Cog):
             file3 = discord.File(f"env/ranked-emblem/junglediff.png", filename=f"junglediff.png")
 
             if self.bot.user in message.mentions:
+                print(f"Message mentionnant le bot : {message.content}")
                 message_content = message.content.replace(f"<@{self.bot.user.id}>", "").strip().lower()
                 await message.reply(generate_content(message_content, message.author.name))
 

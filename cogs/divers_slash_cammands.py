@@ -21,7 +21,7 @@ class DiversSlashCommands(commands.Cog):
         """Commande ping améliorée"""
         await interaction.response.send_message(f"Pong! Latence: {round(self.bot.latency * 1000, 1)}ms")
             
-
+    
     @app_commands.command(name="interaction", description="Fait une interaction avec un membre")
     @app_commands.choices(type=choixInteraction)
     async def interaction(self,interaction: discord.Interaction, type:app_commands.Choice[str], membre: discord.Member):
@@ -35,7 +35,7 @@ class DiversSlashCommands(commands.Cog):
 
     @app_commands.command(name="action", description="Fait une action")
     @app_commands.choices(type=choixAction)
-    async def interaction(self,interaction: discord.Interaction, type:app_commands.Choice[str]):
+    async def action(self,interaction: discord.Interaction, type:app_commands.Choice[str]):
         """Fait une action"""
         await interaction.response.defer()
         embed= discord.Embed(description=generate_interaction_text(type.value, interaction.user.mention,None), color=discord.Color.random())

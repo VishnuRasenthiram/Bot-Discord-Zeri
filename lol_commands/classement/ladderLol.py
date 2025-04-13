@@ -48,7 +48,7 @@ async def add_profile_listeLadder(interaction:discord.Interaction,pseudo:str,cha
             puuid=me["puuid"]
         except ApiError as err :
             if err.response.status_code == 429 :
-                print("Quota de requête dépassé")
+                print("Quota de requête dépassé 1")
             elif err.response.status_code == 404:
                  await interaction.response.send_message("Le compte avec ce pseudo n'existe pas !",ephemeral=True)
         liste = get_ladder_liste()
@@ -128,7 +128,8 @@ async def create_ladder(liste_joueur):
             icone = f'http://ddragon.leagueoflegends.com/cdn/{versions["v"]}/img/profileicon/{myAccount["profileIconId"]}.png'
         except ApiError as err :
             if err.response.status_code == 429 :
-                print("Quota de requête dépassé")
+                print("Quota de requête dépassé 2")
+                return None
 
         regionRiotId = regionForRiotId(region)
         nom=lol_watcher.accountV1.by_puuid(regionRiotId,puuid)["gameName"]

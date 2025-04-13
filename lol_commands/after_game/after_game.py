@@ -1,3 +1,4 @@
+import asyncio
 import json
 import os
 from PIL import Image, ImageDraw,ImageOps, ImageFont
@@ -103,52 +104,86 @@ def get_data(player,region):
 
     return rank,div,lp,masteryPTS
 
-def after_game(region: str, game_id: int):
-    try :
-        matchs = lol_watcher.match.by_id(region, f"{region.upper()}_{game_id}")
-        listeJoueur = [Joueur(player,matchs["info"]["queueId"],matchs["info"]["platformId"]) for player in matchs["info"]["participants"]]
+async def after_game(region: str, game_id: int):
+    try:
+
+        matchs = await asyncio.to_thread(
+            lol_watcher.match.by_id, region, f"{region.upper()}_{game_id}"
+        )
+
+        listeJoueur = await asyncio.to_thread(
+            lambda: [Joueur(player, matchs["info"]["queueId"], matchs["info"]["platformId"]) 
+                    for player in matchs["info"]["participants"]]
+        )
 
 
-        listeJoueur.sort(key=lambda x: x.team)
-        nb_j = (int)(len(listeJoueur)/2)
+        nb_j = len(listeJoueur) // 2
         blue = listeJoueur[:nb_j]
         red = listeJoueur[nb_j:]
+        
         if matchs["info"]["gameMode"] == "CLASSIC":
-            blue.sort(key=lambda x: (position_order[x.position]))
-            red.sort(key=lambda x: (position_order[x.position]))
+            await asyncio.to_thread(
+                lambda: (blue.sort(key=lambda x: position_order[x.position]),
+                        red.sort(key=lambda x: position_order[x.position]))
+            )
 
-        imageFond = Image.open(f"Image/Zeri_CG.png")
-        size = 1920, 1080
-        imageFond = imageFond.resize(size)
+        imageFond = await asyncio.to_thread(
+            lambda: Image.open(f"Image/Zeri_CG.png").resize((1920, 1080))
+        )
+        
         win = blue[0].player["win"]
-        if win:
-            image_cadre_b = Image.open("Image/victory_cadre.png")
-            image_cadre_r = Image.open("Image/defeat_cadre.png")
-        else:
-            image_cadre_b = Image.open("Image/defeat_cadre.png")
-            image_cadre_r = Image.open("Image/victory_cadre.png")
-
-        for index,joueurs in enumerate(blue):
-            localisation = (10+ 400 * index, 40 )
-            imageFond.paste(getChampImage(joueurs).resize((300,450)), localisation)
-            imageFond.paste(joueurs.items.resize((300,40)),(localisation[0],localisation[1]+450))
-            imageFond.paste(image_cadre_b,(localisation[0],localisation[1]-40),image_cadre_b)
-            kda_level(joueurs,imageFond,localisation)
-
-        for index,joueurs in enumerate(red):
-            localisation = (10 + 400 * index, 590 )
-            imageFond.paste(getChampImage(joueurs).resize((300,450)), localisation)
-            imageFond.paste(joueurs.items.resize((300,40)),(localisation[0],localisation[1]+450))
-            imageFond.paste(image_cadre_r,(localisation[0],localisation[1]-40),image_cadre_r)
-            kda_level(joueurs,imageFond,localisation)
-
-        text=ImageDraw.Draw(imageFond)
-
+        cadre_b = "victory" if win else "defeat"
+        cadre_r = "defeat" if win else "victory"
         
+        image_cadre_b = await asyncio.to_thread(
+            lambda: Image.open(f"Image/{cadre_b}_cadre.png")
+        )
+        image_cadre_r = await asyncio.to_thread(
+            lambda: Image.open(f"Image/{cadre_r}_cadre.png")
+        )
+
+        tasks = []
+        for index, joueurs in enumerate(blue):
+            tasks.append(process_player_image(joueurs, imageFond, image_cadre_b, index, is_blue=True))
         
+        for index, joueurs in enumerate(red):
+            tasks.append(process_player_image(joueurs, imageFond, image_cadre_r, index, is_blue=False))
+        
+        await asyncio.gather(*tasks)
+
         return imageFond
-    except ApiError as e:
-        raise e
+        
+    except Exception as e:
+        if isinstance(e, ApiError) and e.response.status_code == 429:
+            pass
+        elif isinstance(e, FileNotFoundError):
+            pass
+        else:
+            print(f"Erreur dans after_game: {e}")
+        raise
+
+async def process_player_image(joueur, base_image, cadre_image, index, is_blue):
+    """Helper pour traiter un joueur de manière asynchrone"""
+    try:
+        y_pos = 40 if is_blue else 590
+        localisation = (10 + 400 * index, y_pos)
+        
+  
+        champ_img = await asyncio.to_thread(getChampImage, joueur)
+        champ_img = await asyncio.to_thread(lambda: champ_img.resize((300, 450)))
+        
+
+        await asyncio.to_thread(
+            lambda: (
+                base_image.paste(champ_img, localisation),
+                base_image.paste(joueur.items.resize((300, 40)), (localisation[0], localisation[1]+450)),
+                base_image.paste(cadre_image, (localisation[0], localisation[1]-40), cadre_image),
+                kda_level(joueur, base_image, localisation)
+            )
+        )
+    except Exception as e:
+        print(f"Error processing player {joueur.pseudo}: {e}")
+
 def kda_level(joueur: Joueur, imageFond: Image.Image, localisation: tuple[int, int]):
     imageFond = ImageDraw.Draw(imageFond)
     imageFond.text((localisation[0]+100,localisation[1]-35),f"{joueur.kda}",font=font,fill="#F0E6D2",align="center",stroke_width=2,stroke_fill="#010A13")

@@ -26,86 +26,223 @@ from lol_commands.classement.ladderLol import (
 from lol_commands.after_game.after_game import after_game
 
 
+import shutil
+import datetime
+import pickle
+import time as time_module
+from pathlib import Path
+import logging
+
 KARAN_ID=614728233497133076
 SALON_NASA=1317082270875652180
 class BackgroundTasks(commands.Cog):
     def __init__(self, bot: discord.Client):
         self.bot = bot
         self.economy = ZeriMoney(bot)
+        
+
+        self.logger = logging.getLogger('zeribot.cache')
+        self.logger.setLevel(logging.DEBUG)
+        
+        
+        if not self.logger.handlers:
+            handler = logging.StreamHandler()
+            formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+            handler.setFormatter(formatter)
+            self.logger.addHandler(handler)
+        
+
         self.scheduler = AsyncIOScheduler()
         self.verif_lock_ladder = asyncio.Lock()
         self.verif_lock = asyncio.Lock()
         self.verif_lock_fini = asyncio.Lock()
         self.lol_watcher = LolWatcher(os.getenv('RIOT_API'))
 
+        self.CACHE_DIR = Path("cache")
+        self.CACHE_DIR.mkdir(exist_ok=True)
+        self.CACHE_MAX_AGE = 86400  # 24 heures en secondes
+        self.CACHE_MAX_SIZE = 500 * 1024 * 1024  # 500 MB
+        
+
+        self._setup_cache_system()
+        
+
+    def _setup_cache_system(self):
+        """Configure le système de cache et planifie son nettoyage"""
+        self.scheduler.add_job(self.clean_old_cache_files, 'interval', hours=12)
+        self.scheduler.add_job(self.clean_cache_if_full, 'interval', hours=3)
+        self.logger.info("Système de cache configuré")
+
+    def get_cache_size(self):
+        """Calcule la taille totale du cache en octets"""
+        total_size = 0
+        for path in self.CACHE_DIR.glob('**/*'):
+            if path.is_file():
+                total_size += path.stat().st_size
+        return total_size
+
+    def clean_old_cache_files(self):
+        """Supprime les fichiers de cache plus anciens que CACHE_MAX_AGE"""
+        now = time_module.time()
+        count = 0
+        try:
+            for file_path in self.CACHE_DIR.glob('*.pickle'):
+                if now - file_path.stat().st_mtime > self.CACHE_MAX_AGE:
+                    file_path.unlink()
+                    count += 1
+            self.logger.info(f"Nettoyage du cache: {count} fichiers supprimés")
+        except Exception as e:
+            self.logger.error(f"Erreur lors du nettoyage du cache: {e}")
+
+    def clean_cache_if_full(self):
+        """Nettoie le cache s'il dépasse la taille maximale"""
+        if self.get_cache_size() > self.CACHE_MAX_SIZE:
+            self.logger.warning("Cache plein, nettoyage en cours...")
+            
+
+            files = [(f, f.stat().st_mtime) for f in self.CACHE_DIR.glob('*.pickle')]
+            files.sort(key=lambda x: x[1])
+            
+
+            target_size = self.CACHE_MAX_SIZE * 0.7  
+            while files and self.get_cache_size() > target_size:
+                if files:
+                    oldest_file = files.pop(0)[0]
+                    oldest_file.unlink()
+                    
+            self.logger.info(f"Cache réduit à {self.get_cache_size() / 1024 / 1024:.2f} MB")
+    
+    def cache_api_data(self, function_name, data, *args, max_age=3600):
+        """Sauvegarde les données dans le cache avec un temps d'expiration"""
+        cache_file = self.CACHE_DIR / f"{function_name}_{hash(str(args))}.pickle"
+        with open(cache_file, 'wb') as f:
+            expiry_time = time_module.time() + max_age
+            cache_data = {
+                'data': data,
+                'expires': expiry_time
+            }
+            pickle.dump(cache_data, f)
+        
+
+        if self.get_cache_size() > self.CACHE_MAX_SIZE:
+            self.clean_cache_if_full()
+    
+    def get_cached_api_data(self, function_name, *args, timeout=3600):
+        """Cache les appels à l'API Riot pour éviter les 429"""
+        cache_file = self.CACHE_DIR / f"{function_name}_{hash(str(args))}.pickle"
+        
+        if cache_file.exists():
+            with open(cache_file, 'rb') as f:
+                try:
+                    cache_data = pickle.load(f)
+
+                    if time_module.time() < cache_data.get('expires', 0):
+                        return cache_data['data']
+                    else:
+
+                        cache_file.unlink(missing_ok=True)
+                except:
+                    pass  
+        
+        return None
+
     async def cog_load(self):
         self.periodic_check.start()
         self.periodic_check_ladder.start()
+        self.scheduler.start()
+        self.logger.info("Background tasks et planificateur démarrés")
 
     async def cog_unload(self):
         self.periodic_check.cancel()
         self.periodic_check_ladder.cancel()
+        self.scheduler.shutdown()
+        self.logger.info("Background tasks et planificateur arrêtés")
 
-        
- 
     @tasks.loop(minutes=5)
     async def periodic_check(self):
-        async with self.verif_lock:
-            try:
-                await self.verif_game_en_cours()
-                await self.verif_game_fini()
-
-            except requests.exceptions.HTTPError as e:
-                if e.response.status_code == 503:
-                    print("Service indisponible, attente...")
-                    await asyncio.sleep(60)
-                else:
-                    print(f"Erreur HTTP: {e}")
-            except Exception as e:
-                print(f"Erreur: {e}")
-
-    
-      
-    @tasks.loop(minutes=60)
-    async def periodic_check_ladder(self):
-        async with self.verif_lock_ladder:
-            try:
-                await self.update_ladder()
-                
-            except requests.exceptions.HTTPError as e:
-                if e.response.status_code == 503:
-                    print("Service indisponible, attente...")
-                    await asyncio.sleep(60)
-                else:
-                    print(f"Erreur HTTP: {e}")
-            except Exception as e:
-                print(f"Erreur: {e}")
-            
-   
-    async def verif_game_en_cours(self):
+        """Vérifie périodiquement les parties en cours et terminées"""
         try:
-            liste = get_player_liste()
-            if not liste:
-                return
-
-            gameDejaSend = {int(gameId[3]) for gameId in liste if gameId[3]}
-
-            tasks = []
-            for player in liste:
-                puuid, region = player[1], player[2]
-                tasks.append(self.process_player_game(puuid, region, gameDejaSend))
-
-            await asyncio.gather(*tasks, return_exceptions=True)
-
+            async with self.verif_lock:
+                await self.verif_game_en_cours()
+                
+            async with self.verif_lock_fini:
+                await self.verif_game_fini()
         except Exception as e:
-            print(f"Erreur globale verif_game_en_cours: {e}")
+            self.logger.error(f"Erreur dans la vérification périodique: {str(e)}")
+
+    @tasks.loop(minutes=15)
+    async def periodic_check_ladder(self):
+        """Met à jour périodiquement les classements"""
+        try:
+            async with self.verif_lock_ladder:
+                await self.update_ladder()
+        except Exception as e:
+            self.logger.error(f"Erreur dans la mise à jour des classements: {str(e)}")
+
+    @commands.command(name="clear_cache")
+    @commands.is_owner() 
+    async def clear_cache_command(self, ctx):
+        """Commande permettant de nettoyer le cache manuellement"""
+        try:
+            before_size = self.get_cache_size() / 1024 / 1024  # Taille en MB
+            
+            if self.CACHE_DIR.exists():
+                shutil.rmtree(self.CACHE_DIR)
+            self.CACHE_DIR.mkdir(exist_ok=True)
+            
+            await ctx.send(f"✅ Cache vidé ! ({before_size:.2f} MB libérés)")
+        except Exception as e:
+            await ctx.send(f"❌ Erreur lors du nettoyage du cache: {e}")
+    
+    @commands.command(name="cache_status")
+    @commands.is_owner()
+    async def cache_status_command(self, ctx):
+        """Affiche des statistiques sur l'utilisation du cache"""
+        try:
+
+            cache_size = self.get_cache_size() / 1024 / 1024  # MB
+            file_count = len(list(self.CACHE_DIR.glob('*.pickle')))
+            
+            files = [(f, f.stat().st_mtime) for f in self.CACHE_DIR.glob('*.pickle')]
+            files.sort(key=lambda x: x[1], reverse=True)
+            recent_files = files[:5] if files else []
+            
+
+            embed = discord.Embed(
+                title="Statistiques du Cache",
+                description=f"État actuel du système de cache",
+                color=discord.Color.blue()
+            )
+            
+            embed.add_field(name="Taille du cache", value=f"{cache_size:.2f} MB / {self.CACHE_MAX_SIZE/1024/1024} MB", inline=False)
+            embed.add_field(name="Nombre de fichiers", value=str(file_count), inline=True)
+            embed.add_field(name="Max âge", value=f"{self.CACHE_MAX_AGE/3600} heures", inline=True)
+            
+            if recent_files:
+                recent = "\n".join([f"{Path(f[0].name).stem} ({datetime.datetime.fromtimestamp(f[1]).strftime('%H:%M:%S')})" for f in recent_files])
+                embed.add_field(name="Fichiers récents", value=recent, inline=False)
+            
+            await ctx.send(embed=embed)
+        except Exception as e:
+            await ctx.send(f"❌ Erreur: {e}")
+            
 
     async def process_player_game(self, puuid, region, gameDejaSend):
         try:
-            cg = await asyncio.to_thread(
-                lambda: self.lol_watcher.spectator.by_puuid(region, puuid)
-            )
+
+            cache_key = f"spectator_{region}_{puuid}"
+            cached_data = self.get_cached_api_data(cache_key, timeout=120) 
             
+            if cached_data:
+                cg = cached_data
+                self.logger.info(f"Données de spectator récupérées du cache pour {puuid}")
+            else:
+
+                cg = await asyncio.to_thread(
+                    lambda: self.lol_watcher.spectator.by_puuid(region, puuid)
+                )
+                self.cache_api_data(cache_key, cg, max_age=120)
+
             if cg["gameId"] in gameDejaSend or cg["gameQueueConfigId"] == 1700:
                 return
 
@@ -140,6 +277,24 @@ class BackgroundTasks(commands.Cog):
         except Exception as e:
             print(f"Error processing player {puuid}: {e}")
 
+    async def verif_game_en_cours(self):
+        try:
+            liste = get_player_liste()
+            if not liste:
+                return
+
+            gameDejaSend = {int(gameId[3]) for gameId in liste if gameId[3]}
+
+            tasks = []
+            for player in liste:
+                puuid, region = player[1], player[2]
+                tasks.append(self.process_player_game(puuid, region, gameDejaSend))
+
+            await asyncio.gather(*tasks, return_exceptions=True)
+
+        except Exception as e:
+            print(f"Erreur globale verif_game_en_cours: {e}")
+
     async def verif_game_fini(self):
         try:
             liste = get_player_liste()
@@ -163,21 +318,20 @@ class BackgroundTasks(commands.Cog):
             puuid, region, game_id = player[1], player[2], player[3]
             gameDejaSend.add(game_id)
 
-            # Traitement parallèle
+
             image_task = asyncio.create_task(after_game(region, game_id))
             messages_task = asyncio.create_task(self.get_existing_messages(player))
 
             image, message_data = await asyncio.gather(image_task, messages_task)
 
-            # Préparation image
+
             img_bytes = BytesIO()
             await asyncio.to_thread(lambda: image.save(img_bytes, format="PNG"))
             img_bytes.seek(0)
 
-            # Envoi notifications
+
             await self.update_game_messages(message_data, img_bytes)
 
-            # Mise à jour BDD
             player_data = {
                 "puuid": puuid,
                 "derniereGame": game_id,
@@ -189,7 +343,6 @@ class BackgroundTasks(commands.Cog):
         except Exception as e:
             pass
 
-    # Helpers
     async def get_channels_to_notify(self, puuid):
         return list(get_player_listeChannel(puuid))
 

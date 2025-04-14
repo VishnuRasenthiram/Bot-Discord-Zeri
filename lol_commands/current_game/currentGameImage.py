@@ -9,6 +9,35 @@ from dotenv import load_dotenv
 import urllib 
 import json
 from lol_commands.historique.historiqueImage import *
+import functools
+import pickle
+import time
+from pathlib import Path
+
+CACHE_DIR = Path("cache")
+CACHE_DIR.mkdir(exist_ok=True)
+
+
+@functools.lru_cache(maxsize=128)
+def get_cached_api_data(function_name, *args, timeout=3600):
+    """Cache les appels à l'API Riot pour éviter les 429"""
+    cache_file = CACHE_DIR / f"{function_name}_{hash(str(args))}.pickle"
+    
+
+    if cache_file.exists() and time.time() - cache_file.stat().st_mtime < timeout:
+        with open(cache_file, 'rb') as f:
+            try:
+                return pickle.load(f)
+            except:
+                pass  
+    
+    return None
+
+def cache_api_data(function_name, data, *args):
+    """Sauvegarde les données dans le cache"""
+    cache_file = CACHE_DIR / f"{function_name}_{hash(str(args))}.pickle"
+    with open(cache_file, 'wb') as f:
+        pickle.dump(data, f)
 
 load_dotenv()
 lol_watcher = LolWatcher(os.getenv('RIOT_API'))
@@ -24,7 +53,7 @@ with open("dossierJson/summoner_info.json","r") as f:
 async def creerImageCG(cg, regionId, region):
     try:
         size = (1920, 1080)
-        sizeChamp = (308, 400)
+        sizeChamp = (300, 450)
         
 
         link = f'https://ddragon.leagueoflegends.com/cdn/{version["v"]}/data/fr_FR/champion.json'
@@ -75,6 +104,8 @@ async def creerImageCG(cg, regionId, region):
         else:
             print(f"Erreur dans creerImageCG: {e}")
         raise
+
+
 def add_game_mode_text(image: Image.Image, mode_text: str):
     """Ajoute le texte du mode de jeu sur l'image"""
     draw = ImageDraw.Draw(image)
@@ -83,6 +114,7 @@ def add_game_mode_text(image: Image.Image, mode_text: str):
     text_x = (image_width - text_width) // 2
     draw.text((text_x, 10), mode_text, font=fontMode, 
               fill="#F0E6D2", align="center", stroke_width=2, stroke_fill="#010A13")
+
 
 async def process_participant(participant, champ, regionId, region, sizeChamp):
     """Traitement async d'un participant"""
@@ -136,14 +168,41 @@ async def process_participant(participant, champ, regionId, region, sizeChamp):
             print(f"Erreur traitement participant {puuid}: {e}")
         raise
 
+
+
 async def get_mastery_points(region, puuid, championId):
-    mastery = await asyncio.to_thread(
-        lol_watcher.champion_mastery.by_puuid, region, puuid
-    )
-    for m in mastery:
-        if int(m['championId']) == int(championId):
-            return "{:,.0f}".format(int(m['championPoints']))
-    return "0"
+
+    cache_key = f"mastery_{region}_{puuid}"
+    cached_data = get_cached_api_data(cache_key, championId)
+    if cached_data:
+        return cached_data
+        
+    try:
+
+        await asyncio.sleep(0.5)
+        
+        mastery = await asyncio.to_thread(
+            lol_watcher.champion_mastery.by_puuid, region, puuid
+        )
+
+        for m in mastery:
+            if int(m['championId']) == int(championId):
+                mastery_points = "{:,.0f}".format(int(m['championPoints']))
+                cache_api_data(cache_key, mastery_points, championId)
+                return mastery_points
+                
+
+        return "0"
+        
+    except ApiError as e:
+        if e.response.status_code == 429:
+            return "0"
+        raise
+    except Exception as e:
+        print(f"❌ Erreur dans get_mastery_points: {e}")
+        return "0"
+
+
 
 async def get_summoner_info(region, summonerId):
     try:
@@ -224,12 +283,16 @@ async def get_rank_icon(puuid, rank, region):
             lol_watcher.summoner.by_puuid, region, puuid
         )
         
-
         return await asyncio.to_thread(
             getRankIcon, account, rank, region
         )
     except ApiError as e:
-        print(f"Erreur dans load_rank_icon: {e}")
+        if isinstance(e, ApiError) and e.response.status_code == 429:
+            pass
+        elif isinstance(e, ApiError) and e.response.status_code == 403:
+            pass
+        else:
+            print(f"Erreur dans load_rank_icon: {e}")
 
         account = {"profileIconId": 1}
         return await asyncio.to_thread(
@@ -241,7 +304,6 @@ async def get_rank_icon(puuid, rank, region):
 
 async def load_spell_images(spells, versions):
     try:
-        imageSumm = await asyncio.to_thread(lambda: Image.open("Image/empty_summ_slot.png"))
         combined_image = Image.new('RGB', (128, 64), color='black')
         
         for i, spell in enumerate(spells):
@@ -476,17 +538,70 @@ def runesImage(image1_url, image2_url):
     output_image.paste(circle2, (265, 130), circle2)
 
     return output_image.convert("RGBA")
-"""
-with open("1.json","r") as f :
-    cg= json.load(f)
 
-
-
-
-image =creerImageCG(cg,"europe","euw1")
-
-image.save("test.png")
-"""
+async def api_call_with_retry(func, *args, max_retries=3, initial_backoff=1.0):
+    """Exécute un appel d'API avec système de retentatives et backoff exponentiel"""
+    retries = 0
+    backoff = initial_backoff
+    
+    while True:
+        try:
+            return await asyncio.to_thread(func, *args)
+        except ApiError as e:
+            if e.response.status_code == 429:
+                retries += 1
+                if retries > max_retries:
+                    print(f"⚠️ Limite de retentatives atteinte pour {func.__name__}")
+                    raise
+                    
+                retry_after = int(e.response.headers.get('Retry-After', backoff))
+                print(f"🕒 Rate limit atteint. Attente de {retry_after}s avant réessai...")
+                
+                await asyncio.sleep(retry_after)
+                backoff *= 2  
+            else:
+                raise
+        except Exception as e:
+            print(f"❌ Erreur dans {func.__name__}: {e}")
+            raise
+'''
+if __name__ == "__main__":
+    try:
+       
+        import os
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        test_file = os.path.join(current_dir, "test.json")
+        
+        
+        if os.path.exists(test_file):
+            print(f"✅ Fichier test.json trouvé: {test_file}")
+            with open(test_file, "r") as f:
+                cg = json.load(f)
+                
+            
+            async def run_test():
+                try:
+                    image = await creerImageCG(cg, "europe", "euw1")
+                    image.save(os.path.join(current_dir, "test.png"))
+                    print("✅ Image de test créée avec succès : test.png")
+                except ApiError as e:
+                    if e.response.status_code == 429:
+                        pass
+                    else:
+                        raise
+                
+            asyncio.run(run_test())
+        else:
+            print(f"❌ Le fichier {test_file} n'existe pas. Test ignoré.")
+            print("💡 Voici où Python cherche le fichier:")
+            print(f"   Répertoire de travail actuel: {os.getcwd()}")
+            print(f"   Répertoire du script: {current_dir}")
+            print("💡 Pour tester, créez un fichier test.json dans l'un de ces répertoires.")
+    except Exception as e:
+        print(f"❌ Erreur lors du test : {e}")
+        import traceback
+        traceback.print_exc()
+'''
 
 
 

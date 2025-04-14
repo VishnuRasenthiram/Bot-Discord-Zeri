@@ -70,3 +70,5 @@ __pycache__/*
 update.log
 update.sh
 env/*
+
+cache/*

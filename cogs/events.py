@@ -60,9 +60,11 @@ class Events(commands.Cog):
             file3 = discord.File(f"env/ranked-emblem/junglediff.png", filename=f"junglediff.png")
 
             if self.bot.user in message.mentions:
-                message_content = message.content.replace(f"<@{self.bot.user.id}>", "").strip().lower()
-                await message.reply(generate_content(message_content, message.author.name))
-
+                try:
+                    message_content = message.content.replace(f"<@{self.bot.user.id}>", "").strip().lower()
+                    await message.reply(generate_content(message_content, message.author.name))
+                except Exception as e:
+                    print(f"Erreur lors de la réponse au message : {e}")
             if "g2 win" in message.content.lower():
                 await message.channel.send(file=fileG2)
 

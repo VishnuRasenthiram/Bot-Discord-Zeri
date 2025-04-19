@@ -56,7 +56,7 @@ class Events(commands.Cog):
         if (not message.author == self.bot.user) and (not message.author.bot) :
                 
             file = discord.File(f"env/ranked-emblem/PALU.mp4", filename=f"PALU.mp4")
-            fileG2 = discord.File(f"env/ranked-emblem/toohless.mp4", filename=f"toohless.mp4")
+            fileG2 = discord.File(f"env/ranked-emblem/g2_win.mp4", filename=f"g2_win.mp4")
             file3 = discord.File(f"env/ranked-emblem/junglediff.png", filename=f"junglediff.png")
 
             if self.bot.user in message.mentions:
@@ -65,7 +65,8 @@ class Events(commands.Cog):
                     await message.reply(generate_content(message_content, message.author.name))
                 except Exception as e:
                     print(f"Erreur lors de la réponse au message : {e}")
-            if "g2 win" in message.content.lower():
+                    
+            if any(phrase in message.content.lower() for phrase in ["g2 win", "g2 a gagné", "g2 a win"]):
                 await message.channel.send(file=fileG2)
 
             if "palu"in message.content.lower().split():

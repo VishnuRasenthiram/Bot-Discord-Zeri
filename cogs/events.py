@@ -72,10 +72,12 @@ class Events(commands.Cog):
                 await message.channel.send(file=fileG2)
 
             if "fuck batclem" in message.content.lower():
-                await message.channel.send(file=file_clem)
+                if random.randrange(0,4) == 1:
+                    await message.channel.send(file=file_clem)
             
             if "fuck guuruu" in message.content.lower():
-                await message.channel.send(file = file_guuruu)
+                if random.randrange(0,4) == 1:
+                    await message.channel.send(file = file_guuruu)
 
             if "palu"in message.content.lower().split():
                 await message.channel.send(file=file)

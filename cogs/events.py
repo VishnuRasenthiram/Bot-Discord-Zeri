@@ -58,6 +58,8 @@ class Events(commands.Cog):
             file = discord.File(f"env/ranked-emblem/PALU.mp4", filename=f"PALU.mp4")
             fileG2 = discord.File(f"env/ranked-emblem/g2_win.mp4", filename=f"g2_win.mp4")
             file3 = discord.File(f"env/ranked-emblem/junglediff.png", filename=f"junglediff.png")
+            file_clem = discord.File(f"env/ranked-emblem/clem.mp4", filename=f"clem.mp4")
+            file_guuruu = discord.File(f"env/ranked-emblem/guuruu.mp4", filename=f"guuruu.mp4")
 
             if self.bot.user in message.mentions:
                 try:
@@ -68,6 +70,12 @@ class Events(commands.Cog):
                     
             if any(phrase in message.content.lower() for phrase in ["g2 win", "g2 a gagné", "g2 a win"]):
                 await message.channel.send(file=fileG2)
+
+            if "fuck batclem" in message.content.lower():
+                await message.channel.send(file=file_clem)
+            
+            if "fuck guuruu" in message.content.lower():
+                await message.channel.send(file = file_guuruu)
 
             if "palu"in message.content.lower().split():
                 await message.channel.send(file=file)

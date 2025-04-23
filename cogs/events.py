@@ -52,7 +52,7 @@ class Events(commands.Cog):
     @commands.Cog.listener() 
     async def on_message(self,message):
         cheh=["https://tenor.com/view/nelson-monfort-cheh-i-hear-cheh-in-my-oreillette-gif-15977955","https://tenor.com/view/maskey-gif-17974418","https://tenor.com/view/wavesives-waves-ives-waves-ives-waves-cheh-gif-1692370554913806768","https://tenor.com/view/capitaine-groscheh-gros-cheh-cheh-m%C3%A9rit%C3%A9-mange-ton-seum-gif-12396020753961179573","https://tenor.com/view/cheh-bienfaits-duh-gif-12323680"]
-        
+        await self.bot.process_commands(message)
         if (not message.author == self.bot.user) and (not message.author.bot) :
                 
             file = discord.File(f"env/ranked-emblem/PALU.mp4", filename=f"PALU.mp4")
@@ -67,38 +67,42 @@ class Events(commands.Cog):
                     await message.reply(generate_content(message_content, message.author.name))
                 except Exception as e:
                     print(f"Erreur lors de la réponse au message : {e}")
+
+            if any(phrase in message.content.lower() for phrase in ["fuck", "batclem"]):
+                await message.add_reaction("<:pepefkbatclem:1363094839155097711>")
+                
+            if random.randrange(0,4) == 1:        
+                if any(phrase in message.content.lower() for phrase in ["g2 win", "g2 a gagné", "g2 a win"]):
+                    await message.channel.send(file=fileG2)
+
+                if "fuck batclem" in message.content.lower():
                     
-            if any(phrase in message.content.lower() for phrase in ["g2 win", "g2 a gagné", "g2 a win"]):
-                await message.channel.send(file=fileG2)
+                        await message.channel.send(file=file_clem)
+                
+                if "fuck guuruu" in message.content.lower():
 
-            if "fuck batclem" in message.content.lower():
-                if random.randrange(0,4) == 1:
-                    await message.channel.send(file=file_clem)
-            
-            if "fuck guuruu" in message.content.lower():
-                if random.randrange(0,4) == 1:
-                    await message.channel.send(file = file_guuruu)
+                        await message.channel.send(file = file_guuruu)
 
-            if "palu"in message.content.lower().split():
-                await message.channel.send(file=file)
+                if "palu"in message.content.lower().split():
+                    await message.channel.send(file=file)
 
-            if "jungle diff"in message.content.lower():
-                a=await message.channel.send(file=file3)
-                await a.add_reaction("✅")
-                await a.add_reaction("❌")
+                if "jungle diff"in message.content.lower():
+                    a=await message.channel.send(file=file3)
+                    await a.add_reaction("✅")
+                    await a.add_reaction("❌")
+                    
+                if "cheh"in message.content.lower().split():
+                    await message.channel.send(random.choice(cheh))
+                    
                 
-            if "cheh"in message.content.lower().split():
-                await message.channel.send(random.choice(cheh))
                 
-            await self.bot.process_commands(message)
-            
-            if "merci zeri" in message.content.lower():
+                if "merci zeri" in message.content.lower():
+                    
+                    await message.reply("Derien Bebou <:Eheh:1280080977418260483>")
+                    
+                if "prankex" in message.content.lower().split():
+                    await message.channel.send("https://tenor.com/view/guuruu-prank-prankex-gif-19025746535426067")
                 
-                await message.reply("Derien Bebou <:Eheh:1280080977418260483>")
-                
-            if "prankex" in message.content.lower().split():
-                await message.channel.send("https://tenor.com/view/guuruu-prank-prankex-gif-19025746535426067")
-            
             await self.Zeri_money.add_xp(message,self.calculer_xp(message))
 
          

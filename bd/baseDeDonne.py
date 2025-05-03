@@ -744,3 +744,93 @@ def get_liste_channel_ladder_joueur(puuid):
     conn.close()
     return liste_channel
 
+def init_temp_voice_creators_table():
+    """Initialise la table qui stocke les IDs des canaux permettant la création de salons vocaux temporaires"""
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        port=DB_PORT
+    )
+
+    cur = conn.cursor()
+
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS temp_voice_creators (
+            channel_id VARCHAR(255) PRIMARY KEY
+        )
+    """)
+
+    conn.commit()
+    cur.close()
+    conn.close()
+
+def add_temp_voice_creator(channel_id):
+    """Ajoute l'ID d'un canal créateur de salons vocaux temporaires"""
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        port=DB_PORT
+    )
+    cur = conn.cursor()
+    cur.execute("""
+        INSERT INTO temp_voice_creators (channel_id)
+        VALUES (%s)
+        ON CONFLICT (channel_id) DO NOTHING
+    """, (str(channel_id),))
+    conn.commit()
+    cur.close()
+    conn.close()
+    return True
+
+def remove_temp_voice_creator(channel_id):
+    """Supprime l'ID d'un canal créateur de salons vocaux temporaires"""
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        port=DB_PORT
+    )
+    cur = conn.cursor()
+    cur.execute("DELETE FROM temp_voice_creators WHERE channel_id = %s", (str(channel_id),))
+    conn.commit()
+    result = cur.rowcount > 0
+    cur.close()
+    conn.close()
+    return result
+
+def get_all_temp_voice_creators():
+    """Récupère tous les IDs des canaux créateurs de salons vocaux temporaires"""
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        port=DB_PORT
+    )
+    cur = conn.cursor()
+    cur.execute("SELECT channel_id FROM temp_voice_creators")
+    creators = [row[0] for row in cur.fetchall()]
+    cur.close()
+    conn.close()
+    return creators
+
+def is_temp_voice_creator(channel_id):
+    """Vérifie si un canal est un créateur de salon vocal temporaire"""
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        port=DB_PORT
+    )
+    cur = conn.cursor()
+    cur.execute("SELECT 1 FROM temp_voice_creators WHERE channel_id = %s", (str(channel_id),))
+    result = cur.fetchone() is not None
+    cur.close()
+    conn.close()
+    return result

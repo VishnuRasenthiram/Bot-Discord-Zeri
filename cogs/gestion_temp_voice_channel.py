@@ -127,17 +127,9 @@ class VoiceChannelManager(commands.Cog):
         
 
         if before.channel:
-
-            if before.channel.id in self.temp_voice_channels:
-
-                if len(before.channel.members) == 0:
-                    try:
-
-                        del self.temp_voice_channels[before.channel.id]
-                        await before.channel.delete(reason="Salon vocal temporaire vide")
-                    except Exception as e:
-                        print(f"Erreur lors de la suppression du salon temporaire: {e}")
-
+                if "◜⏳◞" in before.channel.name :
+                    if len(before.channel.members)==0:
+                        await before.channel.delete()
     def create_control_buttons(self, channel_id):
         """Crée et retourne une vue avec les boutons de contrôle pour un salon vocal temporaire"""
         view = discord.ui.View(timeout=None)

@@ -34,7 +34,7 @@ class Profil_lol(commands.Cog):
     async def supprimer_profil(self, interaction: discord.Interaction):
         """Supprime un profil LoL"""
         await del_profile(interaction)
-
+'''
     # Système de suivi
     @app_commands.command(name="suivre_profil", description="Suivre un profil LoL dans un channel")
     @app_commands.choices(region=choixRegion)
@@ -99,7 +99,7 @@ class Profil_lol(commands.Cog):
     async def type_autocomplete(self,interaction: discord.Interaction, current: str):
         return [app_commands.Choice(name=choice.name, value=choice.value) for choice in generate_choices() if current.lower() in choice.name.lower()]
 
-
+'''
 
 async def setup(bot):
     try:

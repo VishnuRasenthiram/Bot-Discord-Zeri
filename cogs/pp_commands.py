@@ -3,7 +3,6 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 import random
-from zeri_features.zeri_ia.zeriA import clear_history
 
 KARAN_ID=614728233497133076
 

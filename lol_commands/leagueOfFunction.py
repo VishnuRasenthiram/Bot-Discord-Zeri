@@ -237,7 +237,7 @@ class LOF:
                     raise    
 
 
-    async def partieEnCours(interaction:discord.Interaction,puuid:str,region:str):
+    async def partieEnCours(self, interaction:discord.Interaction, puuid:str, region:str):
         await interaction.response.defer()
         try:
             regionId= LOF.regionForRiotId(region)

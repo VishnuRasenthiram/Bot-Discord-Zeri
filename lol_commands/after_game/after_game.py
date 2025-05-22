@@ -156,7 +156,7 @@ async def after_game(region: str, game_id: int):
     except Exception as e:
         if isinstance(e, ApiError) and e.response.status_code == 429:
             pass
-        elif isinstance(e, FileNotFoundError):
+        elif isinstance(e,  ApiError)and e.response.status_code == 404:
             pass
         else:
             print(f"Erreur dans after_game: {e}")

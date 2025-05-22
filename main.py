@@ -1,5 +1,4 @@
 import discord
-from discord.ext import *
 import asyncio
 from datetime import datetime
 from datetime import datetime
@@ -8,6 +7,7 @@ from dotenv import load_dotenv
 import os
 from discord.ext import commands
 import traceback
+ 
 load_dotenv()
 
 ##########################################################################
@@ -34,7 +34,6 @@ CHAN_GEN =833833047454515223
 CHAN_BVN =614953541911576692
 ROLE_NEANTIN =1079422327391006851
 ROLE_FAILLE=1079432006796066816
-CHAN_VOC =1071472444562473021
 CHAN_INFO=634136239804514344
 CHAN_REGLEMENT=657946471022329860
 MESSAGE_AUTO_ROLE=11111

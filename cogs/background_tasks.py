@@ -36,6 +36,8 @@ import logging
 KARAN_ID=614728233497133076
 SALON_NASA=1317082270875652180
 class BackgroundTasks(commands.Cog):
+    CACHE_PICKLE_PATTERN = '*.pickle'
+
     def __init__(self, bot: discord.Client):
         self.bot = bot
         self.economy = ZeriMoney(bot)
@@ -56,7 +58,10 @@ class BackgroundTasks(commands.Cog):
         self.verif_lock_ladder = asyncio.Lock()
         self.verif_lock = asyncio.Lock()
         self.verif_lock_fini = asyncio.Lock()
-        self.lol_watcher = LolWatcher(os.getenv('RIOT_API'))
+        riot_api_key = os.getenv('RIOT_API')
+        if not riot_api_key:
+            raise ValueError("RIOT_API environment variable is not set.")
+        self.lol_watcher = LolWatcher(riot_api_key)
 
         self.CACHE_DIR = Path("cache")
         self.CACHE_DIR.mkdir(exist_ok=True)
@@ -83,10 +88,10 @@ class BackgroundTasks(commands.Cog):
 
     def clean_old_cache_files(self):
         """Supprime les fichiers de cache plus anciens que CACHE_MAX_AGE"""
-        now = time_module.time()
-        count = 0
         try:
-            for file_path in self.CACHE_DIR.glob('*.pickle'):
+            now = time_module.time()
+            count = 0
+            for file_path in self.CACHE_DIR.glob(self.CACHE_PICKLE_PATTERN):
                 if now - file_path.stat().st_mtime > self.CACHE_MAX_AGE:
                     file_path.unlink()
                     count += 1
@@ -98,8 +103,8 @@ class BackgroundTasks(commands.Cog):
         """Nettoie le cache s'il dépasse la taille maximale"""
         if self.get_cache_size() > self.CACHE_MAX_SIZE:
             self.logger.warning("Cache plein, nettoyage en cours...")
-            
-
+            files = [(f, f.stat().st_mtime) for f in self.CACHE_DIR.glob(self.CACHE_PICKLE_PATTERN)]
+            files.sort(key=lambda x: x[1])
             files = [(f, f.stat().st_mtime) for f in self.CACHE_DIR.glob('*.pickle')]
             files.sort(key=lambda x: x[1])
             
@@ -133,27 +138,24 @@ class BackgroundTasks(commands.Cog):
         
         if cache_file.exists():
             with open(cache_file, 'rb') as f:
-                try:
-                    cache_data = pickle.load(f)
+                cache_data = pickle.load(f)
 
-                    if time_module.time() < cache_data.get('expires', 0):
-                        return cache_data['data']
-                    else:
+                if time_module.time() < cache_data.get('expires', 0):
+                    return cache_data['data']
+                else:
 
-                        cache_file.unlink(missing_ok=True)
-                except:
-                    pass  
+                    cache_file.unlink(missing_ok=True)
         
         return None
 
     async def cog_load(self):
-        self.periodic_check.start()
+
         self.periodic_check_ladder.start()
         self.scheduler.start()
         self.logger.info("Background tasks et planificateur démarrés")
 
     async def cog_unload(self):
-        self.periodic_check.cancel()
+
         self.periodic_check_ladder.cancel()
         self.scheduler.shutdown()
         self.logger.info("Background tasks et planificateur arrêtés")
@@ -199,18 +201,19 @@ class BackgroundTasks(commands.Cog):
     async def cache_status_command(self, ctx):
         """Affiche des statistiques sur l'utilisation du cache"""
         try:
-
-            cache_size = self.get_cache_size() / 1024 / 1024  # MB
-            file_count = len(list(self.CACHE_DIR.glob('*.pickle')))
+            file_count = len(list(self.CACHE_DIR.glob(self.CACHE_PICKLE_PATTERN)))
             
-            files = [(f, f.stat().st_mtime) for f in self.CACHE_DIR.glob('*.pickle')]
+            files = [(f, f.stat().st_mtime) for f in self.CACHE_DIR.glob(self.CACHE_PICKLE_PATTERN)]
+            files.sort(key=lambda x: x[1], reverse=True)
+            recent_files = files[:5] if files else []
             files.sort(key=lambda x: x[1], reverse=True)
             recent_files = files[:5] if files else []
             
+            cache_size = self.get_cache_size() / 1024 / 1024  # Taille en MB
 
             embed = discord.Embed(
                 title="Statistiques du Cache",
-                description=f"État actuel du système de cache",
+                description="État actuel du système de cache",
                 color=discord.Color.blue()
             )
             
@@ -227,7 +230,7 @@ class BackgroundTasks(commands.Cog):
             await ctx.send(f"❌ Erreur: {e}")
             
 
-    async def process_player_game(self, puuid, region, gameDejaSend):
+    async def process_player_game(self, puuid, region, game_deja_send):
         try:
 
             cache_key = f"spectator_{region}_{puuid}"
@@ -243,10 +246,10 @@ class BackgroundTasks(commands.Cog):
                 )
                 self.cache_api_data(cache_key, cg, max_age=120)
 
-            if cg["gameId"] in gameDejaSend or cg["gameQueueConfigId"] == 1700:
+            if cg["gameId"] in game_deja_send or cg["gameQueueConfigId"] == 1700:
                 return
 
-            gameDejaSend.add(cg["gameId"])
+            game_deja_send.add(cg["gameId"])
             regionId = LOF.regionForRiotId(region)
             
 
@@ -283,12 +286,12 @@ class BackgroundTasks(commands.Cog):
             if not liste:
                 return
 
-            gameDejaSend = {int(gameId[3]) for gameId in liste if gameId[3]}
+            game_deja_send = {int(gameId[3]) for gameId in liste if gameId[3]}
 
             tasks = []
             for player in liste:
                 puuid, region = player[1], player[2]
-                tasks.append(self.process_player_game(puuid, region, gameDejaSend))
+                tasks.append(self.process_player_game(puuid, region, game_deja_send))
 
             await asyncio.gather(*tasks, return_exceptions=True)
 

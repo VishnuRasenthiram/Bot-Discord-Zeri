@@ -63,13 +63,6 @@ class Events(commands.Cog):
             file_clem = discord.File(f"env/ranked-emblem/clem.mp4", filename=f"clem.mp4")
             file_guuruu = discord.File(f"env/ranked-emblem/guuruu.mp4", filename=f"guuruu.mp4")
 
-            if self.bot.user in message.mentions:
-                try:
-                    message_content = message.content.replace(f"<@{self.bot.user.id}>", "").strip().lower()
-                    await message.reply(generate_content(message_content, message.author.name))
-                except Exception as e:
-                    print(f"Erreur lors de la réponse au message : {e}")
-
             if any(phrase in message.content.lower() for phrase in ["fuck", "batclem"]):
                 await message.add_reaction("<:pepefkbatclem:1363094839155097711>")
                 

@@ -1,9 +1,11 @@
+from io import BytesIO
+import json
+import math
 import discord
 from discord.ext import commands
-from zeri_features.zeri_economy.zeriMoney import *
-from zeri_features.zeri_interactions.interaction import *
-from zeri_features.zeri_ia.zeriA import *
-from zeri_features.zeri_welcome.welcomeImage import *
+from zeri_features.zeri_economy.zeriMoney import ZeriMoney # Replace 'Interaction' with the actual names you use from this module
+from zeri_features.zeri_ia.zeriA import get_response_from_ai
+from zeri_features.zeri_welcome.welcomeImage import creerImageBVN
 
 import  time
 
@@ -14,7 +16,7 @@ CHAN_VOC =1071472444562473021
 ANNONCE_CHAN=634266557383442432
 KARAN_ID=614728233497133076
 COOLDOWN=10
-
+BASE_PATH="env/ranked-emblem/"
 
 class Events(commands.Cog):
     
@@ -37,68 +39,97 @@ class Events(commands.Cog):
     async def on_member_update(self,before,after):
         guild=self.bot.get_guild(KARAN_ID)
         annonce =guild.get_channel(ANNONCE_CHAN)
-        dansMonServ=False
+        dans_mon_serv = False
         for i in guild.members:
-            if i.id==after.id:
-                dansMonServ = True
+            if i.id == after.id:
+                dans_mon_serv = True
                 break
                 
 
-        if after.activity != None:
-            if dansMonServ:
-                if after.activity.type==discord.ActivityType.streaming : 
-                    await annonce.send(f"{before.name} est en live ! \n{after.activity.url}")
+        if after.activity != None and dans_mon_serv:
+            if after.activity.type == discord.ActivityType.streaming: 
+                await annonce.send(f"{before.name} est en live ! \n{after.activity.url}")
         
 
 
     @commands.Cog.listener() 
-    async def on_message(self,message):
-        cheh=["https://tenor.com/view/nelson-monfort-cheh-i-hear-cheh-in-my-oreillette-gif-15977955","https://tenor.com/view/maskey-gif-17974418","https://tenor.com/view/wavesives-waves-ives-waves-ives-waves-cheh-gif-1692370554913806768","https://tenor.com/view/capitaine-groscheh-gros-cheh-cheh-m%C3%A9rit%C3%A9-mange-ton-seum-gif-12396020753961179573","https://tenor.com/view/cheh-bienfaits-duh-gif-12323680"]
+    async def on_message(self, message):
         await self.bot.process_commands(message)
-        if (not message.author == self.bot.user) and (not message.author.bot) :
-                
-            file = discord.File(f"env/ranked-emblem/PALU.mp4", filename=f"PALU.mp4")
-            fileG2 = discord.File(f"env/ranked-emblem/g2_win.mp4", filename=f"g2_win.mp4")
-            file3 = discord.File(f"env/ranked-emblem/junglediff.png", filename=f"junglediff.png")
-            file_clem = discord.File(f"env/ranked-emblem/clem.mp4", filename=f"clem.mp4")
-            file_guuruu = discord.File(f"env/ranked-emblem/guuruu.mp4", filename=f"guuruu.mp4")
+        if (message.author == self.bot.user) or message.author.bot:
+            return
 
-            if any(phrase in message.content.lower() for phrase in ["fuck", "batclem"]):
-                await message.add_reaction("<:pepefkbatclem:1363094839155097711>")
-                
-            if random.randrange(0,4) == 1:        
-                if any(phrase in message.content.lower() for phrase in ["g2 win", "g2 a gagné", "g2 a win"]):
-                    await message.channel.send(file=fileG2)
+        await self.handle_ai_mention(message)
+        await self.handle_reactions(message)
+        await self.handle_random_responses(message)
+        await self.Zeri_money.add_xp(message, self.calculer_xp(message))
 
-                if "fuck batclem" in message.content.lower():
-                    
-                        await message.channel.send(file=file_clem)
-                
-                if "fuck guuruu" in message.content.lower():
+    async def handle_ai_mention(self, message):
+        if self.bot.user in message.mentions:
+            try:
+                message_content = message.content.replace(f"<@{self.bot.user.id}>", "").strip().lower()
+                await message.reply(get_response_from_ai(message.author.name, message_content))
+            except Exception as e:
+                print(f"Erreur lors de la réponse au message : {e}")
 
-                        await message.channel.send(file = file_guuruu)
+    async def handle_reactions(self, message):
+        if any(phrase in message.content.lower() for phrase in ["fuck", "batclem"]):
+            await message.add_reaction("<:pepefkbatclem:1363094839155097711>")
 
-                if "palu"in message.content.lower().split():
-                    await message.channel.send(file=file)
+    async def handle_random_responses(self, message):
+        import random
+        cheh = [
+            "https://tenor.com/view/nelson-monfort-cheh-i-hear-cheh-in-my-oreillette-gif-15977955",
+            "https://tenor.com/view/maskey-gif-17974418",
+            "https://tenor.com/view/wavesives-waves-ives-waves-ives-waves-cheh-gif-1692370554913806768",
+            "https://tenor.com/view/capitaine-groscheh-gros-cheh-cheh-m%C3%A9rit%C3%A9-mange-ton-seum-gif-12396020753961179573",
+            "https://tenor.com/view/cheh-bienfaits-duh-gif-12323680"
+        ]
+        BASE_PATH = "env/ranked-emblem/"
+        file = discord.File(BASE_PATH + "PALU.mp4", filename="PALU.mp4")
+        file_g2 = discord.File(BASE_PATH + "g2_win.mp4", filename="g2_win.mp4")
+        file3 = discord.File(BASE_PATH + "junglediff.png", filename="junglediff.png")
+        file_clem = discord.File(BASE_PATH + "clem.mp4", filename="clem.mp4")
+        file_guuruu = discord.File(BASE_PATH + "guuruu.mp4", filename="guuruu.mp4")
 
-                if "jungle diff"in message.content.lower():
-                    a=await message.channel.send(file=file3)
-                    await a.add_reaction("✅")
-                    await a.add_reaction("❌")
-                    
-                if "cheh"in message.content.lower().split():
-                    await message.channel.send(random.choice(cheh))
-                    
-                
-                
-                if "merci zeri" in message.content.lower():
-                    
-                    await message.reply("Derien Bebou <:Eheh:1280080977418260483>")
-                    
-                if "prankex" in message.content.lower().split():
-                    await message.channel.send("https://tenor.com/view/guuruu-prank-prankex-gif-19025746535426067")
-                
-            await self.Zeri_money.add_xp(message,self.calculer_xp(message))
+        content_lower = message.content.lower()
+        content_split = content_lower.split()
+
+        if random.randrange(0, 4) != 1:
+            return
+
+        if any(phrase in content_lower for phrase in ["g2 win", "g2 a gagné", "g2 a win"]):
+            await message.channel.send(file=file_g2)
+            return
+
+        if "fuck batclem" in content_lower:
+            await message.channel.send(file=file_clem)
+            return
+
+        if "fuck guuruu" in content_lower:
+            await message.channel.send(file=file_guuruu)
+            return
+
+        if "palu" in content_split:
+            await message.channel.send(file=file)
+            return
+
+        if "jungle diff" in content_lower:
+            a = await message.channel.send(file=file3)
+            await a.add_reaction("✅")
+            await a.add_reaction("❌")
+            return
+
+        if "cheh" in content_split:
+            await message.channel.send(random.choice(cheh))
+            return
+
+        if "merci zeri" in content_lower:
+            await message.reply("Derien Bebou <:Eheh:1280080977418260483>")
+            return
+
+        if "prankex" in content_split:
+            await message.channel.send("https://tenor.com/view/guuruu-prank-prankex-gif-19025746535426067")
+
 
          
     def calculer_xp(self,message):
@@ -117,12 +148,6 @@ class Events(commands.Cog):
         return min(int(coef), 100)
 
     
-    @commands.Cog.listener() 
-    async def  on_raw_reaction_remove(self,payload):
-        #role = discord.utils.get(emoji.member.guild.roles, id=658408130593423371)
-        guild = discord.utils.find(lambda g: g.id == payload.guild_id, self.bot.guilds)
-        member = discord.utils.find(lambda m: m.id == payload.user_id, guild.members)
-
     @commands.Cog.listener() 
     async def on_member_join(self,member):
         
@@ -163,9 +188,9 @@ class Events(commands.Cog):
             with open("dossierJson/logs.json", "r") as f:
                 users = json.load(f)
             msg = message.content
-            msgAuthor = str(message.author.id)
+            msg_author = str(message.author.id)
             users["dernierMSG"] = {}
-            users["dernierMSG"]["MSG"]=[msg,msgAuthor]
+            users["dernierMSG"]["MSG"]=[msg,msg_author]
 
             with open("dossierJson/logs.json","w") as f :
                 json.dump(users,f)

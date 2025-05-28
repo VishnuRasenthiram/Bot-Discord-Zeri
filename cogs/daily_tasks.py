@@ -7,6 +7,7 @@ import pytz
 import os
 from io import BytesIO
 from main import KARAN_ID,SALON_NASA
+from zeri_features.zeri_ia.zeriA import full_reset
 from zeri_features.zeri_interactions.zeri_nasa import imageNasa
 from zeri_features.zeri_economy.zeriMoney import *
 
@@ -88,6 +89,7 @@ class DailyTasks(commands.Cog):
     async def apod_auto(self):
         """Poste automatiquement l'image astronomique du jour"""
         try:
+            full_reset()
             salon = self.bot.get_channel(SALON_NASA)
             if salon:
                 await imageNasa(salon)  

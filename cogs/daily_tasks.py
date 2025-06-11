@@ -9,7 +9,9 @@ from io import BytesIO
 from main import KARAN_ID,SALON_NASA
 from zeri_features.zeri_ia.zeriA import full_reset
 from zeri_features.zeri_interactions.zeri_nasa import imageNasa
-from zeri_features.zeri_economy.zeriMoney import *
+from zeri_features.zeri_economy.zeriMoney import ZeriMoney
+
+TIMEZONE_PARIS = "Europe/Paris"
 
 class DailyTasks(commands.Cog):
     def __init__(self, bot: discord.Client):
@@ -40,19 +42,17 @@ class DailyTasks(commands.Cog):
     def setup_tasks(self):
         """Configure les tâches planifiées"""
         try:
-
             self.scheduler.add_job(
                 self.changement_icone_serveur,
-                CronTrigger(hour=11, minute=1, timezone="Europe/Paris")
+                CronTrigger(hour=11, minute=1, timezone=TIMEZONE_PARIS)
             )
             self.scheduler.add_job(
                 self.changement_icone_serveur,
-                CronTrigger(hour=23, minute=1, timezone="Europe/Paris")
+                CronTrigger(hour=23, minute=1, timezone=TIMEZONE_PARIS)
             )
-
             self.scheduler.add_job(
                 self.execute_daily_update, 
-                CronTrigger(hour=0, minute=0, timezone="Europe/Paris")
+                CronTrigger(hour=0, minute=0, timezone=TIMEZONE_PARIS)
             )
         except Exception as e:
             print(f"❌ Erreur configuration tâches: {e}")
@@ -67,21 +67,22 @@ class DailyTasks(commands.Cog):
     async def changement_icone_serveur(self):
         """Change l'icône et le nom du serveur"""
         try:
+            """
             if not self.icon_loaded:
                 await self.load_icons()
-
+            """
             guild = self.bot.get_guild(KARAN_ID)
             if not guild:
                 print("❌ Serveur introuvable")
-                return
-
+            now = datetime.datetime.now(pytz.timezone(TIMEZONE_PARIS))
+            current_hour = now.hour
             now = datetime.datetime.now(pytz.timezone("Europe/Paris"))
             current_hour = now.hour
 
             if current_hour >= 22 or current_hour < 10:
-                await guild.edit(name="Karan 🌙", icon=self.iconNuit)
+                await guild.edit(name="Karan 🌙") #, icon=self.iconNuit
             else:
-                await guild.edit(name="Karan 🍁", icon=self.iconJour)
+                await guild.edit(name="Karan 🍁") #, icon=self.iconJour
                 await self.apod_auto()
         except Exception as e:
             print(f"❌ Erreur changement icône: {e}")

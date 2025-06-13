@@ -60,9 +60,13 @@ def save_history(prev_id=None, history=[]):
         json.dump({"prev_id": prev_id, "history": history}, f, indent=2)
 
 def get_response_from_ai(user, user_message):
-    data = load_history()
-    prev_id = data.get("prev_id")
-    history = data.get("history", [])
+    data : dict = load_history()
+    prev_id : str = data.get("prev_id")
+    history : list = data.get("history", [])
+
+    
+    
+
 
     if not user_message:
         return None
@@ -108,6 +112,9 @@ def get_response_from_ai(user, user_message):
 
         assistant_entry = {"role": "assistant", "content": response_text}
         history.append(assistant_entry)
+
+        if len(history) > 100 :
+            history.pop(0)
 
         save_history(response.id, history)
         return response_text

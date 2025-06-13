@@ -7,7 +7,6 @@ import pytz
 import os
 from io import BytesIO
 from main import KARAN_ID,SALON_NASA
-from zeri_features.zeri_ia.zeriA import full_reset
 from zeri_features.zeri_interactions.zeri_nasa import imageNasa
 from zeri_features.zeri_economy.zeriMoney import ZeriMoney
 
@@ -67,10 +66,10 @@ class DailyTasks(commands.Cog):
     async def changement_icone_serveur(self):
         """Change l'icône et le nom du serveur"""
         try:
-            """
+
             if not self.icon_loaded:
                 await self.load_icons()
-            """
+
             guild = self.bot.get_guild(KARAN_ID)
             if not guild:
                 print("❌ Serveur introuvable")
@@ -80,9 +79,9 @@ class DailyTasks(commands.Cog):
             current_hour = now.hour
 
             if current_hour >= 22 or current_hour < 10:
-                await guild.edit(name="Karan 🌙") #, icon=self.iconNuit
+                await guild.edit(name="Karan 🌙", icon=self.iconNuit) 
             else:
-                await guild.edit(name="Karan 🍁") #, icon=self.iconJour
+                await guild.edit(name="Karan 🍁", icon=self.iconJour) 
                 await self.apod_auto()
         except Exception as e:
             print(f"❌ Erreur changement icône: {e}")
@@ -90,7 +89,6 @@ class DailyTasks(commands.Cog):
     async def apod_auto(self):
         """Poste automatiquement l'image astronomique du jour"""
         try:
-            full_reset()
             salon = self.bot.get_channel(SALON_NASA)
             if salon:
                 await imageNasa(salon)  

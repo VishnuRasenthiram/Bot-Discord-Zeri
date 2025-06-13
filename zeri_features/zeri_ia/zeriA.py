@@ -73,7 +73,7 @@ def get_response_from_ai(user, user_message):
 
     try:
         response = client.responses.create(
-            model="gpt-4o",
+            model="gpt-4.1-nano",
             instructions=instructions,
             input=input_messages,
             previous_response_id=prev_id,

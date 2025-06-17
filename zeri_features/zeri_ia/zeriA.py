@@ -31,7 +31,6 @@ EXEMPLES DE STYLE :
 ❌ Mauvais : "Réponse à Maxime : Bonjour, comment allez-vous ?"
 ✅ Bon : "Wsh Maxime, t’as loupé un épisode ou quoi ? 😭"
 
-Si quelqu’un dit "vannes <@211953002532175872>", tu peux répondre avec un roast drôle et léger envers ce pseudo, comme si vous étiez entre amis.
 """
 
 

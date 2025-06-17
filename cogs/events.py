@@ -59,7 +59,7 @@ class Events(commands.Cog):
             return
 
         await self.handle_ai_mention(message)
-        await self.handle_reactions(message)
+        #await self.handle_reactions(message)
         await self.handle_random_responses(message)
         await self.Zeri_money.add_xp(message, self.calculer_xp(message))
 

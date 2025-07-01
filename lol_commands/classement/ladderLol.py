@@ -124,7 +124,7 @@ async def create_ladder(liste_joueur):
         versions = lol_watcher.data_dragon.versions_for_region(region)
         try:
             myAccount = lol_watcher.summoner.by_puuid(region, puuid)
-            me1 = lol_watcher.league.by_summoner(region, myAccount["id"])
+            me1 = lol_watcher.league.by_puuid(region, puuid)
             icone = f'http://ddragon.leagueoflegends.com/cdn/{versions["v"]}/img/profileicon/{myAccount["profileIconId"]}.png'
         except ApiError as err :
             if err.response.status_code == 429 :

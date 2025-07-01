@@ -82,7 +82,7 @@ position_order = {
 
 fontAfter = ImageFont.truetype("font/BeaufortforLOL-Bold.ttf",size=40)
 def get_data(player,region):
-    invocateur= lol_watcher.league.by_summoner(region,player["summonerId"])
+    invocateur= lol_watcher.league.by_puuid(region,player["summonerId"])
     rank="Unranked"
     div=" "
     lp=" "

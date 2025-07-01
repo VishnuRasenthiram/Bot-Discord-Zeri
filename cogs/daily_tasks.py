@@ -7,6 +7,7 @@ import pytz
 import os
 from io import BytesIO
 from main import KARAN_ID,SALON_NASA
+from zeri_features.zeri_ia.zeriA import full_reset
 from zeri_features.zeri_interactions.zeri_nasa import imageNasa
 from zeri_features.zeri_economy.zeriMoney import ZeriMoney
 
@@ -91,6 +92,7 @@ class DailyTasks(commands.Cog):
         try:
             salon = self.bot.get_channel(SALON_NASA)
             if salon:
+                full_reset()
                 await imageNasa(salon)  
         except Exception as e:
             print(f"❌ Erreur APOD auto: {e}")

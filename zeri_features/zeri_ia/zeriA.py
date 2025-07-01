@@ -114,4 +114,4 @@ def get_response_from_ai(user, user_message):
 
 def full_reset():
     save_history(None, [])
-    print("Réinitialisation complète effectuée. Nouvelle conversation commencée.")
+    

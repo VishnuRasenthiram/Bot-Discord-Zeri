@@ -4,6 +4,8 @@ from discord.ext import commands
 from discord import app_commands
 import random
 
+from zeri_features.zeri_ia.zeriA import full_reset
+
 
 KARAN_ID=614728233497133076
 ROLE_JSON_PATH = 'dossierJson/role.json'
@@ -101,7 +103,7 @@ class Admin(commands.Cog):
 
     @commands.command()
     @commands.has_permissions(administrator = True)
-    async def leave(self,ctx):
+    async def leave(self, ctx):
         if ctx.author.id==517231233235812353:
             serv = self.bot.get_guild(int(ctx.message.content.split()[1:][0]))
             if serv is not None:
@@ -109,13 +111,13 @@ class Admin(commands.Cog):
                 await ctx.channel.send(f'J\'ai quitté le serveur : {serv}!')
             else:
                 await ctx.channel.send("Serveur introuvable ou je ne suis pas membre de ce serveur.")
-"""
+
     @commands.command()
     @commands.cooldown(1, 900, commands.BucketType.user)
-    async def resetHistory(ctx):
-        clear_history()
+    async def resetHistory(self, ctx):
+        full_reset()
         await ctx.channel.send("Historique réinitialisé")
-"""
+
 
         
 async def setup(bot):

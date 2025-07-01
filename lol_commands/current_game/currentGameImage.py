@@ -207,7 +207,7 @@ async def get_mastery_points(region, puuid, championId):
 async def get_summoner_info(region, summonerId):
     try:
         leagues = await asyncio.to_thread(
-            lol_watcher.league.by_summoner, region, summonerId
+            lol_watcher.league.by_puuid, region, summonerId
         )
         for league in leagues:
             if league['queueType'] == "RANKED_SOLO_5x5":

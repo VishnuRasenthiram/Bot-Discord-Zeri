@@ -6,12 +6,13 @@ import datetime
 import pytz
 import os
 from io import BytesIO
-from main import KARAN_ID,SALON_NASA
+from main import KARAN_ID, SALON_NASA
 from zeri_features.zeri_ia.zeriA import full_reset
 from zeri_features.zeri_interactions.zeri_nasa import imageNasa
 from zeri_features.zeri_economy.zeriMoney import ZeriMoney
 
 TIMEZONE_PARIS = "Europe/Paris"
+
 
 class DailyTasks(commands.Cog):
     def __init__(self, bot: discord.Client):
@@ -20,13 +21,11 @@ class DailyTasks(commands.Cog):
         self.scheduler = AsyncIOScheduler()
         self.icon_loaded = False
 
-
     async def cog_load(self):
         """Exécuté quand le cog est chargé"""
         await self.load_icons()
         self.setup_tasks()
         self.scheduler.start()
-
 
     async def load_icons(self):
         """Charge les icônes du serveur"""
@@ -51,7 +50,7 @@ class DailyTasks(commands.Cog):
                 CronTrigger(hour=23, minute=1, timezone=TIMEZONE_PARIS)
             )
             self.scheduler.add_job(
-                self.execute_daily_update, 
+                self.execute_daily_update,
                 CronTrigger(hour=0, minute=0, timezone=TIMEZONE_PARIS)
             )
         except Exception as e:
@@ -80,10 +79,9 @@ class DailyTasks(commands.Cog):
             current_hour = now.hour
 
             if current_hour >= 22 or current_hour < 10:
-                await guild.edit(name="Karan 🌙", icon=self.iconNuit) 
+                await guild.edit(name="Karan 🌙", icon=self.iconNuit)
             else:
-                await guild.edit(name="Karan 🍁", icon=self.iconJour) 
-                await self.apod_auto()
+                await guild.edit(name="Karan 🍁", icon=self.iconJour)
         except Exception as e:
             print(f"❌ Erreur changement icône: {e}")
 
@@ -93,7 +91,7 @@ class DailyTasks(commands.Cog):
             salon = self.bot.get_channel(SALON_NASA)
             if salon:
                 full_reset()
-                await imageNasa(salon)  
+                await imageNasa(salon)
         except Exception as e:
             print(f"❌ Erreur APOD auto: {e}")
 

@@ -2,8 +2,8 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 import random
-from zeri_features.zeri_interactions.interaction import *
-from zeri_features.zeri_interactions.tenorApi import *
+from zeri_features.zeri_interactions.interaction import generate_interaction_text, choixInteraction, choixAction
+from zeri_features.zeri_interactions.tenorApi import getRandomGIf
 
 
 class DiversSlashCommands(commands.Cog):

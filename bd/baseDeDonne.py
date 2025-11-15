@@ -1,7 +1,8 @@
-import mysql.connector
 import os
+import time
+import mysql.connector
+from mysql.connector import pooling, errors
 from dotenv import load_dotenv
-import ast
 
 load_dotenv()
 
@@ -11,16 +12,74 @@ DB_USER = os.getenv("DB_USER")
 DB_PORT = int(os.getenv("DB_PORT"))
 DB_PASSWORD = os.getenv("DB_PASSWORD")
 
+_pool = None
 
-def get_connection():
-    """Crée et retourne une connexion MySQL"""
-    return mysql.connector.connect(
-        host=DB_HOST,
-        database=DB_NAME,
-        user=DB_USER,
-        password=DB_PASSWORD,
-        port=DB_PORT
-    )
+
+def init_pool(pool_size=5):
+    global _pool
+    if _pool is None:
+        _pool = pooling.MySQLConnectionPool(
+            pool_name="zeri_pool",
+            pool_size=pool_size,
+            host=DB_HOST,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            database=DB_NAME,
+            port=DB_PORT,
+            connect_timeout=10,
+            autocommit=True
+        )
+
+
+def get_connection(retries=3, delay=2):
+    """Retourne une connexion opérationnelle (ping + retries)."""
+    init_pool()
+    last_exc = None
+    for attempt in range(1, retries + 1):
+        try:
+            conn = _pool.get_connection()
+            try:
+                conn.ping(reconnect=True, attempts=3, delay=1)
+            except Exception:
+                conn.close()
+                raise
+            return conn
+        except (errors.InterfaceError, errors.OperationalError, Exception) as e:
+            last_exc = e
+            print(f"[DB] tentative {attempt} échouée: {e}")
+            time.sleep(delay)
+    raise last_exc
+
+
+def execute_query(query, params=None, fetchone=False, fetchall=False):
+    """Helper safe: gère connexion, curseur, retries."""
+    conn = None
+    cur = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor(buffered=True)
+        cur.execute(query, params or ())
+        if fetchone:
+            return cur.fetchone()
+        if fetchall:
+            return cur.fetchall()
+        if not conn.autocommit:
+            conn.commit()
+        return None
+    except Exception as e:
+        print(f"[DB] execute_query erreur: {e}")
+        raise
+    finally:
+        try:
+            if cur:
+                cur.close()
+        except Exception:
+            pass
+        try:
+            if conn and conn.is_connected():
+                conn.close()
+        except Exception:
+            pass
 
 
 def initDataBase():
